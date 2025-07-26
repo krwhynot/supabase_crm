@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.ts --quiet --fix",
     "type-check": "vue-tsc --noEmit",
+    "test": "echo 'No tests specified. Skipping test phase.' && exit 0",
     "validate:config": "vite-node src/config/environment.ts",
     "start": "npm run dev",
     "prod:build": "NODE_ENV=production npm run build",
