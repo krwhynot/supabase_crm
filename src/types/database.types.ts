@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      contacts: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          organization: string
+          email: string
+          title: string | null
+          phone: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          organization: string
+          email: string
+          title?: string | null
+          phone?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          organization?: string
+          email?: string
+          title?: string | null
+          phone?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_submissions: {
         Row: {
           age: number
@@ -187,3 +226,8 @@ export const Constants = {
 export type UserSubmission = Database['public']['Tables']['user_submissions']['Row']
 export type UserSubmissionInsert = Database['public']['Tables']['user_submissions']['Insert']
 export type UserSubmissionUpdate = Database['public']['Tables']['user_submissions']['Update']
+
+// Contact entity types
+export type Contact = Database['public']['Tables']['contacts']['Row']
+export type ContactInsert = Database['public']['Tables']['contacts']['Insert']
+export type ContactUpdate = Database['public']['Tables']['contacts']['Update']
