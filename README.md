@@ -4,6 +4,7 @@ Vue 3 + Vite + Tailwind CSS application with Supabase integration for user data 
 
 ## Live Demo
 🚀 **Live App**: [crm.kjrcloud.com](https://crm.kjrcloud.com)
+✅ **Status**: Deployed with Vercel + Supabase integration
 
 ## Features
 - Modern Vue 3 with TypeScript and Composition API
