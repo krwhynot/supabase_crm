@@ -28,8 +28,8 @@
             ],
             "env": {
                 "SUPABASE_URL": "${SUPABASE_URL}",
-                "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6eHh3cHRnc3l6aGR0dWxyZGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NDYyNzEsImV4cCI6MjA2OTEyMjI3MX0.X9eZUb_hM2g0pDTHYRbfxjKbrHeRbzYxWsWLrorEzRU",
-                
+                "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6eHh3cHRnc3l6aGR0dWxyZGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NDYyNzEsImV4cCI6MjA2OTEyMjI3MX0.X9eZUb_hM2g0pDTHYRbfxjKbrHeRbzYxWsWLrorEzRU"
+
             },
             "startupDelay": 200,
             "priority": "essential",
@@ -92,6 +92,13 @@
                 "--headless"
             ],
             "startupDelay": 800,
+            "priority": "optional",
+            "timeout": 30000
+        },
+        "vercel": {
+            "command": "vercel",
+            "args": [],
+            "startupDelay": 900,
             "priority": "optional",
             "timeout": 30000
         }
