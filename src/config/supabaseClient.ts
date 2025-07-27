@@ -83,6 +83,17 @@ export const devUtils = {
   }
 }
 
+// Production debugging - log environment variable status
+if (!devUtils.isDevelopment) {
+  console.log('🚀 Production Supabase Config Check:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    urlPrefix: supabaseUrl?.substring(0, 20) + '...',
+    keyPrefix: supabaseAnonKey?.substring(0, 20) + '...',
+    buildTime: new Date().toISOString()
+  })
+}
+
 // Initialize in development
 if (devUtils.isDevelopment) {
   devUtils.logConnectionInfo()
