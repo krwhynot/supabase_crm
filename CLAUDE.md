@@ -163,3 +163,41 @@ To connect to a real Supabase database:
    - Get URL and anon key from your Supabase project settings
    - Ensure you have a `user_submissions` table with the required schema
 3. The app will automatically detect valid credentials and disable demo mode
+
+## Database Schema Management
+
+**SQL Files Organization (`/sql/`):**
+- `01_initial_schema.sql` - Core table definitions for `user_submissions`
+- `02_rls_policies.sql` - Row Level Security policies for data access
+- `03_indexes.sql` - Performance optimization indexes
+- `migrations/` - Incremental schema changes over time
+- `queries/` - Reference queries for analytics and maintenance
+
+**Database Type Safety:**
+- TypeScript types auto-generated from Supabase schema in `src/types/database.types.ts`
+- Helper types: `UserSubmission`, `UserSubmissionInsert`, `UserSubmissionUpdate`
+- Full type safety across database operations
+
+**Supabase Client Configuration:**
+- Graceful fallback to demo mode when credentials are missing
+- Production error handling with connection validation
+- Development utilities for debugging (`devUtils.logConnectionInfo()`)
+
+## Error Handling Patterns
+
+**Form Validation:**
+- Yup schema validation with TypeScript inference
+- Real-time validation on blur events
+- Accessible error messaging with ARIA attributes
+
+**Supabase Integration:**
+- Demo mode simulation when database unavailable
+- Production error logging and fallback handling
+- Environment variable validation with helpful development warnings
+
+## Live Deployment
+
+**Production URL:** [crm.kjrcloud.com](https://crm.kjrcloud.com)
+- Deployed on Vercel with automatic builds from main branch
+- Environment variables configured in Vercel dashboard
+- Production Supabase integration with real database
