@@ -178,7 +178,7 @@ export function useSidebar() {
     // Only handle swipe from left edge
     if (startX > 20) return
     
-    let startTime = Date.now()
+    const startTime = Date.now()
     
     const handleTouchMove = (moveEvent: TouchEvent) => {
       moveEvent.preventDefault()

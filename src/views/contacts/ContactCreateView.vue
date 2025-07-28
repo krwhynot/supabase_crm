@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+  <DashboardLayout>
+    <div class="min-h-screen bg-gray-50 py-8">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
         <div class="flex items-center space-x-3 mb-4">
@@ -187,8 +188,9 @@
           </div>
         </form>
       </div>
+      </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup lang="ts">
@@ -197,6 +199,9 @@ import { useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { ContactValidator } from '@/types/contacts'
 import type { ContactCreateForm, ValidationError } from '@/types/contacts'
+
+// Layout Components
+import DashboardLayout from '@/components/DashboardLayout.vue'
 
 const router = useRouter()
 

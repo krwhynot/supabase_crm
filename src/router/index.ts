@@ -4,8 +4,12 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/HomeView.vue'),
+    name: 'Dashboard',
+    component: () => import('@/views/DashboardView.vue'),
+    meta: {
+      title: 'Dashboard',
+      description: 'CRM Dashboard with analytics and metrics'
+    }
   },
   {
     path: '/contacts',

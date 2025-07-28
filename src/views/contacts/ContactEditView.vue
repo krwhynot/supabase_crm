@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+  <DashboardLayout>
+    <div class="min-h-screen bg-gray-50 py-8">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Loading State -->
       <div v-if="loading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <div class="flex justify-center">
@@ -221,8 +222,9 @@
           </form>
         </div>
       </div>
+      </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup lang="ts">
@@ -232,6 +234,9 @@ import { contactsApi } from '@/services/contactsApi'
 import { ContactValidator } from '@/types/contacts'
 import type { Contact } from '@/types/database.types'
 import type { ContactCreateForm, ValidationError } from '@/types/contacts'
+
+// Layout Components
+import DashboardLayout from '@/components/DashboardLayout.vue'
 
 const route = useRoute()
 const router = useRouter()

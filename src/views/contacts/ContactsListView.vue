@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <DashboardLayout>
+    <div class="min-h-screen bg-gray-50 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="flex justify-between items-center mb-8">
         <div>
@@ -200,8 +201,9 @@
           Showing {{ contacts.length }} contacts
         </div>
       </div>
+      </div>
     </div>
-  </div>
+  </DashboardLayout>
 </template>
 
 <script setup lang="ts">
@@ -210,6 +212,9 @@ import { useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { contactUtils } from '@/types/contacts'
 import type { Contact } from '@/types/database.types'
+
+// Layout Components
+import DashboardLayout from '@/components/DashboardLayout.vue'
 
 const router = useRouter()
 
