@@ -83,9 +83,73 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_preferences: {
+        Row: {
+          id: number
+          user_id: string
+          widget_layout: Json
+          visible_widgets: Json
+          dashboard_theme: string
+          refresh_interval: number
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          widget_layout?: Json
+          visible_widgets?: Json
+          dashboard_theme?: string
+          refresh_interval?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          user_id?: string
+          widget_layout?: Json
+          visible_widgets?: Json
+          dashboard_theme?: string
+          refresh_interval?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      dashboard_contact_analytics: {
+        Row: {
+          total_contacts: number | null
+          contacts_this_week: number | null
+          contacts_this_month: number | null
+          unique_organizations: number | null
+          day_of_week: number | null
+          contact_date: string | null
+          daily_contact_count: number | null
+        }
+        Relationships: []
+      }
+      dashboard_organization_analytics: {
+        Row: {
+          organization: string | null
+          contact_count: number | null
+          first_contact_date: string | null
+          latest_contact_date: string | null
+          avg_days_since_contact: number | null
+        }
+        Relationships: []
+      }
+      dashboard_weekly_interactions: {
+        Row: {
+          week_start: string | null
+          interaction_count: number | null
+          organizations_contacted: number | null
+          unique_emails: number | null
+          organizations_list: string[] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
