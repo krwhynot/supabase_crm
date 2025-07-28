@@ -21,7 +21,7 @@
       v-if="error"
       :id="errorId"
       role="alert"
-      class="text-sm text-red-600"
+      class="text-sm text-danger"
     >
       {{ error }}
     </p>
@@ -54,8 +54,8 @@ const errorId = computed(() => `error-${props.name}`)
 
 const inputClasses = computed(() => {
   const base = 'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200'
-  const errorClasses = 'border-red-500 focus:ring-red-500'
-  const normalClasses = 'border-gray-300 focus:ring-blue-500'
+  const errorClasses = 'border-danger focus:ring-danger'
+  const normalClasses = 'border-gray-300 focus:ring-primary'
   
   return `${base} ${props.error ? errorClasses : normalClasses}`
 })
