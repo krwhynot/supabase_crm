@@ -9,7 +9,7 @@
         <!-- Logo/Brand -->
         <div class="flex h-16 items-center justify-between px-4 border-b border-gray-200">
           <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-900">
+            <h1 class="text-xl font-bold text-gray-700">
               <span v-if="!isCollapsed || isMobile">CRM Dashboard</span>
               <span v-else class="text-center w-full block">CRM</span>
             </h1>
@@ -77,7 +77,7 @@
         <div class="border-t border-gray-200 p-4">
           <div v-if="!isCollapsed || isMobile" class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+              <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                 <UserIcon class="h-4 w-4 text-white" />
               </div>
             </div>
@@ -87,7 +87,7 @@
             </div>
           </div>
           <div v-else class="flex justify-center">
-            <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+            <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
               <UserIcon class="h-4 w-4 text-white" />
             </div>
           </div>
@@ -123,7 +123,7 @@
 
           <!-- Page Title -->
           <div class="flex-1 min-w-0">
-            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate">
+            <h1 class="text-2xl font-bold leading-7 text-gray-700 sm:truncate">
               {{ pageTitle }}
             </h1>
           </div>
@@ -134,7 +134,7 @@
             <button
               v-if="isCurrentRoute('/') && !isRefreshing"
               @click="refreshDashboard"
-              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               :disabled="isLoading"
             >
               <ArrowPathIcon class="h-4 w-4 mr-2" />
@@ -153,7 +153,7 @@
             <!-- Settings Button -->
             <button
               @click="openSettings"
-              class="inline-flex items-center p-2 border border-transparent rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="inline-flex items-center p-2 border border-transparent rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               aria-label="Dashboard settings"
             >
               <Cog6ToothIcon class="h-5 w-5" />
@@ -207,7 +207,7 @@
         <div class="flex items-center justify-between text-sm text-gray-500">
           <div class="flex items-center">
             <span>Last updated: {{ lastUpdatedFormatted }}</span>
-            <span v-if="isDemoMode" class="ml-4 px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-medium">
+            <span v-if="isDemoMode" class="ml-4 px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
               Demo Mode
             </span>
           </div>

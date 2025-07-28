@@ -23,140 +23,164 @@
         <form @submit.prevent="handleSubmit">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- First Name -->
-            <div>
-              <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
-                First Name *
-              </label>
-              <input
-                id="first_name"
-                v-model="form.first_name"
-                type="text"
-                required
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.first_name }"
-                placeholder="Enter first name"
-              />
-              <p v-if="validationErrors.first_name" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.first_name }}
-              </p>
-            </div>
+            <FormGroup
+              name="first_name"
+              label="First Name"
+              :error="validationErrors.first_name"
+              required
+            >
+              <template #default="{ fieldId, hasError, errorId }">
+                <input
+                  :id="fieldId"
+                  v-model="form.first_name"
+                  type="text"
+                  required
+                  placeholder="Enter first name"
+                  :aria-describedby="hasError ? errorId : undefined"
+                  :aria-invalid="hasError ? 'true' : 'false'"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                  :class="{ 'border-danger focus:ring-danger': hasError }"
+                />
+              </template>
+            </FormGroup>
 
             <!-- Last Name -->
-            <div>
-              <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
-                Last Name *
-              </label>
-              <input
-                id="last_name"
-                v-model="form.last_name"
-                type="text"
-                required
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.last_name }"
-                placeholder="Enter last name"
-              />
-              <p v-if="validationErrors.last_name" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.last_name }}
-              </p>
-            </div>
+            <FormGroup
+              name="last_name"
+              label="Last Name"
+              :error="validationErrors.last_name"
+              required
+            >
+              <template #default="{ fieldId, hasError, errorId }">
+                <input
+                  :id="fieldId"
+                  v-model="form.last_name"
+                  type="text"
+                  required
+                  placeholder="Enter last name"
+                  :aria-describedby="hasError ? errorId : undefined"
+                  :aria-invalid="hasError ? 'true' : 'false'"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                  :class="{ 'border-danger focus:ring-danger': hasError }"
+                />
+              </template>
+            </FormGroup>
 
             <!-- Email -->
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
-              </label>
-              <input
-                id="email"
-                v-model="form.email"
-                type="email"
-                required
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.email }"
-                placeholder="Enter email address"
-              />
-              <p v-if="validationErrors.email" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.email }}
-              </p>
-            </div>
+            <FormGroup
+              name="email"
+              label="Email Address"
+              :error="validationErrors.email"
+              required
+            >
+              <template #default="{ fieldId, hasError, errorId }">
+                <input
+                  :id="fieldId"
+                  v-model="form.email"
+                  type="email"
+                  required
+                  placeholder="Enter email address"
+                  :aria-describedby="hasError ? errorId : undefined"
+                  :aria-invalid="hasError ? 'true' : 'false'"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                  :class="{ 'border-danger focus:ring-danger': hasError }"
+                />
+              </template>
+            </FormGroup>
 
             <!-- Phone -->
-            <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                v-model="form.phone"
-                type="tel"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.phone }"
-                placeholder="Enter phone number"
-              />
-              <p v-if="validationErrors.phone" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.phone }}
-              </p>
-            </div>
+            <FormGroup
+              name="phone"
+              label="Phone Number"
+              :error="validationErrors.phone"
+            >
+              <template #default="{ fieldId, hasError, errorId }">
+                <input
+                  :id="fieldId"
+                  v-model="form.phone"
+                  type="tel"
+                  placeholder="Enter phone number"
+                  :aria-describedby="hasError ? errorId : undefined"
+                  :aria-invalid="hasError ? 'true' : 'false'"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                  :class="{ 'border-danger focus:ring-danger': hasError }"
+                />
+              </template>
+            </FormGroup>
 
             <!-- Organization -->
             <div class="md:col-span-2">
-              <label for="organization" class="block text-sm font-medium text-gray-700 mb-2">
-                Organization *
-              </label>
-              <input
-                id="organization"
-                v-model="form.organization"
-                type="text"
+              <FormGroup
+                name="organization"
+                label="Organization"
+                :error="validationErrors.organization"
                 required
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.organization }"
-                placeholder="Enter organization or company name"
-              />
-              <p v-if="validationErrors.organization" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.organization }}
-              </p>
+              >
+                <template #default="{ fieldId, hasError, errorId }">
+                  <input
+                    :id="fieldId"
+                    v-model="form.organization"
+                    type="text"
+                    required
+                    placeholder="Enter organization or company name"
+                    :aria-describedby="hasError ? errorId : undefined"
+                    :aria-invalid="hasError ? 'true' : 'false'"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                    :class="{ 'border-danger focus:ring-danger': hasError }"
+                  />
+                </template>
+              </FormGroup>
             </div>
 
             <!-- Title -->
             <div class="md:col-span-2">
-              <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                Job Title
-              </label>
-              <input
-                id="title"
-                v-model="form.title"
-                type="text"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.title }"
-                placeholder="Enter job title"
-              />
-              <p v-if="validationErrors.title" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.title }}
-              </p>
+              <FormGroup
+                name="title"
+                label="Job Title"
+                :error="validationErrors.title"
+              >
+                <template #default="{ fieldId, hasError, errorId }">
+                  <input
+                    :id="fieldId"
+                    v-model="form.title"
+                    type="text"
+                    placeholder="Enter job title"
+                    :aria-describedby="hasError ? errorId : undefined"
+                    :aria-invalid="hasError ? 'true' : 'false'"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                    :class="{ 'border-danger focus:ring-danger': hasError }"
+                  />
+                </template>
+              </FormGroup>
             </div>
 
             <!-- Notes -->
             <div class="md:col-span-2">
-              <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                Notes
-              </label>
-              <textarea
-                id="notes"
-                v-model="form.notes"
-                rows="4"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': validationErrors.notes }"
-                placeholder="Add any additional notes about this contact..."
-              ></textarea>
-              <p v-if="validationErrors.notes" class="mt-1 text-sm text-red-600">
-                {{ validationErrors.notes }}
-              </p>
+              <FormGroup
+                name="notes"
+                label="Notes"
+                :error="validationErrors.notes"
+              >
+                <template #default="{ fieldId, hasError, errorId }">
+                  <textarea
+                    :id="fieldId"
+                    v-model="form.notes"
+                    rows="4"
+                    placeholder="Add any additional notes about this contact..."
+                    :aria-describedby="hasError ? errorId : undefined"
+                    :aria-invalid="hasError ? 'true' : 'false'"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+                    :class="{ 'border-danger focus:ring-danger': hasError }"
+                  ></textarea>
+                </template>
+              </FormGroup>
             </div>
           </div>
 
           <!-- Error Message -->
-          <div v-if="submitError" class="mt-6 p-4 border border-red-200 rounded-md bg-red-50">
+          <div v-if="submitError" class="mt-6 p-4 border border-danger rounded-md bg-red-50">
             <div class="flex">
-              <svg class="h-5 w-5 text-red-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-danger mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
@@ -170,21 +194,21 @@
           <div class="mt-8 flex justify-end space-x-3">
             <router-link
               to="/contacts"
-              class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="inline-flex items-center justify-center px-4 py-2 border text-sm font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary"
             >
               Cancel
             </router-link>
-            <button
+            <Button
               type="submit"
+              variant="primary"
               :disabled="submitting"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg v-if="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               {{ submitting ? 'Creating...' : 'Create Contact' }}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -202,6 +226,8 @@ import type { ContactCreateForm, ValidationError } from '@/types/contacts'
 
 // Layout Components
 import DashboardLayout from '@/components/DashboardLayout.vue'
+import Button from '@/components/atomic/Button.vue'
+import FormGroup from '@/components/molecular/FormGroup.vue'
 
 const router = useRouter()
 
