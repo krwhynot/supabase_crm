@@ -57,7 +57,7 @@
     <InputField
       name="age"
       label="Age"
-      type="number"
+      type="text"
       v-model="formData.age"
       :error="errors.age"
       placeholder="Enter your age"
@@ -74,13 +74,14 @@
       @blur="validateField('favoriteColor')"
     />
 
-    <button
+    <Button
       type="submit"
+      variant="primary"
       :disabled="isSubmitting"
-      class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+      class="w-full"
     >
       {{ isSubmitting ? 'Submitting...' : 'Submit' }}
-    </button>
+    </Button>
   </form>
 </template>
 
@@ -93,6 +94,7 @@ import { useFormStore } from '@/stores/formStore'
 import type { UserSubmissionInsert } from '@/types/database.types'
 import InputField from './InputField.vue'
 import SelectField from './SelectField.vue'
+import Button from './atomic/Button.vue'
 
 const schema = yup.object({
   firstName: yup.string().required('First name is required'),

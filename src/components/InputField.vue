@@ -34,7 +34,7 @@ import { computed } from 'vue'
 interface Props {
   name: string
   label: string
-  type?: 'text' | 'number' | 'email' | 'password'
+  type?: 'text' | 'email' | 'password'
   modelValue: string | number
   error?: string
   placeholder?: string
