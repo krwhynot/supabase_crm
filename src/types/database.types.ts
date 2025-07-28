@@ -20,6 +20,7 @@ export type Database = {
           first_name: string
           last_name: string
           organization: string
+          organization_id: string | null
           email: string
           title: string | null
           phone: string | null
@@ -32,6 +33,7 @@ export type Database = {
           first_name: string
           last_name: string
           organization: string
+          organization_id?: string | null
           email: string
           title?: string | null
           phone?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           first_name?: string
           last_name?: string
           organization?: string
+          organization_id?: string | null
           email?: string
           title?: string | null
           phone?: string | null
@@ -51,7 +54,352 @@ export type Database = {
           created_at?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          legal_name: string | null
+          description: string | null
+          industry: string | null
+          type: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
+          size: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
+          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          website: string | null
+          email: string | null
+          primary_phone: string | null
+          secondary_phone: string | null
+          address_line_1: string | null
+          address_line_2: string | null
+          city: string | null
+          state_province: string | null
+          postal_code: string | null
+          country: string | null
+          founded_year: number | null
+          employees_count: number | null
+          annual_revenue: number | null
+          currency_code: string | null
+          lead_source: string | null
+          lead_score: number | null
+          tags: Json | null
+          custom_fields: Json | null
+          parent_org_id: string | null
+          assigned_user_id: string | null
+          last_contact_date: string | null
+          next_follow_up_date: string | null
+          created_at: string | null
+          updated_at: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          legal_name?: string | null
+          description?: string | null
+          industry?: string | null
+          type?: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
+          size?: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
+          status?: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          website?: string | null
+          email?: string | null
+          primary_phone?: string | null
+          secondary_phone?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          state_province?: string | null
+          postal_code?: string | null
+          country?: string | null
+          founded_year?: number | null
+          employees_count?: number | null
+          annual_revenue?: number | null
+          currency_code?: string | null
+          lead_source?: string | null
+          lead_score?: number | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          parent_org_id?: string | null
+          assigned_user_id?: string | null
+          last_contact_date?: string | null
+          next_follow_up_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          legal_name?: string | null
+          description?: string | null
+          industry?: string | null
+          type?: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
+          size?: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
+          status?: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          website?: string | null
+          email?: string | null
+          primary_phone?: string | null
+          secondary_phone?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          state_province?: string | null
+          postal_code?: string | null
+          country?: string | null
+          founded_year?: number | null
+          employees_count?: number | null
+          annual_revenue?: number | null
+          currency_code?: string | null
+          lead_source?: string | null
+          lead_score?: number | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          parent_org_id?: string | null
+          assigned_user_id?: string | null
+          last_contact_date?: string | null
+          next_follow_up_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_parent_org_id_fkey"
+            columns: ["parent_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      organization_interactions: {
+        Row: {
+          id: string
+          organization_id: string
+          contact_id: string | null
+          type: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
+          direction: "Inbound" | "Outbound" | null
+          subject: string | null
+          description: string | null
+          interaction_date: string | null
+          duration_minutes: number | null
+          tags: Json | null
+          metadata: Json | null
+          created_by_user_id: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          contact_id?: string | null
+          type?: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
+          direction?: "Inbound" | "Outbound" | null
+          subject?: string | null
+          description?: string | null
+          interaction_date?: string | null
+          duration_minutes?: number | null
+          tags?: Json | null
+          metadata?: Json | null
+          created_by_user_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          contact_id?: string | null
+          type?: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
+          direction?: "Inbound" | "Outbound" | null
+          subject?: string | null
+          description?: string | null
+          interaction_date?: string | null
+          duration_minutes?: number | null
+          tags?: Json | null
+          metadata?: Json | null
+          created_by_user_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_interactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      organization_documents: {
+        Row: {
+          id: string
+          organization_id: string
+          name: string
+          description: string | null
+          file_type: string | null
+          file_size_bytes: number | null
+          storage_path: string | null
+          external_url: string | null
+          category: string | null
+          tags: Json | null
+          is_public: boolean | null
+          access_level: string | null
+          version: string | null
+          parent_document_id: string | null
+          uploaded_by_user_id: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          name: string
+          description?: string | null
+          file_type?: string | null
+          file_size_bytes?: number | null
+          storage_path?: string | null
+          external_url?: string | null
+          category?: string | null
+          tags?: Json | null
+          is_public?: boolean | null
+          access_level?: string | null
+          version?: string | null
+          parent_document_id?: string | null
+          uploaded_by_user_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          name?: string
+          description?: string | null
+          file_type?: string | null
+          file_size_bytes?: number | null
+          storage_path?: string | null
+          external_url?: string | null
+          category?: string | null
+          tags?: Json | null
+          is_public?: boolean | null
+          access_level?: string | null
+          version?: string | null
+          parent_document_id?: string | null
+          uploaded_by_user_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "organization_documents"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      organization_analytics: {
+        Row: {
+          id: string
+          organization_id: string
+          period_start: string | null
+          period_end: string | null
+          period_type: string | null
+          total_interactions: number | null
+          email_interactions: number | null
+          phone_interactions: number | null
+          meeting_interactions: number | null
+          revenue_generated: number | null
+          deals_closed: number | null
+          deals_in_progress: number | null
+          lead_score_change: number | null
+          conversion_events: number | null
+          documents_added: number | null
+          documents_accessed: number | null
+          new_contacts_added: number | null
+          active_contacts: number | null
+          custom_metrics: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          period_start: string | null
+          period_end: string | null
+          period_type: string | null
+          total_interactions?: number | null
+          email_interactions?: number | null
+          phone_interactions?: number | null
+          meeting_interactions?: number | null
+          revenue_generated?: number | null
+          deals_closed?: number | null
+          deals_in_progress?: number | null
+          lead_score_change?: number | null
+          conversion_events?: number | null
+          documents_added?: number | null
+          documents_accessed?: number | null
+          new_contacts_added?: number | null
+          active_contacts?: number | null
+          custom_metrics?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          period_start?: string | null
+          period_end?: string | null
+          period_type?: string | null
+          total_interactions?: number | null
+          email_interactions?: number | null
+          phone_interactions?: number | null
+          meeting_interactions?: number | null
+          revenue_generated?: number | null
+          deals_closed?: number | null
+          deals_in_progress?: number | null
+          lead_score_change?: number | null
+          conversion_events?: number | null
+          documents_added?: number | null
+          documents_accessed?: number | null
+          new_contacts_added?: number | null
+          active_contacts?: number | null
+          custom_metrics?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_analytics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_submissions: {
         Row: {
@@ -137,6 +485,52 @@ export type Database = {
           first_contact_date: string | null
           latest_contact_date: string | null
           avg_days_since_contact: number | null
+        }
+        Relationships: []
+      }
+      organization_summary_analytics: {
+        Row: {
+          id: string | null
+          name: string | null
+          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          industry: string | null
+          lead_score: number | null
+          total_interactions: number | null
+          contact_count: number | null
+          document_count: number | null
+          last_interaction_date: string | null
+          next_follow_up_date: string | null
+          engagement_status: string | null
+        }
+        Relationships: []
+      }
+      monthly_organization_performance: {
+        Row: {
+          organization_id: string | null
+          organization_name: string | null
+          month: string | null
+          interaction_count: number | null
+          interaction_types: number | null
+          meetings: number | null
+          emails: number | null
+          calls: number | null
+          avg_duration_minutes: number | null
+        }
+        Relationships: []
+      }
+      organization_lead_scoring: {
+        Row: {
+          id: string | null
+          name: string | null
+          lead_score: number | null
+          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          industry: string | null
+          size: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
+          total_interactions: number | null
+          recent_interactions: number | null
+          lead_temperature: string | null
+          last_interaction: string | null
+          document_count: number | null
         }
         Relationships: []
       }
@@ -295,3 +689,35 @@ export type UserSubmissionUpdate = Database['public']['Tables']['user_submission
 export type Contact = Database['public']['Tables']['contacts']['Row']
 export type ContactInsert = Database['public']['Tables']['contacts']['Insert']
 export type ContactUpdate = Database['public']['Tables']['contacts']['Update']
+
+// Organization entity types
+export type Organization = Database['public']['Tables']['organizations']['Row']
+export type OrganizationInsert = Database['public']['Tables']['organizations']['Insert']
+export type OrganizationUpdate = Database['public']['Tables']['organizations']['Update']
+
+// Organization interaction types
+export type OrganizationInteraction = Database['public']['Tables']['organization_interactions']['Row']
+export type OrganizationInteractionInsert = Database['public']['Tables']['organization_interactions']['Insert']
+export type OrganizationInteractionUpdate = Database['public']['Tables']['organization_interactions']['Update']
+
+// Organization document types
+export type OrganizationDocument = Database['public']['Tables']['organization_documents']['Row']
+export type OrganizationDocumentInsert = Database['public']['Tables']['organization_documents']['Insert']
+export type OrganizationDocumentUpdate = Database['public']['Tables']['organization_documents']['Update']
+
+// Organization analytics types
+export type OrganizationAnalytics = Database['public']['Tables']['organization_analytics']['Row']
+export type OrganizationAnalyticsInsert = Database['public']['Tables']['organization_analytics']['Insert']
+export type OrganizationAnalyticsUpdate = Database['public']['Tables']['organization_analytics']['Update']
+
+// Organization view types
+export type OrganizationSummaryAnalytics = Database['public']['Views']['organization_summary_analytics']['Row']
+export type MonthlyOrganizationPerformance = Database['public']['Views']['monthly_organization_performance']['Row']
+export type OrganizationLeadScoring = Database['public']['Views']['organization_lead_scoring']['Row']
+
+// Organization enum types
+export type OrganizationType = 'B2B' | 'B2C' | 'B2B2C' | 'Non-Profit' | 'Government' | 'Other'
+export type OrganizationSize = 'Startup' | 'Small' | 'Medium' | 'Large' | 'Enterprise'
+export type OrganizationStatus = 'Active' | 'Inactive' | 'Prospect' | 'Customer' | 'Partner' | 'Vendor'
+export type InteractionType = 'Email' | 'Phone' | 'Meeting' | 'Demo' | 'Proposal' | 'Contract' | 'Note' | 'Task' | 'Event' | 'Social' | 'Website' | 'Other'
+export type InteractionDirection = 'Inbound' | 'Outbound'
