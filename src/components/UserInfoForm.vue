@@ -36,43 +36,96 @@
       Error: {{ errorMessage }}
     </div>
     
-    <InputField
+    <FormGroup
       name="firstName"
       label="First Name"
-      v-model="formData.firstName"
       :error="errors.firstName"
-      placeholder="Enter your first name"
-      @blur="validateField('firstName')"
-    />
+      required
+    >
+      <template #default="{ fieldId, hasError, errorId }">
+        <input
+          :id="fieldId"
+          type="text"
+          v-model="formData.firstName"
+          placeholder="Enter your first name"
+          :aria-describedby="hasError ? errorId : undefined"
+          :aria-invalid="hasError ? 'true' : 'false'"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+          :class="{ 'border-danger focus:ring-danger': hasError }"
+          @blur="validateField('firstName')"
+        />
+      </template>
+    </FormGroup>
 
-    <InputField
+    <FormGroup
       name="lastName"
       label="Last Name"
-      v-model="formData.lastName"
       :error="errors.lastName"
-      placeholder="Enter your last name"
-      @blur="validateField('lastName')"
-    />
+      required
+    >
+      <template #default="{ fieldId, hasError, errorId }">
+        <input
+          :id="fieldId"
+          type="text"
+          v-model="formData.lastName"
+          placeholder="Enter your last name"
+          :aria-describedby="hasError ? errorId : undefined"
+          :aria-invalid="hasError ? 'true' : 'false'"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+          :class="{ 'border-danger focus:ring-danger': hasError }"
+          @blur="validateField('lastName')"
+        />
+      </template>
+    </FormGroup>
 
-    <InputField
+    <FormGroup
       name="age"
       label="Age"
-      type="text"
-      v-model="formData.age"
       :error="errors.age"
-      placeholder="Enter your age"
-      @blur="validateField('age')"
-    />
+      required
+    >
+      <template #default="{ fieldId, hasError, errorId }">
+        <input
+          :id="fieldId"
+          type="text"
+          v-model="formData.age"
+          placeholder="Enter your age"
+          :aria-describedby="hasError ? errorId : undefined"
+          :aria-invalid="hasError ? 'true' : 'false'"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+          :class="{ 'border-danger focus:ring-danger': hasError }"
+          @blur="validateField('age')"
+        />
+      </template>
+    </FormGroup>
 
-    <SelectField
+    <FormGroup
       name="favoriteColor"
       label="Favorite Color"
-      :options="colorOptions"
-      v-model="formData.favoriteColor"
       :error="errors.favoriteColor"
-      placeholder="Select your favorite color"
-      @blur="validateField('favoriteColor')"
-    />
+      required
+    >
+      <template #default="{ fieldId, hasError, errorId }">
+        <select
+          :id="fieldId"
+          v-model="formData.favoriteColor"
+          :aria-describedby="hasError ? errorId : undefined"
+          :aria-invalid="hasError ? 'true' : 'false'"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition duration-200 border-gray-300 focus:ring-primary"
+          :class="{ 'border-danger focus:ring-danger': hasError }"
+          @blur="validateField('favoriteColor')"
+        >
+          <option value="">Select your favorite color</option>
+          <option 
+            v-for="option in colorOptions" 
+            :key="option" 
+            :value="option"
+          >
+            {{ option }}
+          </option>
+        </select>
+      </template>
+    </FormGroup>
 
     <Button
       type="submit"
@@ -92,9 +145,8 @@ import * as yup from 'yup'
 import { CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/vue/24/solid'
 import { useFormStore } from '@/stores/formStore'
 import type { UserSubmissionInsert } from '@/types/database.types'
-import InputField from './InputField.vue'
-import SelectField from './SelectField.vue'
 import Button from './atomic/Button.vue'
+import FormGroup from './molecular/FormGroup.vue'
 
 const schema = yup.object({
   firstName: yup.string().required('First name is required'),
