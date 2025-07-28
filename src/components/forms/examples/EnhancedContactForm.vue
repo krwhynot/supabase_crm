@@ -88,7 +88,7 @@
         v-bind="validation.getFieldProps('title')"
         label="Job Title"
         type="text"
-        autocomplete="organization-title"
+        autocomplete="organization"
         description="Your current position or role"
         :showValidIcon="true"
       />
@@ -227,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+// import { ref } from 'vue'
 import * as yup from 'yup'
 import { useFormValidation, createValidationRules } from '@/composables/useFormValidation'
 

@@ -161,15 +161,15 @@
         <div><strong>Is Dirty:</strong> {{ isDirty }}</div>
         <div><strong>Is Submitting:</strong> {{ isSubmitting }}</div>
         <div><strong>Has Been Submitted:</strong> {{ hasBeenSubmitted }}</div>
-        <div><strong>Touched Fields:</strong> {{ touchedFields.join(', ') || 'None' }}</div>
-        <div><strong>Errors:</strong> {{ Object.keys(errors).length ? JSON.stringify(errors, null, 2) : 'None' }}</div>
+        <div><strong>Touched Fields:</strong> {{ (touchedFields || []).join(', ') || 'None' }}</div>
+        <div><strong>Errors:</strong> {{ Object.keys(errors || {}).length ? JSON.stringify(errors, null, 2) : 'None' }}</div>
       </div>
     </details>
   </form>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 /**
  * Form layout options

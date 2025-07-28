@@ -4,7 +4,7 @@
  */
 
 import { ref, reactive, computed, nextTick } from 'vue'
-import type { Ref } from 'vue'
+// import type { Ref } from 'vue'
 import * as yup from 'yup'
 
 /**
@@ -59,7 +59,8 @@ export function useFormValidation<T extends Record<string, any>>(
 
   // Initialize field states
   Object.keys(initialData).forEach(key => {
-    fieldStates[key as keyof T] = {
+    const typedKey = key as keyof T
+    ;(fieldStates as any)[typedKey] = {
       error: '',
       touched: false,
       dirty: false,
@@ -110,7 +111,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Validate a single field
    */
   const validateField = async (fieldName: keyof T, showError = true): Promise<string> => {
-    const state = fieldStates[fieldName]
+    const state = (fieldStates as any)[fieldName]
     if (!state) return ''
 
     // Clear existing timeout
@@ -122,7 +123,7 @@ export function useFormValidation<T extends Record<string, any>>(
     state.validating = true
 
     try {
-      const value = formData[fieldName]
+      const value = (formData as any)[fieldName]
       await schema.validateAt(String(fieldName), { [fieldName]: value })
       
       if (showError) {
@@ -169,7 +170,8 @@ export function useFormValidation<T extends Record<string, any>>(
       
       // Clear all errors
       Object.keys(fieldStates).forEach(key => {
-        fieldStates[key as keyof T].error = ''
+        const typedKey = key as keyof T
+        ;(fieldStates as any)[typedKey].error = ''
       })
 
       return {
@@ -180,7 +182,8 @@ export function useFormValidation<T extends Record<string, any>>(
       if (error instanceof yup.ValidationError) {
         // Clear previous errors
         Object.keys(fieldStates).forEach(key => {
-          fieldStates[key as keyof T].error = ''
+          const typedKey = key as keyof T
+          ;(fieldStates as any)[typedKey].error = ''
         })
 
         // Set new errors
@@ -188,7 +191,7 @@ export function useFormValidation<T extends Record<string, any>>(
         error.inner.forEach(err => {
           if (err.path) {
             const fieldName = err.path as keyof T
-            fieldStates[fieldName].error = err.message
+            ;(fieldStates as any)[fieldName].error = err.message
             newErrors[String(fieldName)] = err.message
           }
         })
@@ -212,7 +215,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Touch a field (mark as interacted with)
    */
   const touchField = (fieldName: keyof T) => {
-    const state = fieldStates[fieldName]
+    const state = (fieldStates as any)[fieldName]
     if (state) {
       state.touched = true
     }
@@ -222,7 +225,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Mark field as dirty (value changed)
    */
   const markFieldDirty = (fieldName: keyof T) => {
-    const state = fieldStates[fieldName]
+    const state = (fieldStates as any)[fieldName]
     if (state) {
       state.dirty = true
     }
@@ -243,7 +246,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Handle field change event
    */
   const handleFieldChange = async (fieldName: keyof T, value: any) => {
-    formData[fieldName] = value
+    (formData as any)[fieldName] = value
     markFieldDirty(fieldName)
     
     if (validateOnChange || hasBeenSubmitted.value) {
@@ -258,13 +261,13 @@ export function useFormValidation<T extends Record<string, any>>(
     // Reset data
     Object.keys(formData).forEach(key => {
       const typedKey = key as keyof T
-      formData[typedKey] = newData?.[typedKey] ?? initialData[typedKey]
+      ;(formData as any)[typedKey] = newData?.[typedKey] ?? initialData[typedKey]
     })
 
     // Reset field states
     Object.keys(fieldStates).forEach(key => {
       const typedKey = key as keyof T
-      fieldStates[typedKey] = {
+      ;(fieldStates as any)[typedKey] = {
         error: '',
         touched: false,
         dirty: false,
@@ -286,7 +289,8 @@ export function useFormValidation<T extends Record<string, any>>(
    */
   const clearErrors = () => {
     Object.keys(fieldStates).forEach(key => {
-      fieldStates[key as keyof T].error = ''
+      const typedKey = key as keyof T
+      ;(fieldStates as any)[typedKey].error = ''
     })
   }
 
@@ -294,7 +298,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Set field error manually
    */
   const setFieldError = (fieldName: keyof T, error: string) => {
-    const state = fieldStates[fieldName]
+    const state = (fieldStates as any)[fieldName]
     if (state) {
       state.error = error
     }
@@ -339,7 +343,7 @@ export function useFormValidation<T extends Record<string, any>>(
         return
       }
 
-      await submitFn(formData)
+      await submitFn({ ...formData } as T)
     } catch (error) {
       console.error('Form submission error:', error)
       throw error
@@ -352,10 +356,10 @@ export function useFormValidation<T extends Record<string, any>>(
    * Get field helper functions
    */
   const getFieldProps = (fieldName: keyof T) => {
-    const state = fieldStates[fieldName]
+    const state = (fieldStates as any)[fieldName]
     
     return {
-      modelValue: formData[fieldName],
+      modelValue: (formData as any)[fieldName],
       error: state?.error || '',
       name: String(fieldName),
       'onUpdate:modelValue': (value: any) => handleFieldChange(fieldName, value),
@@ -368,7 +372,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Get field state
    */
   const getFieldState = (fieldName: keyof T) => {
-    return fieldStates[fieldName] || {
+    return (fieldStates as any)[fieldName] || {
       error: '',
       touched: false,
       dirty: false,

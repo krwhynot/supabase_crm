@@ -67,7 +67,7 @@
         <template v-else>
           <option
             v-for="option in options"
-            :key="option"
+            :key="String(option)"
             :value="option"
           >
             {{ option }}
@@ -195,7 +195,7 @@ interface Props {
   /** Visual label for the field */
   label: string
   /** Current field value - string for single, array for multiple */
-  modelValue: string | string[] | number | number[]
+  modelValue: string | number | (string | number)[]
   /** Options array - supports strings or objects */
   options: string[] | SelectOption[]
   /** Validation error message */
@@ -230,12 +230,12 @@ const props = withDefaults(defineProps<Props>(), {
  * Enhanced event emissions
  */
 interface Emits {
-  'update:modelValue': [value: string | string[] | number | number[]]
+  'update:modelValue': [value: string | number | (string | number)[]]
   'blur': [event: FocusEvent]
   'focus': [event: FocusEvent] 
   'change': [event: Event]
   'keydown': [event: KeyboardEvent]
-  'validate': [value: string | string[] | number | number[]]
+  'validate': [value: string | number | (string | number)[]]
 }
 
 const emit = defineEmits<Emits>()
@@ -381,7 +381,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   
   // Enhanced keyboard navigation
   if (event.key === 'Escape' && isFocused.value) {
-    ;(event.target as HTMLSelectElement).blur()
+    (event.target as HTMLSelectElement).blur()
   }
   
   // Space bar handling for better UX

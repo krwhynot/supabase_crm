@@ -331,7 +331,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   
   // Enhanced keyboard navigation
   if (event.key === 'Escape' && isFocused.value) {
-    ;(event.target as HTMLInputElement).blur()
+    (event.target as HTMLInputElement).blur()
   }
 }
 

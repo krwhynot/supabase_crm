@@ -263,7 +263,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   
   // Enhanced keyboard shortcuts
   if (event.key === 'Escape' && isFocused.value) {
-    ;(event.target as HTMLTextAreaElement).blur()
+    (event.target as HTMLTextAreaElement).blur()
   }
   
   // Tab behavior for better UX

@@ -125,7 +125,7 @@ interface Props {
   /** Visual label for the checkbox */
   label: string
   /** Current field value - boolean for single checkbox, array for checkbox group */
-  modelValue: boolean | string[] | number[]
+  modelValue: boolean | (string | number)[]
   /** Value of this specific checkbox (for checkbox groups) */
   checkboxValue?: string | number
   /** Validation error message */
@@ -155,12 +155,12 @@ const props = withDefaults(defineProps<Props>(), {
  * Enhanced event emissions
  */
 interface Emits {
-  'update:modelValue': [value: boolean | string[] | number[]]
+  'update:modelValue': [value: boolean | (string | number)[]]
   'blur': [event: FocusEvent]
   'focus': [event: FocusEvent] 
   'change': [event: Event, checked: boolean]
   'keydown': [event: KeyboardEvent]
-  'validate': [value: boolean | string[] | number[]]
+  'validate': [value: boolean | (string | number)[]]
 }
 
 const emit = defineEmits<Emits>()
@@ -193,7 +193,7 @@ const isChecked = computed(() => {
   }
   
   if (Array.isArray(props.modelValue) && props.checkboxValue !== undefined) {
-    return props.modelValue.includes(props.checkboxValue)
+    return (props.modelValue as (string | number)[]).includes(props.checkboxValue)
   }
   
   return false
@@ -257,7 +257,7 @@ const handleChange = (event: Event) => {
     emit('update:modelValue', checked)
   } else if (Array.isArray(props.modelValue) && props.checkboxValue !== undefined) {
     // Checkbox group
-    const currentValues = [...props.modelValue]
+    const currentValues = [...(props.modelValue as (string | number)[])]
     
     if (checked) {
       if (!currentValues.includes(props.checkboxValue)) {
@@ -295,7 +295,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   
   // Enhanced keyboard navigation
   if (event.key === 'Escape' && isFocused.value) {
-    ;(event.target as HTMLInputElement).blur()
+    (event.target as HTMLInputElement).blur()
   }
   
   // Space bar handling for better UX
