@@ -1,12 +1,11 @@
 <template>
-  <DashboardLayout>
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
         <div class="flex items-center space-x-3 mb-4">
           <router-link
-            to="/contacts"
+            to="/"
             class="text-gray-500 hover:text-gray-700"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +192,7 @@
           <!-- Actions -->
           <div class="mt-8 flex justify-end space-x-3">
             <router-link
-              to="/contacts"
+              to="/"
               class="inline-flex items-center justify-center px-4 py-2 border text-sm font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary"
             >
               Cancel
@@ -214,22 +213,21 @@
       </div>
       </div>
     </div>
-  </DashboardLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { contactsApi } from '@/services/contactsApi'
+import { useContactStore } from '@/stores/contactStore'
 import { ContactValidator } from '@/types/contacts'
 import type { ContactCreateForm, ValidationError } from '@/types/contacts'
 
 // Layout Components
-import DashboardLayout from '@/components/DashboardLayout.vue'
 import Button from '@/components/atomic/Button.vue'
 import FormGroup from '@/components/molecular/FormGroup.vue'
 
 const router = useRouter()
+const contactStore = useContactStore()
 
 // Form state
 const form = reactive<ContactCreateForm>({
@@ -284,15 +282,15 @@ const handleSubmit = async () => {
       return
     }
 
-    // Convert form data and create contact
+    // Convert form data and create contact using the contact store
     const contactData = ContactValidator.formToInsert(form)
-    const response = await contactsApi.createContact(contactData)
+    const createdContact = await contactStore.createContact(contactData)
 
-    if (response.success && response.data) {
+    if (createdContact) {
       // Success - redirect to contact detail
-      router.push(`/contacts/${response.data.id}`)
+      router.push(`/contacts/${createdContact.id}`)
     } else {
-      submitError.value = response.error || 'Failed to create contact'
+      submitError.value = contactStore.errorMessage || 'Failed to create contact'
     }
   } catch (error) {
     console.error('Error creating contact:', error)

@@ -1,5 +1,5 @@
 <template>
-  <DashboardLayout>
+  
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Loading State -->
@@ -19,7 +19,7 @@
         </div>
         <div class="flex space-x-3">
           <router-link
-            to="/contacts"
+            to="/"
             class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             Back to Contacts
@@ -40,7 +40,7 @@
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
               <router-link
-                to="/contacts"
+                to="/"
                 class="text-gray-500 hover:text-gray-700"
               >
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +191,7 @@
       </div>
       </div>
     </div>
-  </DashboardLayout>
+  
 </template>
 
 <script setup lang="ts">
@@ -202,7 +202,6 @@ import { contactUtils } from '@/types/contacts'
 import type { Contact } from '@/types/database.types'
 
 // Layout Components
-import DashboardLayout from '@/components/DashboardLayout.vue'
 
 const route = useRoute()
 const router = useRouter()

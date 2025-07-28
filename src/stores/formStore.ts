@@ -14,21 +14,7 @@ export const useFormStore = defineStore('form', () => {
       submitStatus.value = 'idle'
       errorMessage.value = ''
 
-      // Check if we have valid Supabase configuration
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-      const isDemoMode = !supabaseUrl || !supabaseKey || 
-                        supabaseUrl === 'your-supabase-project-url' || 
-                        supabaseKey === 'your-supabase-anon-key'
-
-      if (isDemoMode) {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        console.log('Demo mode: Form data would be submitted:', data)
-        submitStatus.value = 'success'
-        return { id: Math.floor(Math.random() * 1000), ...data }
-      }
+      // Submit to Supabase database
 
       const { data: result, error } = await supabase
         .from('user_submissions')

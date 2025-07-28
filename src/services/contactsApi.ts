@@ -1,7 +1,7 @@
 /**
  * Contacts API Service
  * Centralized Supabase operations for contact management
- * Supports both authenticated and demo modes
+ * Requires valid Supabase authentication
  */
 
 import { supabase } from '@/config/supabaseClient'
@@ -37,27 +37,11 @@ export interface ContactStats {
 }
 
 class ContactsApiService {
-  private isDemoMode: boolean = false
-
-  constructor() {
-    // Check if we're in demo mode (invalid Supabase config)
-    this.isDemoMode = this.checkDemoMode()
-  }
-
-  private checkDemoMode(): boolean {
-    const url = import.meta.env.VITE_SUPABASE_URL
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-    return !url || !key || url === 'your-supabase-project-url' || key === 'your-supabase-anon-key'
-  }
 
   /**
    * Get all contacts with optional search and pagination
    */
   async getContacts(options: ContactSearchOptions = {}): Promise<ApiResponse<Contact[]>> {
-    if (this.isDemoMode) {
-      return this.getMockContacts(options)
-    }
-
     try {
       let query = supabase
         .from('contacts')
@@ -111,10 +95,6 @@ class ContactsApiService {
    * Get a single contact by ID
    */
   async getContact(id: string): Promise<ApiResponse<Contact>> {
-    if (this.isDemoMode) {
-      return this.getMockContact(id)
-    }
-
     try {
       const { data, error } = await supabase
         .from('contacts')
@@ -150,10 +130,6 @@ class ContactsApiService {
    * Create a new contact
    */
   async createContact(contact: ContactInsert): Promise<ApiResponse<Contact>> {
-    if (this.isDemoMode) {
-      return this.createMockContact(contact)
-    }
-
     try {
       const { data, error } = await supabase
         .from('contacts')
@@ -189,10 +165,6 @@ class ContactsApiService {
    * Update an existing contact
    */
   async updateContact(id: string, updates: ContactUpdate): Promise<ApiResponse<Contact>> {
-    if (this.isDemoMode) {
-      return this.updateMockContact(id, updates)
-    }
-
     try {
       const { data, error } = await supabase
         .from('contacts')
@@ -229,10 +201,6 @@ class ContactsApiService {
    * Delete a contact
    */
   async deleteContact(id: string): Promise<ApiResponse<boolean>> {
-    if (this.isDemoMode) {
-      return this.deleteMockContact(id)
-    }
-
     try {
       const { error } = await supabase
         .from('contacts')
@@ -267,10 +235,6 @@ class ContactsApiService {
    * Get contact statistics
    */
   async getContactStats(): Promise<ApiResponse<ContactStats>> {
-    if (this.isDemoMode) {
-      return this.getMockStats()
-    }
-
     try {
       // Get total count
       const { count: total, error: countError } = await supabase
@@ -327,162 +291,6 @@ class ContactsApiService {
     }
   }
 
-  // Demo mode mock implementations
-  private async getMockContacts(options: ContactSearchOptions): Promise<ApiResponse<Contact[]>> {
-    const mockContacts: Contact[] = [
-      {
-        id: 'mock-1',
-        first_name: 'John',
-        last_name: 'Doe',
-        organization: 'Tech Corp',
-        email: 'john.doe@techcorp.com',
-        title: 'Software Engineer',
-        phone: '+1-555-0123',
-        notes: 'Met at tech conference 2024',
-        created_at: '2024-01-15T10:00:00Z',
-        updated_at: '2024-01-15T10:00:00Z'
-      },
-      {
-        id: 'mock-2',
-        first_name: 'Jane',
-        last_name: 'Smith',
-        organization: 'Design Studio',
-        email: 'jane.smith@designstudio.com',
-        title: 'UX Designer',
-        phone: '+1-555-0124',
-        notes: 'Portfolio review scheduled',
-        created_at: '2024-01-20T14:30:00Z',
-        updated_at: '2024-01-20T14:30:00Z'
-      },
-      {
-        id: 'mock-3',
-        first_name: 'Bob',
-        last_name: 'Johnson',
-        organization: 'Marketing Agency',
-        email: 'bob.johnson@marketing.com',
-        title: 'Marketing Manager',
-        phone: null,
-        notes: null,
-        created_at: '2024-02-01T09:15:00Z',
-        updated_at: '2024-02-01T09:15:00Z'
-      }
-    ]
-
-    // Apply search filter
-    let filteredContacts = mockContacts
-    if (options.search) {
-      const searchLower = options.search.toLowerCase()
-      filteredContacts = mockContacts.filter(contact =>
-        contact.first_name.toLowerCase().includes(searchLower) ||
-        contact.last_name.toLowerCase().includes(searchLower) ||
-        contact.organization.toLowerCase().includes(searchLower) ||
-        contact.email.toLowerCase().includes(searchLower)
-      )
-    }
-
-    // Apply sorting
-    const sortBy = options.sortBy || 'last_name'
-    const sortOrder = options.sortOrder || 'asc'
-    filteredContacts.sort((a, b) => {
-      const aVal = a[sortBy] || ''
-      const bVal = b[sortBy] || ''
-      const comparison = aVal.localeCompare(bVal)
-      return sortOrder === 'asc' ? comparison : -comparison
-    })
-
-    // Apply pagination
-    if (options.offset || options.limit) {
-      const start = options.offset || 0
-      const end = start + (options.limit || filteredContacts.length)
-      filteredContacts = filteredContacts.slice(start, end)
-    }
-
-    return {
-      data: filteredContacts,
-      error: null,
-      success: true
-    }
-  }
-
-  private async getMockContact(id: string): Promise<ApiResponse<Contact>> {
-    const mockContacts = await this.getMockContacts({})
-    const contact = mockContacts.data?.find(c => c.id === id)
-    
-    if (!contact) {
-      return {
-        data: null,
-        error: 'Contact not found',
-        success: false
-      }
-    }
-
-    return {
-      data: contact,
-      error: null,
-      success: true
-    }
-  }
-
-  private async createMockContact(contact: ContactInsert): Promise<ApiResponse<Contact>> {
-    const newContact: Contact = {
-      id: `mock-${Date.now()}`,
-      first_name: contact.first_name,
-      last_name: contact.last_name,
-      organization: contact.organization,
-      email: contact.email,
-      title: contact.title || null,
-      phone: contact.phone || null,
-      notes: contact.notes || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-
-    return {
-      data: newContact,
-      error: null,
-      success: true
-    }
-  }
-
-  private async updateMockContact(id: string, updates: ContactUpdate): Promise<ApiResponse<Contact>> {
-    const existing = await this.getMockContact(id)
-    if (!existing.success || !existing.data) {
-      return existing
-    }
-
-    const updatedContact: Contact = {
-      ...existing.data,
-      ...updates,
-      updated_at: new Date().toISOString()
-    }
-
-    return {
-      data: updatedContact,
-      error: null,
-      success: true
-    }
-  }
-
-  private async deleteMockContact(_id: string): Promise<ApiResponse<boolean>> {
-    // In demo mode, we can't actually delete, but we simulate success
-    return {
-      data: true,
-      error: null,
-      success: true
-    }
-  }
-
-  private async getMockStats(): Promise<ApiResponse<ContactStats>> {
-    return {
-      data: {
-        total: 3,
-        recentlyAdded: 2,
-        organizations: 3
-      },
-      error: null,
-      success: true
-    }
-  }
 }
 
 // Export singleton instance

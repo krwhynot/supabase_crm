@@ -6,15 +6,6 @@
   >
     <h2 class="text-2xl font-bold text-gray-800 mb-6">User Information</h2>
     
-    <!-- Demo Mode Notice -->
-    <div
-      v-if="isDemoMode"
-      class="p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded-md text-sm"
-      role="alert"
-    >
-      <InformationCircleIcon class="w-4 h-4 inline mr-2" />
-      <strong>Demo Mode:</strong> Form submissions will be simulated (no database connection)
-    </div>
     
     <!-- Success Message -->
     <div
@@ -139,10 +130,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue'
+import { reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import * as yup from 'yup'
-import { CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/vue/24/solid'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid'
 import { useFormStore } from '@/stores/formStore'
 import type { UserSubmissionInsert } from '@/types/database.types'
 import Button from './atomic/Button.vue'
@@ -167,13 +158,6 @@ const colorOptions = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Pin
 const formStore = useFormStore()
 const { isSubmitting, submitStatus, errorMessage } = storeToRefs(formStore)
 
-const isDemoMode = computed(() => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-  return !supabaseUrl || !supabaseKey || 
-         supabaseUrl === 'your-supabase-project-url' || 
-         supabaseKey === 'your-supabase-anon-key'
-})
 
 const formData = reactive<FormData>({
   firstName: '',

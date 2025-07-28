@@ -4,7 +4,8 @@
  */
 
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { BreakpointSize } from '@/types/dashboard.types'
+// Removed dashboard types import - using simple string type
+type BreakpointSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 
 // Tailwind CSS breakpoints
 const BREAKPOINTS = {
