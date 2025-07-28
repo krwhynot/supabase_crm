@@ -221,8 +221,8 @@ export function useSidebar() {
   // Navigation item helper
   const getNavItemClasses = (isActive: boolean) => {
     const baseClasses = [
-      'flex', 'items-center', 'px-3', 'py-2', 'text-sm', 'font-medium',
-      'rounded-md', 'transition-colors', 'duration-200'
+      'flex', 'items-center', 'px-3', 'py-3', 'text-sm', 'font-semibold',
+      'rounded-md', 'transition-colors', 'duration-200', 'min-h-[44px]'
     ]
     
     if (isActive) {

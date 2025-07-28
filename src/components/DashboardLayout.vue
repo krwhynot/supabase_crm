@@ -41,6 +41,7 @@
                 to="/"
                 :class="getNavItemClasses(isCurrentRoute('/'))"
                 class="group"
+                aria-label="Navigate to Dashboard"
               >
                 <HomeIcon :class="getNavIconClasses(isCurrentRoute('/'))" />
                 <span :class="getNavTextClasses()">Dashboard</span>
@@ -52,6 +53,7 @@
                 to="/contacts"
                 :class="getNavItemClasses(isCurrentRoute('/contacts'))"
                 class="group"
+                aria-label="Navigate to Contacts"
               >
                 <UsersIcon :class="getNavIconClasses(isCurrentRoute('/contacts'))" />
                 <span :class="getNavTextClasses()">Contacts</span>
