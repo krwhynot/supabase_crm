@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { supabase } from '@/config/supabaseClient'
+import { usePerformanceMonitoring } from '@/composables/monitoring/usePerformanceMonitoring'
+import { useErrorTracking } from '@/composables/monitoring/useErrorTracking'
 import type {
   Organization,
   OrganizationInsert,
@@ -32,6 +34,13 @@ import type {
  * Comprehensive CRUD operations with analytics and relationship management
  */
 export const useOrganizationStore = defineStore('organization', () => {
+  // ===============================
+  // MONITORING INTEGRATION
+  // ===============================
+  
+  const { measureFunction, recordMetric } = usePerformanceMonitoring()
+  const { recordDatabaseError, recordUserActionError } = useErrorTracking()
+  
   // ===============================
   // STATE MANAGEMENT
   // ===============================
@@ -252,9 +261,10 @@ export const useOrganizationStore = defineStore('organization', () => {
     useCache?: boolean
     resetList?: boolean
   } = {}): Promise<OrganizationListResponse | null> => {
-    try {
-      loading.organizations = true
-      clearError('organizations')
+    return await measureFunction(async () => {
+      try {
+        loading.organizations = true
+        clearError('organizations')
       
       // Update pagination and filters
       if (options.page !== undefined) pagination.value.page = options.page
@@ -420,10 +430,22 @@ export const useOrganizationStore = defineStore('organization', () => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch organizations'
       setError('organizations', message)
+      
+      recordDatabaseError(`Failed to fetch organizations: ${message}`, 'SELECT FROM organizations', {
+        operation: 'fetch_organizations',
+        options
+      })
+      
       return null
     } finally {
       loading.organizations = false
     }
+    }, 'Fetch Organizations', 'database_query', { 
+      operation: 'fetch',
+      filters: options.filters,
+      page: options.page,
+      limit: options.limit
+    })
   }
   
   /**
@@ -511,33 +533,50 @@ export const useOrganizationStore = defineStore('organization', () => {
    * Create new organization
    */
   const createOrganization = async (organizationData: OrganizationInsert): Promise<Organization | null> => {
-    try {
-      loading.creating = true
-      clearError('creating')
-      
-      const { data, error } = await supabase
-        .from('organizations')
-        .insert(organizationData)
-        .select()
-        .single()
-      
-      if (error) {
-        throw new Error(error.message)
+    return await measureFunction(async () => {
+      try {
+        loading.creating = true
+        clearError('creating')
+        
+        const { data, error } = await supabase
+          .from('organizations')
+          .insert(organizationData)
+          .select()
+          .single()
+        
+        if (error) {
+          recordDatabaseError(`Failed to create organization: ${error.message}`, 'INSERT INTO organizations', {
+            operation: 'create_organization',
+            data: organizationData
+          })
+          throw new Error(error.message)
+        }
+        
+        // Clear cache and refresh list
+        clearCache()
+        await fetchOrganizations({ resetList: true })
+        
+        // Record successful user action
+        recordMetric('create_organization_success', 'user_interaction', 0, true, {
+          organizationName: organizationData.name,
+          organizationIndustry: organizationData.industry
+        })
+        
+        return data
+        
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to create organization'
+        setError('creating', message)
+        
+        recordUserActionError('create_organization', message, {
+          organizationData
+        })
+        
+        return null
+      } finally {
+        loading.creating = false
       }
-      
-      // Clear cache and refresh list
-      clearCache()
-      await fetchOrganizations({ resetList: true })
-      
-      return data
-      
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create organization'
-      setError('creating', message)
-      return null
-    } finally {
-      loading.creating = false
-    }
+    }, 'Create Organization', 'database_query', { operation: 'create' })
   }
   
   /**

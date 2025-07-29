@@ -23,6 +23,23 @@
       </router-link>
     </div>
 
+    <!-- Error Display -->
+    <div v-if="submitError" class="bg-red-50 border border-red-200 rounded-md p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Error Creating Organization</h3>
+          <div class="mt-2 text-sm text-red-700">
+            <p>{{ submitError }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Form -->
     <form @submit.prevent="handleSubmit" class="space-y-8">
       <!-- Basic Information -->
@@ -303,7 +320,7 @@ import { useRouter } from 'vue-router'
 import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useOrganizationStore } from '@/stores/organizationStore'
 // Simple validation - removing complex validation composable dependency
-import type { OrganizationCreateData, OrganizationStatus } from '@/types/organizations'
+import type { OrganizationInsert, OrganizationStatus } from '@/types/database.types'
 
 /**
  * Organization Create View
@@ -337,23 +354,24 @@ const validateOrganization = (data: any) => {
 // Form state
 const isSubmitting = ref(false)
 const errors = ref<Record<string, string>>({})
+const submitError = ref<string>('')
 
-// Form data - using correct database field names and types
-const formData = reactive<OrganizationCreateData>({
+// Form data - using correct database types
+const formData = reactive({
   name: '',
-  industry: '',
+  industry: null as string | null,
   status: 'Prospect' as OrganizationStatus,
-  description: '',
-  website: '',
-  email: '',
-  primary_phone: '',
-  employees_count: undefined,
-  address_line_1: '',
-  address_line_2: '',
-  city: '',
-  state_province: '',
-  postal_code: '',
-  country: ''
+  description: null as string | null,
+  website: null as string | null,
+  email: null as string | null,
+  primary_phone: null as string | null,
+  employees_count: null as number | null,
+  address_line_1: null as string | null,
+  address_line_2: null as string | null,
+  city: null as string | null,
+  state_province: null as string | null,
+  postal_code: null as string | null,
+  country: null as string | null
 })
 
 // Industry options
@@ -387,7 +405,41 @@ const validateForm = (): boolean => {
   return validation.isValid
 }
 
+// Helper function to prepare data for submission
+const prepareSubmissionData = (data: OrganizationInsert): OrganizationInsert => {
+  const cleanData: OrganizationInsert = {
+    name: data.name.trim()
+  }
+  
+  // Only include non-empty string fields
+  if (data.industry?.trim()) cleanData.industry = data.industry.trim()
+  if (data.description?.trim()) cleanData.description = data.description.trim()
+  if (data.website?.trim()) cleanData.website = data.website.trim()
+  if (data.email?.trim()) cleanData.email = data.email.trim()
+  if (data.primary_phone?.trim()) cleanData.primary_phone = data.primary_phone.trim()
+  if (data.address_line_1?.trim()) cleanData.address_line_1 = data.address_line_1.trim()
+  if (data.address_line_2?.trim()) cleanData.address_line_2 = data.address_line_2.trim()
+  if (data.city?.trim()) cleanData.city = data.city.trim()
+  if (data.state_province?.trim()) cleanData.state_province = data.state_province.trim()
+  if (data.postal_code?.trim()) cleanData.postal_code = data.postal_code.trim()
+  if (data.country?.trim()) cleanData.country = data.country.trim()
+  
+  // Include status (required field with default)
+  cleanData.status = data.status || 'Prospect'
+  
+  // Include numeric fields if they have valid values
+  if (typeof data.employees_count === 'number' && data.employees_count > 0) {
+    cleanData.employees_count = data.employees_count
+  }
+  
+  return cleanData
+}
+
 const handleSubmit = async () => {
+  // Clear previous errors
+  errors.value = {}
+  submitError.value = ''
+  
   if (!validateForm()) {
     return
   }
@@ -395,29 +447,39 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    // Convert formData for API submission
-    const submitData = {
-      ...formData,
-      next_follow_up_date: formData.next_follow_up_date?.toISOString() || null
-    }
-    const organization = await organizationStore.createOrganization(submitData)
+    console.log('Submitting organization data:', formData)
     
-    // Navigate to the new organization's detail page
+    // Prepare clean data for submission
+    const submitData = prepareSubmissionData(formData)
+    console.log('Cleaned submission data:', submitData)
+    
+    const organization = await organizationStore.createOrganization(submitData)
+    console.log('Organization created:', organization)
+    
     if (organization?.id) {
-      router.push(`/organizations/${organization.id}`)
+      // Success - navigate to the new organization's detail page
+      console.log('Organization created successfully, navigating to detail page')
+      await router.push(`/organizations/${organization.id}`)
     } else {
-      router.push('/organizations')
+      // Success but no ID returned - go to organizations list
+      console.log('Organization created successfully, navigating to list')
+      await router.push('/organizations')
     }
   } catch (error) {
     console.error('Error creating organization:', error)
     
-    // Handle validation errors from the server
-    if (error && typeof error === 'object' && 'details' in error) {
-      const serverErrors = error.details as Record<string, string>
-      errors.value = { ...errors.value, ...serverErrors }
+    // Handle different types of errors
+    if (error && typeof error === 'object') {
+      if ('message' in error) {
+        submitError.value = (error as any).message
+      } else if ('details' in error) {
+        const serverErrors = (error as any).details as Record<string, string>
+        errors.value = { ...errors.value, ...serverErrors }
+      } else {
+        submitError.value = 'An unexpected error occurred'
+      }
     } else {
-      // Show generic error
-      alert('Failed to create organization. Please try again.')
+      submitError.value = 'Failed to create organization. Please try again.'
     }
   } finally {
     isSubmitting.value = false
