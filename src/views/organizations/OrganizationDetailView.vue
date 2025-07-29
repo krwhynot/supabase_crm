@@ -276,6 +276,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Advanced Features Sections -->
+    <div class="space-y-6">
+      <!-- Interaction Timeline -->
+      <InteractionTimeline :organization-id="organization.id" />
+      
+      <!-- Document Repository -->
+      <DocumentRepository :organization-id="organization.id" />
+      
+      <!-- Opportunity Pipeline -->
+      <OpportunityPipeline :organization-id="organization.id" />
+    </div>
   </div>
 </template>
 
@@ -296,6 +308,9 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { OrganizationStatus } from '@/types/organizations'
+import InteractionTimeline from '@/components/organizations/InteractionTimeline.vue'
+import DocumentRepository from '@/components/organizations/DocumentRepository.vue'
+import OpportunityPipeline from '@/components/organizations/OpportunityPipeline.vue'
 
 /**
  * Organization Detail View
