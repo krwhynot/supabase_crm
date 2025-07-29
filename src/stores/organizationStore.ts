@@ -123,15 +123,15 @@ export const useOrganizationStore = defineStore('organization', () => {
     if (!dashboardMetrics.value) return null
     
     return {
-      total: dashboardMetrics.value.total_organizations,
-      active: dashboardMetrics.value.active_organizations,
-      prospects: dashboardMetrics.value.prospect_organizations,
-      customers: dashboardMetrics.value.customer_organizations,
-      partners: dashboardMetrics.value.partner_organizations,
-      totalRevenue: dashboardMetrics.value.total_revenue,
-      averageLeadScore: dashboardMetrics.value.average_lead_score,
-      thisMonth: dashboardMetrics.value.organizations_this_month,
-      thisWeek: dashboardMetrics.value.organizations_this_week
+      total: dashboardMetrics.value.totalOrganizations,
+      active: dashboardMetrics.value.activeOrganizations,
+      prospects: dashboardMetrics.value.prospects,
+      customers: dashboardMetrics.value.customers,
+      partners: dashboardMetrics.value.partners,
+      totalRevenue: dashboardMetrics.value.totalRevenue,
+      averageLeadScore: dashboardMetrics.value.averageLeadScore,
+      thisMonth: dashboardMetrics.value.monthlyGrowth > 0 ? Math.round(dashboardMetrics.value.totalOrganizations * dashboardMetrics.value.monthlyGrowth / 100) : 0,
+      thisWeek: Math.round((dashboardMetrics.value.monthlyGrowth > 0 ? dashboardMetrics.value.totalOrganizations * dashboardMetrics.value.monthlyGrowth / 100 : 0) / 4)
     }
   })
   
@@ -281,9 +281,9 @@ export const useOrganizationStore = defineStore('organization', () => {
         }
       }
       
-      // Build Supabase query
+      // Build Supabase query - using basic organizations table instead of missing analytics view
       let query = supabase
-        .from('organization_summary_analytics')
+        .from('organizations')
         .select('*', { count: 'exact' })
       
       // Apply search
@@ -345,8 +345,12 @@ export const useOrganizationStore = defineStore('organization', () => {
       
       // Date range filters
       if (appliedFilters.value.lastContactDateRange) {
-        query = query.gte('last_contact_date', appliedFilters.value.lastContactDateRange.start.toISOString())
-        query = query.lte('last_contact_date', appliedFilters.value.lastContactDateRange.end.toISOString())
+        if (appliedFilters.value.lastContactDateRange.start) {
+          query = query.gte('last_contact_date', appliedFilters.value.lastContactDateRange.start.toISOString())
+        }
+        if (appliedFilters.value.lastContactDateRange.end) {
+          query = query.lte('last_contact_date', appliedFilters.value.lastContactDateRange.end.toISOString())
+        }
       }
       
       // Apply sorting
@@ -363,28 +367,28 @@ export const useOrganizationStore = defineStore('organization', () => {
         throw new Error(error.message)
       }
       
-      // Transform data to OrganizationListItem format
+      // Transform data to OrganizationListItem format using full organization data
       const transformedData: OrganizationListItem[] = (data || []).map(item => ({
         id: item.id || '',
         name: item.name || '',
-        legal_name: null, // Not available in summary analytics view
+        legal_name: item.legal_name,
         industry: item.industry,
-        type: null, // Not available in summary analytics view
-        size: null, // Not available in summary analytics view
+        type: item.type,
+        size: item.size,
         status: item.status,
-        website: null, // Not available in summary analytics view
-        email: null, // Not available in summary analytics view
-        primary_phone: null, // Not available in summary analytics view
-        city: null, // Not available in summary analytics view
-        country: null, // Not available in summary analytics view
-        employees_count: null, // Not available in summary analytics view
-        annual_revenue: null, // Not available in summary analytics view
+        website: item.website,
+        email: item.email,
+        primary_phone: item.primary_phone,
+        city: item.city,
+        country: item.country,
+        employees_count: item.employees_count,
+        annual_revenue: item.annual_revenue,
         lead_score: item.lead_score,
-        contact_count: item.contact_count ?? undefined,
-        last_interaction_date: item.last_interaction_date,
+        contact_count: undefined, // Will need to be calculated separately if needed
+        last_interaction_date: item.last_contact_date,
         next_follow_up_date: item.next_follow_up_date,
-        created_at: null, // Not available in summary analytics view
-        updated_at: null // Not available in summary analytics view
+        created_at: item.created_at,
+        updated_at: item.updated_at
       }))
       
       // Update pagination
@@ -483,13 +487,7 @@ export const useOrganizationStore = defineStore('organization', () => {
           contact_name: contactsResult.data?.find(c => c.id === interaction.contact_id)
             ? `${contactsResult.data.find(c => c.id === interaction.contact_id)?.first_name} ${contactsResult.data.find(c => c.id === interaction.contact_id)?.last_name}`
             : undefined
-        })),
-        analytics_summary: {
-          total_interactions: interactionsResult.data?.length || 0,
-          revenue_generated: orgData.annual_revenue,
-          deals_closed: 0, // Would need to fetch from opportunities table
-          engagement_status: getEngagementStatus(interactionsResult.data?.length || 0)
-        }
+        }))
       }
       
       currentOrganization.value = detailData
@@ -734,13 +732,8 @@ export const useOrganizationStore = defineStore('organization', () => {
       // Calculate date ranges
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      const firstDayOfWeek = new Date(now)
-      firstDayOfWeek.setDate(now.getDate() - now.getDay())
       
-      const [monthResult, weekResult] = await Promise.all([
-        supabase.from('organizations').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
-        supabase.from('organizations').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfWeek.toISOString())
-      ])
+      const monthResult = await supabase.from('organizations').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString())
       
       // Calculate metrics
       const totalRevenue = revenueResult.data?.reduce((sum, org) => sum + (org.annual_revenue || 0), 0) || 0
@@ -749,15 +742,17 @@ export const useOrganizationStore = defineStore('organization', () => {
         : 0
       
       const metrics: OrganizationMetrics = {
-        total_organizations: totalResult.count || 0,
-        active_organizations: activeResult.count || 0,
-        prospect_organizations: prospectResult.count || 0,
-        customer_organizations: customerResult.count || 0,
-        partner_organizations: partnerResult.count || 0,
-        total_revenue: totalRevenue,
-        average_lead_score: averageLeadScore,
-        organizations_this_month: monthResult.count || 0,
-        organizations_this_week: weekResult.count || 0
+        totalOrganizations: totalResult.count || 0,
+        activeOrganizations: activeResult.count || 0,
+        prospects: prospectResult.count || 0,
+        customers: customerResult.count || 0,
+        partners: partnerResult.count || 0,
+        totalRevenue: totalRevenue,
+        averageLeadScore: averageLeadScore,
+        monthlyGrowth: monthResult.count || 0,
+        industryDistribution: [], // Will be populated by industry analytics
+        statusDistribution: [], // Will be populated by status analytics
+        recentActivity: [] // Will be populated by activity analytics
       }
       
       dashboardMetrics.value = metrics
@@ -1012,14 +1007,14 @@ export const useOrganizationStore = defineStore('organization', () => {
       
       let processedCount = 0
       let errorCount = 0
-      const errors: Array<{ organizationId: string; error: string }> = []
+      const errors: Array<{ id: string; error: string }> = []
       
       for (const orgId of operation.organizationIds) {
         try {
           switch (operation.type) {
-            case 'update':
-              if (operation.data) {
-                await updateOrganization(orgId, operation.data)
+            case 'update_status':
+              if (operation.data?.status) {
+                await updateOrganization(orgId, { status: operation.data.status })
                 processedCount++
               }
               break
@@ -1029,7 +1024,7 @@ export const useOrganizationStore = defineStore('organization', () => {
               processedCount++
               break
               
-            case 'tag':
+            case 'add_tags':
               if (operation.data?.tags) {
                 const org = organizations.value.find(o => o.id === orgId)
                 if (org) {
@@ -1045,16 +1040,18 @@ export const useOrganizationStore = defineStore('organization', () => {
         } catch (error) {
           errorCount++
           errors.push({
-            organizationId: orgId,
+            id: orgId,
             error: error instanceof Error ? error.message : 'Unknown error'
           })
         }
       }
       
       return {
+        operation,
         success: errorCount === 0,
-        processedCount,
-        errorCount,
+        total: operation.organizationIds.length,
+        successful: processedCount,
+        failed: errorCount,
         errors
       }
       
@@ -1062,10 +1059,12 @@ export const useOrganizationStore = defineStore('organization', () => {
       const message = error instanceof Error ? error.message : 'Failed to perform bulk operation'
       setError('bulkOperations', message)
       return {
+        operation,
         success: false,
-        processedCount: 0,
-        errorCount: operation.organizationIds.length,
-        errors: operation.organizationIds.map(id => ({ organizationId: id, error: message }))
+        total: operation.organizationIds.length,
+        successful: 0,
+        failed: operation.organizationIds.length,
+        errors: operation.organizationIds.map(id => ({ id: id, error: message }))
       }
     } finally {
       loading.bulkOperations = false
@@ -1093,12 +1092,6 @@ export const useOrganizationStore = defineStore('organization', () => {
   /**
    * Get engagement status based on interaction count
    */
-  const getEngagementStatus = (interactionCount: number): string => {
-    if (interactionCount >= 10) return 'High'
-    if (interactionCount >= 5) return 'Medium'
-    if (interactionCount >= 1) return 'Low'
-    return 'None'
-  }
   
   /**
    * Refresh all data

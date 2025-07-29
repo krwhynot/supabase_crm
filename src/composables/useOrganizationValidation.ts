@@ -351,7 +351,7 @@ export function useOrganizationSearchValidation(
   options: FormValidationOptions = {}
 ) {
   const baseDefaults = {
-    search: '',
+    search: null,
     industry: null,
     type: null,
     size: null,
@@ -370,7 +370,7 @@ export function useOrganizationSearchValidation(
     sortOrder: 'asc' as const
   }
   
-  const defaultData: OrganizationSearchForm = {
+  const defaultData = {
     ...baseDefaults,
     ...initialData
   }

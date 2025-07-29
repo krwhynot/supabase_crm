@@ -1,900 +1,874 @@
-/**
- * Organization validation schemas and form types
- * Uses Yup for schema validation with TypeScript inference
- * Follows established patterns from contacts.ts
- */
+// =============================================================================
+// Organization Types and Validation Schemas
+// =============================================================================
+// TypeScript types and Yup validation schemas for organizations functionality
+// Generated from Supabase database schema - Stage 1 Database Implementation
+// =============================================================================
 
-import * as yup from 'yup'
-import type {
-  Organization,
-  OrganizationInsert,
-  OrganizationUpdate,
-  OrganizationInteraction,
-  OrganizationInteractionInsert,
-  OrganizationDocument,
-  OrganizationDocumentInsert,
-  OrganizationAnalytics,
-  OrganizationSummaryAnalytics,
-  MonthlyOrganizationPerformance,
-  OrganizationLeadScoring,
+import * as yup from 'yup';
+import type { 
+  Organization, 
   OrganizationType,
   OrganizationSize,
   OrganizationStatus,
   InteractionType,
   InteractionDirection
-} from './database.types'
+} from './database.types';
 
-// Re-export types for external use
-export type {
-  Organization,
-  OrganizationInsert,
-  OrganizationUpdate,
-  OrganizationInteraction,
-  OrganizationInteractionInsert,
-  OrganizationDocument,
-  OrganizationDocumentInsert,
-  OrganizationAnalytics,
-  OrganizationSummaryAnalytics,
-  MonthlyOrganizationPerformance,
-  OrganizationLeadScoring,
-  OrganizationType,
-  OrganizationSize,
-  OrganizationStatus,
-  InteractionType,
-  InteractionDirection
-}
+// =============================================================================
+// Organization Validation Schemas
+// =============================================================================
 
-/**
- * Validation regex patterns
- */
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-const PHONE_REGEX = /^[+]?[1-9][\d]{0,15}$|^[+]?[()]?[\d\s\-()]{10,20}$/
-const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/
-
-/**
- * Organization type enums for validation
- */
-const ORGANIZATION_TYPES: OrganizationType[] = ['B2B', 'B2C', 'B2B2C', 'Non-Profit', 'Government', 'Other']
-const ORGANIZATION_SIZES: OrganizationSize[] = ['Startup', 'Small', 'Medium', 'Large', 'Enterprise']
-const ORGANIZATION_STATUSES: OrganizationStatus[] = ['Active', 'Inactive', 'Prospect', 'Customer', 'Partner', 'Vendor']
-
-/**
- * Organization creation validation schema
- */
-export const organizationCreateSchema = yup.object({
+// Base organization schema for creation/updates
+export const organizationSchema = yup.object({
   name: yup
     .string()
     .required('Organization name is required')
+    .trim()
     .min(1, 'Organization name cannot be empty')
-    .max(255, 'Organization name must be less than 255 characters')
-    .trim(),
-
+    .max(255, 'Organization name must be less than 255 characters'),
+  
   legal_name: yup
     .string()
     .nullable()
-    .max(255, 'Legal name must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(255, 'Legal name must be less than 255 characters'),
+  
   description: yup
     .string()
-    .nullable()
-    .max(1000, 'Description must be less than 1000 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .nullable(),
+  
   industry: yup
     .string()
     .nullable()
-    .max(100, 'Industry must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(255, 'Industry must be less than 255 characters'),
+  
   type: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_TYPES, null], 'Please select a valid organization type'),
-
+    .mixed<OrganizationType>()
+    .oneOf(['B2B', 'B2C', 'B2B2C', 'Non-Profit', 'Government', 'Other'])
+    .nullable(),
+  
   size: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_SIZES, null], 'Please select a valid organization size'),
-
+    .mixed<OrganizationSize>()
+    .oneOf(['Startup', 'Small', 'Medium', 'Large', 'Enterprise'])
+    .nullable(),
+  
   status: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_STATUSES, null], 'Please select a valid organization status')
-    .default('Prospect'),
-
+    .mixed<OrganizationStatus>()
+    .oneOf(['Active', 'Inactive', 'Prospect', 'Customer', 'Partner', 'Vendor'])
+    .nullable(),
+  
   website: yup
     .string()
     .nullable()
-    .matches(URL_REGEX, 'Please enter a valid website URL')
-    .max(255, 'Website URL must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .matches(/^https?:\/\/[^\s]+$/, 'Website must be a valid URL starting with http:// or https://'),
+  
   email: yup
     .string()
     .nullable()
-    .matches(EMAIL_REGEX, 'Please enter a valid email address')
-    .max(255, 'Email must be less than 255 characters')
-    .trim()
-    .lowercase()
-    .transform((value) => value === '' ? null : value),
-
+    .email('Email must be a valid email address'),
+  
   primary_phone: yup
     .string()
     .nullable()
-    .matches(PHONE_REGEX, 'Please enter a valid phone number')
-    .max(50, 'Phone number must be less than 50 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(50, 'Primary phone must be less than 50 characters'),
+  
   secondary_phone: yup
     .string()
     .nullable()
-    .matches(PHONE_REGEX, 'Please enter a valid phone number')
-    .max(50, 'Phone number must be less than 50 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(50, 'Secondary phone must be less than 50 characters'),
+  
   address_line_1: yup
     .string()
     .nullable()
-    .max(255, 'Address line 1 must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(255, 'Address line 1 must be less than 255 characters'),
+  
   address_line_2: yup
     .string()
     .nullable()
-    .max(255, 'Address line 2 must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(255, 'Address line 2 must be less than 255 characters'),
+  
   city: yup
     .string()
     .nullable()
-    .max(100, 'City must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(100, 'City must be less than 100 characters'),
+  
   state_province: yup
     .string()
     .nullable()
-    .max(100, 'State/Province must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(100, 'State/Province must be less than 100 characters'),
+  
   postal_code: yup
     .string()
     .nullable()
-    .max(20, 'Postal code must be less than 20 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(20, 'Postal code must be less than 20 characters'),
+  
   country: yup
     .string()
     .nullable()
-    .max(100, 'Country must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(100, 'Country must be less than 100 characters'),
+  
   founded_year: yup
     .number()
     .nullable()
-    .min(1800, 'Founded year must be after 1800')
-    .max(new Date().getFullYear(), 'Founded year cannot be in the future')
     .integer('Founded year must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
+    .min(1800, 'Founded year must be 1800 or later')
+    .max(new Date().getFullYear() + 1, 'Founded year cannot be in the future'),
+  
   employees_count: yup
     .number()
     .nullable()
-    .min(0, 'Employee count cannot be negative')
-    .max(10000000, 'Employee count seems too large')
     .integer('Employee count must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
+    .min(0, 'Employee count cannot be negative'),
+  
   annual_revenue: yup
     .number()
     .nullable()
-    .min(0, 'Annual revenue cannot be negative')
-    .max(1000000000000, 'Annual revenue seems too large')
-    .transform((value) => isNaN(value) ? null : value),
-
+    .min(0, 'Annual revenue cannot be negative'),
+  
   currency_code: yup
     .string()
     .nullable()
-    .length(3, 'Currency code must be exactly 3 characters')
-    .uppercase()
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .matches(/^[A-Z]{3}$/, 'Currency code must be 3 uppercase letters (e.g., USD)'),
+  
   lead_source: yup
     .string()
     .nullable()
-    .max(100, 'Lead source must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(255, 'Lead source must be less than 255 characters'),
+  
   lead_score: yup
     .number()
     .nullable()
+    .integer('Lead score must be a whole number')
     .min(0, 'Lead score cannot be negative')
-    .max(100, 'Lead score cannot exceed 100')
-    .transform((value) => isNaN(value) ? null : value),
-
+    .max(100, 'Lead score cannot exceed 100'),
+  
+  tags: yup
+    .array()
+    .of(yup.string())
+    .nullable(),
+  
+  custom_fields: yup
+    .object()
+    .nullable(),
+  
   parent_org_id: yup
     .string()
     .nullable()
-    .uuid('Parent organization ID must be a valid UUID')
-    .transform((value) => value === '' ? null : value),
-
-  tags: yup
-    .array()
+    .uuid('Parent organization ID must be a valid UUID'),
+  
+  assigned_user_id: yup
+    .string()
     .nullable()
-    .of(yup.string().trim()),
-
+    .uuid('Assigned user ID must be a valid UUID'),
+  
+  last_contact_date: yup
+    .date()
+    .nullable(),
+  
   next_follow_up_date: yup
     .date()
     .nullable()
-    .min(new Date(), 'Follow-up date cannot be in the past')
-    .transform((value) => {
-      if (!value || value === '') return null
-      const date = new Date(value as string)
-      return isNaN(date.getTime()) ? null : date
-    })
-})
+});
 
-/**
- * Organization update validation schema (all fields optional)
- */
-export const organizationUpdateSchema = yup.object({
-  name: yup
-    .string()
-    .min(1, 'Organization name cannot be empty')
-    .max(255, 'Organization name must be less than 255 characters')
-    .trim(),
+// Schema for creating new organizations
+export const createOrganizationSchema = organizationSchema;
 
-  legal_name: yup
-    .string()
-    .nullable()
-    .max(255, 'Legal name must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
+// Schema for updating organizations (all fields optional except constraints)
+export const updateOrganizationSchema = organizationSchema.partial();
 
-  description: yup
-    .string()
-    .nullable()
-    .max(1000, 'Description must be less than 1000 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
+// =============================================================================
+// Organization Interaction Validation Schemas
+// =============================================================================
 
-  industry: yup
-    .string()
-    .nullable()
-    .max(100, 'Industry must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  type: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_TYPES, null], 'Please select a valid organization type'),
-
-  size: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_SIZES, null], 'Please select a valid organization size'),
-
-  status: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_STATUSES, null], 'Please select a valid organization status'),
-
-  website: yup
-    .string()
-    .nullable()
-    .matches(URL_REGEX, 'Please enter a valid website URL')
-    .max(255, 'Website URL must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  email: yup
-    .string()
-    .nullable()
-    .matches(EMAIL_REGEX, 'Please enter a valid email address')
-    .max(255, 'Email must be less than 255 characters')
-    .trim()
-    .lowercase()
-    .transform((value) => value === '' ? null : value),
-
-  primary_phone: yup
-    .string()
-    .nullable()
-    .matches(PHONE_REGEX, 'Please enter a valid phone number')
-    .max(50, 'Phone number must be less than 50 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  secondary_phone: yup
-    .string()
-    .nullable()
-    .matches(PHONE_REGEX, 'Please enter a valid phone number')
-    .max(50, 'Phone number must be less than 50 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  address_line_1: yup
-    .string()
-    .nullable()
-    .max(255, 'Address line 1 must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  address_line_2: yup
-    .string()
-    .nullable()
-    .max(255, 'Address line 2 must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  city: yup
-    .string()
-    .nullable()
-    .max(100, 'City must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  state_province: yup
-    .string()
-    .nullable()
-    .max(100, 'State/Province must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  postal_code: yup
-    .string()
-    .nullable()
-    .max(20, 'Postal code must be less than 20 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  country: yup
-    .string()
-    .nullable()
-    .max(100, 'Country must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  founded_year: yup
-    .number()
-    .nullable()
-    .min(1800, 'Founded year must be after 1800')
-    .max(new Date().getFullYear(), 'Founded year cannot be in the future')
-    .integer('Founded year must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
-  employees_count: yup
-    .number()
-    .nullable()
-    .min(0, 'Employee count cannot be negative')
-    .max(10000000, 'Employee count seems too large')
-    .integer('Employee count must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
-  annual_revenue: yup
-    .number()
-    .nullable()
-    .min(0, 'Annual revenue cannot be negative')
-    .max(1000000000000, 'Annual revenue seems too large')
-    .transform((value) => isNaN(value) ? null : value),
-
-  currency_code: yup
-    .string()
-    .nullable()
-    .length(3, 'Currency code must be exactly 3 characters')
-    .uppercase()
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  lead_source: yup
-    .string()
-    .nullable()
-    .max(100, 'Lead source must be less than 100 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
-  lead_score: yup
-    .number()
-    .nullable()
-    .min(0, 'Lead score cannot be negative')
-    .max(100, 'Lead score cannot exceed 100')
-    .transform((value) => isNaN(value) ? null : value),
-
-  parent_org_id: yup
-    .string()
-    .nullable()
-    .uuid('Parent organization ID must be a valid UUID')
-    .transform((value) => value === '' ? null : value),
-
-  tags: yup
-    .array()
-    .nullable()
-    .of(yup.string().trim()),
-
-  next_follow_up_date: yup
-    .date()
-    .nullable()
-    .min(new Date(), 'Follow-up date cannot be in the past')
-    .transform((value) => {
-      if (!value || value === '') return null
-      const date = new Date(value as string)
-      return isNaN(date.getTime()) ? null : date
-    })
-})
-
-/**
- * Organization search validation schema
- */
-export const organizationSearchSchema = yup.object({
-  search: yup
-    .string()
-    .max(255, 'Search term must be less than 255 characters')
-    .trim(),
-
-  industry: yup
-    .string()
-    .nullable()
-    .max(100, 'Industry filter must be less than 100 characters')
-    .trim(),
-
-  type: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_TYPES, null], 'Please select a valid organization type'),
-
-  size: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_SIZES, null], 'Please select a valid organization size'),
-
-  status: yup
-    .string()
-    .nullable()
-    .oneOf([...ORGANIZATION_STATUSES, null], 'Please select a valid organization status'),
-
-  country: yup
-    .string()
-    .nullable()
-    .max(100, 'Country filter must be less than 100 characters')
-    .trim(),
-
-  min_employees: yup
-    .number()
-    .nullable()
-    .min(0, 'Minimum employees cannot be negative')
-    .integer('Minimum employees must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
-  max_employees: yup
-    .number()
-    .nullable()
-    .min(0, 'Maximum employees cannot be negative')
-    .integer('Maximum employees must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
-  min_revenue: yup
-    .number()
-    .nullable()
-    .min(0, 'Minimum revenue cannot be negative')
-    .transform((value) => isNaN(value) ? null : value),
-
-  max_revenue: yup
-    .number()
-    .nullable()
-    .min(0, 'Maximum revenue cannot be negative')
-    .transform((value) => isNaN(value) ? null : value),
-
-  min_lead_score: yup
-    .number()
-    .nullable()
-    .min(0, 'Minimum lead score cannot be negative')
-    .max(100, 'Minimum lead score cannot exceed 100')
-    .transform((value) => isNaN(value) ? null : value),
-
-  max_lead_score: yup
-    .number()
-    .nullable()
-    .min(0, 'Maximum lead score cannot be negative')
-    .max(100, 'Maximum lead score cannot exceed 100')
-    .transform((value) => isNaN(value) ? null : value),
-
-  tags: yup
-    .array()
-    .nullable()
-    .of(yup.string().trim()),
-
-  limit: yup
-    .number()
-    .positive('Limit must be positive')
-    .max(100, 'Limit cannot exceed 100')
-    .integer('Limit must be an integer')
-    .default(20),
-
-  offset: yup
-    .number()
-    .min(0, 'Offset cannot be negative')
-    .integer('Offset must be an integer')
-    .default(0),
-
-  sortBy: yup
-    .string()
-    .oneOf([
-      'name', 'legal_name', 'industry', 'type', 'size', 'status',
-      'lead_score', 'employees_count', 'annual_revenue', 'founded_year',
-      'created_at', 'updated_at', 'last_contact_date', 'next_follow_up_date'
-    ], 'Invalid sort field')
-    .default('name'),
-
-  sortOrder: yup
-    .string()
-    .oneOf(['asc', 'desc'], 'Sort order must be asc or desc')
-    .default('asc')
-})
-
-/**
- * Organization interaction validation schemas
- */
-const INTERACTION_TYPES: InteractionType[] = [
-  'Email', 'Phone', 'Meeting', 'Demo', 'Proposal', 'Contract', 
-  'Note', 'Task', 'Event', 'Social', 'Website', 'Other'
-]
-const INTERACTION_DIRECTIONS: InteractionDirection[] = ['Inbound', 'Outbound']
-
-export const organizationInteractionCreateSchema = yup.object({
+export const organizationInteractionSchema = yup.object({
   organization_id: yup
     .string()
     .required('Organization ID is required')
     .uuid('Organization ID must be a valid UUID'),
-
+  
   contact_id: yup
     .string()
     .nullable()
-    .uuid('Contact ID must be a valid UUID')
-    .transform((value) => value === '' ? null : value),
-
+    .uuid('Contact ID must be a valid UUID'),
+  
   type: yup
-    .string()
-    .nullable()
-    .oneOf([...INTERACTION_TYPES, null], 'Please select a valid interaction type')
-    .default('Note'),
-
+    .mixed<InteractionType>()
+    .oneOf(['Email', 'Phone', 'Meeting', 'Demo', 'Proposal', 'Contract', 'Note', 'Task', 'Event', 'Social', 'Website', 'Other'])
+    .required('Interaction type is required'),
+  
   direction: yup
-    .string()
-    .nullable()
-    .oneOf([...INTERACTION_DIRECTIONS, null], 'Please select a valid direction'),
-
+    .mixed<InteractionDirection>()
+    .oneOf(['Inbound', 'Outbound'])
+    .nullable(),
+  
   subject: yup
     .string()
     .nullable()
-    .max(255, 'Subject must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .max(500, 'Subject must be less than 500 characters')
+    .test('not-empty', 'Subject cannot be empty if provided', function(value) {
+      return value === null || value === undefined || value.trim().length > 0;
+    }),
+  
   description: yup
     .string()
-    .nullable()
-    .max(5000, 'Description must be less than 5000 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-
+    .nullable(),
+  
   interaction_date: yup
     .date()
-    .nullable()
-    .max(new Date(), 'Interaction date cannot be in the future')
-    .default(() => new Date())
-    .transform((value) => {
-      if (!value || value === '') return new Date()
-      const date = new Date(value as string)
-      return isNaN(date.getTime()) ? new Date() : date
-    }),
-
+    .required('Interaction date is required'),
+  
   duration_minutes: yup
     .number()
     .nullable()
-    .min(0, 'Duration cannot be negative')
-    .max(1440, 'Duration cannot exceed 24 hours')
-    .integer('Duration must be a whole number')
-    .transform((value) => isNaN(value) ? null : value),
-
+    .integer('Duration must be a whole number of minutes')
+    .min(0, 'Duration cannot be negative'),
+  
   tags: yup
     .array()
+    .of(yup.string())
+    .nullable(),
+  
+  metadata: yup
+    .object()
+    .nullable(),
+  
+  created_by_user_id: yup
+    .string()
     .nullable()
-    .of(yup.string().trim())
-})
+    .uuid('Created by user ID must be a valid UUID')
+});
 
-/**
- * TypeScript types inferred from Yup schemas
- */
-export type OrganizationCreateForm = yup.InferType<typeof organizationCreateSchema>
-export type OrganizationUpdateForm = yup.InferType<typeof organizationUpdateSchema>
-export type OrganizationSearchForm = yup.InferType<typeof organizationSearchSchema>
-export type OrganizationInteractionCreateForm = yup.InferType<typeof organizationInteractionCreateSchema>
+export const createOrganizationInteractionSchema = organizationInteractionSchema;
+export const updateOrganizationInteractionSchema = organizationInteractionSchema.partial().shape({
+  organization_id: yup.string().uuid('Organization ID must be a valid UUID'), // Keep required for updates
+});
 
-/**
- * UI-specific types for organization display
- */
+// =============================================================================
+// Organization Document Validation Schemas
+// =============================================================================
+
+export const organizationDocumentSchema = yup.object({
+  organization_id: yup
+    .string()
+    .required('Organization ID is required')
+    .uuid('Organization ID must be a valid UUID'),
+  
+  name: yup
+    .string()
+    .required('Document name is required')
+    .trim()
+    .min(1, 'Document name cannot be empty')
+    .max(500, 'Document name must be less than 500 characters'),
+  
+  description: yup
+    .string()
+    .nullable(),
+  
+  file_type: yup
+    .string()
+    .nullable()
+    .max(50, 'File type must be less than 50 characters'),
+  
+  file_size_bytes: yup
+    .number()
+    .nullable()
+    .integer('File size must be a whole number')
+    .min(0, 'File size cannot be negative'),
+  
+  storage_path: yup
+    .string()
+    .nullable()
+    .max(1000, 'Storage path must be less than 1000 characters'),
+  
+  external_url: yup
+    .string()
+    .nullable()
+    .matches(/^https?:\/\/[^\s]+$/, 'External URL must be a valid URL starting with http:// or https://')
+    .max(1000, 'External URL must be less than 1000 characters'),
+  
+  category: yup
+    .string()
+    .nullable()
+    .max(255, 'Category must be less than 255 characters'),
+  
+  tags: yup
+    .array()
+    .of(yup.string())
+    .nullable(),
+  
+  is_public: yup
+    .boolean()
+    .nullable(),
+  
+  access_level: yup
+    .string()
+    .nullable()
+    .max(50, 'Access level must be less than 50 characters'),
+  
+  version: yup
+    .string()
+    .nullable()
+    .max(50, 'Version must be less than 50 characters'),
+  
+  parent_document_id: yup
+    .string()
+    .nullable()
+    .uuid('Parent document ID must be a valid UUID'),
+  
+  uploaded_by_user_id: yup
+    .string()
+    .nullable()
+    .uuid('Uploaded by user ID must be a valid UUID')
+}).test('has-location', 'Document must have either a storage path or external URL', function(value) {
+  return !!(value.storage_path || value.external_url);
+});
+
+export const createOrganizationDocumentSchema = organizationDocumentSchema;
+export const updateOrganizationDocumentSchema = organizationDocumentSchema.partial().shape({
+  organization_id: yup.string().uuid('Organization ID must be a valid UUID'), // Keep required for updates
+});
+
+// =============================================================================
+// Organization Analytics Validation Schemas
+// =============================================================================
+
+export const organizationAnalyticsSchema = yup.object({
+  organization_id: yup
+    .string()
+    .required('Organization ID is required')
+    .uuid('Organization ID must be a valid UUID'),
+  
+  period_start: yup
+    .date()
+    .required('Period start date is required'),
+  
+  period_end: yup
+    .date()
+    .required('Period end date is required')
+    .test('after-start', 'Period end must be after period start', function(value) {
+      const { period_start } = this.parent;
+      if (!period_start || !value) return true;
+      return value > period_start;
+    }),
+  
+  period_type: yup
+    .string()
+    .required('Period type is required')
+    .oneOf(['daily', 'weekly', 'monthly', 'quarterly', 'yearly'], 'Period type must be one of: daily, weekly, monthly, quarterly, yearly'),
+  
+  total_interactions: yup
+    .number()
+    .nullable()
+    .integer('Total interactions must be a whole number')
+    .min(0, 'Total interactions cannot be negative'),
+  
+  email_interactions: yup
+    .number()
+    .nullable()
+    .integer('Email interactions must be a whole number')
+    .min(0, 'Email interactions cannot be negative'),
+  
+  phone_interactions: yup
+    .number()
+    .nullable()
+    .integer('Phone interactions must be a whole number')
+    .min(0, 'Phone interactions cannot be negative'),
+  
+  meeting_interactions: yup
+    .number()
+    .nullable()
+    .integer('Meeting interactions must be a whole number')
+    .min(0, 'Meeting interactions cannot be negative'),
+  
+  revenue_generated: yup
+    .number()
+    .nullable()
+    .min(0, 'Revenue generated cannot be negative'),
+  
+  deals_closed: yup
+    .number()
+    .nullable()
+    .integer('Deals closed must be a whole number')
+    .min(0, 'Deals closed cannot be negative'),
+  
+  deals_in_progress: yup
+    .number()
+    .nullable()
+    .integer('Deals in progress must be a whole number')
+    .min(0, 'Deals in progress cannot be negative'),
+  
+  lead_score_change: yup
+    .number()
+    .nullable()
+    .integer('Lead score change must be a whole number'),
+  
+  conversion_events: yup
+    .number()
+    .nullable()
+    .integer('Conversion events must be a whole number')
+    .min(0, 'Conversion events cannot be negative'),
+  
+  documents_added: yup
+    .number()
+    .nullable()
+    .integer('Documents added must be a whole number')
+    .min(0, 'Documents added cannot be negative'),
+  
+  documents_accessed: yup
+    .number()
+    .nullable()
+    .integer('Documents accessed must be a whole number')
+    .min(0, 'Documents accessed cannot be negative'),
+  
+  new_contacts_added: yup
+    .number()
+    .nullable()
+    .integer('New contacts added must be a whole number')
+    .min(0, 'New contacts added cannot be negative'),
+  
+  active_contacts: yup
+    .number()
+    .nullable()
+    .integer('Active contacts must be a whole number')
+    .min(0, 'Active contacts cannot be negative'),
+  
+  custom_metrics: yup
+    .object()
+    .nullable()
+});
+
+export const createOrganizationAnalyticsSchema = organizationAnalyticsSchema;
+export const updateOrganizationAnalyticsSchema = organizationAnalyticsSchema.partial().shape({
+  organization_id: yup.string().uuid('Organization ID must be a valid UUID'), // Keep required for updates
+});
+
+// =============================================================================
+// Type Inference from Schemas
+// =============================================================================
+
+// Infer TypeScript types from Yup schemas for form handling
+export type OrganizationFormData = yup.InferType<typeof organizationSchema>;
+export type CreateOrganizationFormData = yup.InferType<typeof createOrganizationSchema>;
+export type UpdateOrganizationFormData = yup.InferType<typeof updateOrganizationSchema>;
+
+export type OrganizationInteractionFormData = yup.InferType<typeof organizationInteractionSchema>;
+export type CreateOrganizationInteractionFormData = yup.InferType<typeof createOrganizationInteractionSchema>;
+export type UpdateOrganizationInteractionFormData = yup.InferType<typeof updateOrganizationInteractionSchema>;
+
+export type OrganizationDocumentFormData = yup.InferType<typeof organizationDocumentSchema>;
+export type CreateOrganizationDocumentFormData = yup.InferType<typeof createOrganizationDocumentSchema>;
+export type UpdateOrganizationDocumentFormData = yup.InferType<typeof updateOrganizationDocumentSchema>;
+
+export type OrganizationAnalyticsFormData = yup.InferType<typeof organizationAnalyticsSchema>;
+export type CreateOrganizationAnalyticsFormData = yup.InferType<typeof createOrganizationAnalyticsSchema>;
+export type UpdateOrganizationAnalyticsFormData = yup.InferType<typeof updateOrganizationAnalyticsSchema>;
+
+// =============================================================================
+// Form Type Aliases for Composables
+// =============================================================================
+
+// Form types used by composables and components
+export type OrganizationCreateForm = CreateOrganizationFormData;
+export type OrganizationUpdateForm = UpdateOrganizationFormData;
+export type OrganizationInteractionCreateForm = CreateOrganizationInteractionFormData;
+
+// Schema exports for composables
+export const organizationCreateSchema = createOrganizationSchema;
+export const organizationUpdateSchema = updateOrganizationSchema;
+export const organizationInteractionCreateSchema = createOrganizationInteractionSchema;
+
+// =============================================================================
+// Organization List and Detail Types
+// =============================================================================
+
+// Organization list item for tables and cards
 export interface OrganizationListItem {
-  id: string
-  name: string
-  legal_name: string | null
-  industry: string | null
-  type: OrganizationType | null
-  size: OrganizationSize | null
-  status: OrganizationStatus | null
-  website: string | null
-  email: string | null
-  primary_phone: string | null
-  city: string | null
-  country: string | null
-  employees_count: number | null
-  annual_revenue: number | null
-  lead_score: number | null
-  contact_count?: number
-  last_interaction_date: string | null
-  next_follow_up_date: string | null
-  created_at: string | null
-  updated_at: string | null
+  id: string;
+  name: string;
+  legal_name: string | null;
+  industry: string | null;
+  type: OrganizationType | null;
+  size: OrganizationSize | null;
+  status: OrganizationStatus | null;
+  website: string | null;
+  email: string | null;
+  primary_phone: string | null;
+  city: string | null;
+  country: string | null;
+  employees_count: number | null;
+  annual_revenue: number | null;
+  lead_score: number | null;
+  contact_count?: number;
+  last_interaction_date: string | null;
+  next_follow_up_date: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
-export interface OrganizationCardData {
-  id: string
-  name: string
-  industry: string | null
-  status: OrganizationStatus | null
-  lead_score: number | null
-  contact_count: number
-  last_interaction: string | null
-  website: string | null
-  location: string | null
-  avatar_url?: string
-}
-
+// Organization detail data with relationships
 export interface OrganizationDetailData extends Organization {
-  contact_count: number
-  interaction_count: number
-  document_count: number
+  contact_count: number;
+  interaction_count: number;
+  document_count: number;
   recent_interactions: Array<{
-    id: string
-    type: InteractionType | null
-    subject: string | null
-    interaction_date: string | null
-    contact_name?: string
-  }>
-  analytics_summary?: {
-    total_interactions: number
-    revenue_generated: number | null
-    deals_closed: number | null
-    engagement_status: string
-  }
+    id: string;
+    type: InteractionType | null;
+    subject: string | null;
+    interaction_date: string | null;
+    contact_name?: string;
+  }>;
 }
 
-/**
- * Analytics and dashboard types
- */
-export interface OrganizationMetrics {
-  total_organizations: number
-  active_organizations: number
-  prospect_organizations: number
-  customer_organizations: number
-  partner_organizations: number
-  total_revenue: number | null
-  average_lead_score: number | null
-  organizations_this_month: number
-  organizations_this_week: number
+// Organization creation data
+export interface OrganizationCreateData {
+  name: string;
+  legal_name?: string | null;
+  description?: string | null;
+  industry?: string | null;
+  type?: OrganizationType | null;
+  size?: OrganizationSize | null;
+  status?: OrganizationStatus | null;
+  website?: string | null;
+  email?: string | null;
+  primary_phone?: string | null;
+  secondary_phone?: string | null;
+  address_line_1?: string | null;
+  address_line_2?: string | null;
+  city?: string | null;
+  state_province?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  founded_year?: number | null;
+  employees_count?: number | null;
+  annual_revenue?: number | null;
+  currency_code?: string | null;
+  lead_source?: string | null;
+  lead_score?: number | null;
+  parent_org_id?: string | null;
+  tags?: string[] | null;
+  next_follow_up_date?: Date | null;
 }
 
-export interface OrganizationPerformanceData {
-  organization_id: string
-  organization_name: string
-  interaction_count: number
-  meeting_count: number
-  email_count: number
-  phone_count: number
-  revenue_generated: number | null
-  lead_score_change: number | null
-  engagement_trend: 'up' | 'down' | 'stable'
-}
+// =============================================================================
+// Filter and Sort Types
+// =============================================================================
 
-export interface LeadScoringData {
-  id: string
-  name: string
-  lead_score: number | null
-  lead_temperature: 'hot' | 'warm' | 'cold'
-  status: OrganizationStatus | null
-  industry: string | null
-  size: OrganizationSize | null
-  total_interactions: number
-  recent_interactions: number
-  last_interaction: string | null
-  document_count: number
-  score_factors: {
-    interaction_frequency: number
-    engagement_quality: number
-    company_size: number
-    industry_fit: number
-    website_activity: number
-  }
-}
-
-/**
- * Filter and sorting types
- */
+// Organization filters interface
 export interface OrganizationFilters {
-  search?: string
-  industry?: string[]
-  type?: OrganizationType[]
-  size?: OrganizationSize[]
-  status?: OrganizationStatus[]
-  country?: string[]
+  search?: string;
+  industry?: string[];
+  type?: OrganizationType[];
+  size?: OrganizationSize[];
+  status?: OrganizationStatus[];
+  country?: string[];
+  tags?: string[];
   leadScoreRange?: {
-    min: number
-    max: number
-  }
+    min?: number;
+    max?: number;
+  };
   employeeRange?: {
-    min: number
-    max: number
-  }
+    min?: number;
+    max?: number;
+  };
   revenueRange?: {
-    min: number
-    max: number
-  }
-  tags?: string[]
+    min?: number;
+    max?: number;
+  };
   foundedYearRange?: {
-    min: number
-    max: number
-  }
+    min?: number;
+    max?: number;
+  };
   lastContactDateRange?: {
-    start: Date
-    end: Date
-  }
+    start?: Date;
+    end?: Date;
+  };
 }
 
+// Sort configuration
 export type OrganizationSortField = 
   | 'name' 
   | 'legal_name' 
   | 'industry' 
   | 'type' 
   | 'size' 
-  | 'status'
+  | 'status' 
   | 'lead_score' 
   | 'employees_count' 
   | 'annual_revenue' 
-  | 'founded_year'
+  | 'founded_year' 
   | 'created_at' 
   | 'updated_at' 
   | 'last_contact_date' 
-  | 'next_follow_up_date'
+  | 'next_follow_up_date';
 
-export type SortOrder = 'asc' | 'desc'
+export type SortOrder = 'asc' | 'desc';
 
 export interface OrganizationSortConfig {
-  field: OrganizationSortField
-  order: SortOrder
+  field: OrganizationSortField;
+  order: SortOrder;
 }
 
-/**
- * Pagination types
- */
+// =============================================================================
+// Pagination and Response Types
+// =============================================================================
+
+// Pagination configuration
 export interface PaginationConfig {
-  page: number
-  limit: number
-  total: number
-  totalPages: number
-  hasNext: boolean
-  hasPrevious: boolean
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
+// Organization list response
 export interface OrganizationListResponse {
-  data: OrganizationListItem[]
-  pagination: PaginationConfig
-  filters: OrganizationFilters
-  sort: OrganizationSortConfig
+  data: OrganizationListItem[];
+  pagination: PaginationConfig;
+  filters: OrganizationFilters;
+  sort: OrganizationSortConfig;
 }
 
-/**
- * Relationship types
- */
-export interface OrganizationContactRelation {
-  organization_id: string
-  contact_id: string
-  contact_name: string
-  contact_email: string
-  contact_title: string | null
-  is_primary_contact: boolean
-  relationship_type: 'employee' | 'contractor' | 'partner' | 'vendor' | 'client' | 'other'
-  created_at: string
+// =============================================================================
+// Search and Validation Types
+// =============================================================================
+
+// Organization search form
+export interface OrganizationSearchForm {
+  search?: string | null;
+  industry?: string | null;
+  type?: OrganizationType | null;
+  size?: OrganizationSize | null;
+  status?: OrganizationStatus | null;
+  country?: string | null;
+  min_employees?: number | null;
+  max_employees?: number | null;
+  min_revenue?: number | null;
+  max_revenue?: number | null;
+  min_lead_score?: number | null;
+  max_lead_score?: number | null;
+  tags?: string[] | null;
+  limit?: number;
+  offset?: number;
+  sortBy?: OrganizationSortField;
+  sortOrder?: SortOrder;
 }
 
-export interface OrganizationHierarchy {
-  id: string
-  name: string
-  parent_org_id: string | null
-  children: OrganizationHierarchy[]
-  level: number
-  path: string[]
-}
+// Search schema
+export const organizationSearchSchema = yup.object({
+  search: yup.string().nullable().optional(),
+  industry: yup.string().nullable().optional(),
+  type: yup.mixed<OrganizationType>().oneOf(['B2B', 'B2C', 'B2B2C', 'Non-Profit', 'Government', 'Other']).nullable().optional(),
+  size: yup.mixed<OrganizationSize>().oneOf(['Startup', 'Small', 'Medium', 'Large', 'Enterprise']).nullable().optional(),
+  status: yup.mixed<OrganizationStatus>().oneOf(['Active', 'Inactive', 'Prospect', 'Customer', 'Partner', 'Vendor']).nullable().optional(),
+  country: yup.string().nullable().optional(),
+  min_employees: yup.number().min(0).nullable().optional(),
+  max_employees: yup.number().min(0).nullable().optional(),
+  min_revenue: yup.number().min(0).nullable().optional(),
+  max_revenue: yup.number().min(0).nullable().optional(),
+  min_lead_score: yup.number().min(0).max(100).nullable().optional(),
+  max_lead_score: yup.number().min(0).max(100).nullable().optional(),
+  tags: yup.array().of(yup.string()).nullable().optional(),
+  limit: yup.number().min(1).max(100).optional().default(20),
+  offset: yup.number().min(0).optional().default(0),
+  sortBy: yup.mixed<OrganizationSortField>().oneOf(['name', 'legal_name', 'industry', 'type', 'size', 'status', 'lead_score', 'employees_count', 'annual_revenue', 'founded_year', 'created_at', 'updated_at', 'last_contact_date', 'next_follow_up_date']).optional().default('name'),
+  sortOrder: yup.mixed<SortOrder>().oneOf(['asc', 'desc']).optional().default('asc')
+});
 
-/**
- * Form validation helper types (extending from existing patterns)
- */
+// Validation error type
 export interface OrganizationValidationError {
-  field: string
-  message: string
+  field: string;
+  message: string;
 }
 
+// Form validation result
 export interface OrganizationFormValidationResult<T> {
-  isValid: boolean
-  data?: T
-  errors: OrganizationValidationError[]
+  isValid: boolean;
+  data?: T;
+  errors: OrganizationValidationError[];
 }
 
-/**
- * Multi-step form types for organization creation
- */
-export interface OrganizationWizardStep {
-  id: string
-  title: string
-  description: string
-  isComplete: boolean
-  isActive: boolean
-  fields: string[]
+// =============================================================================
+// Metrics and Analytics Types
+// =============================================================================
+
+// Organization metrics for dashboard and analytics
+export interface OrganizationMetrics {
+  totalOrganizations: number;
+  activeOrganizations: number;
+  prospects: number;
+  customers: number;
+  partners: number;
+  averageLeadScore: number;
+  totalRevenue: number;
+  monthlyGrowth: number;
+  industryDistribution: Array<{
+    industry: string;
+    count: number;
+    percentage: number;
+  }>;
+  statusDistribution: Array<{
+    status: OrganizationStatus;
+    count: number;
+    percentage: number;
+  }>;
+  recentActivity: Array<{
+    date: string;
+    organizationsAdded: number;
+    interactionsLogged: number;
+  }>;
 }
 
-export interface OrganizationWizardData {
-  currentStep: number
-  steps: OrganizationWizardStep[]
-  formData: Partial<OrganizationCreateForm>
-  isValid: boolean
-  canProceed: boolean
-  canGoBack: boolean
+// =============================================================================
+// Bulk Operations Types
+// =============================================================================
+
+// Bulk operation types
+export interface BulkOrganizationOperationData {
+  type: 'delete' | 'update_status' | 'update_assigned_user' | 'add_tags' | 'remove_tags' | 'export';
+  organizationIds: string[];
+  data?: {
+    status?: OrganizationStatus;
+    assigned_user_id?: string;
+    tags?: string[];
+  };
 }
 
-/**
- * Bulk operations types
- */
-export interface BulkOrganizationOperation {
-  type: 'update' | 'delete' | 'export' | 'tag' | 'assign'
-  organizationIds: string[]
-  data?: Record<string, any>
-}
+export type BulkOrganizationOperation = BulkOrganizationOperationData;
 
 export interface BulkOperationResult {
-  success: boolean
-  processedCount: number
-  errorCount: number
+  operation: BulkOrganizationOperation;
+  success: boolean;
+  total: number;
+  successful: number;
+  failed: number;
   errors: Array<{
-    organizationId: string
-    error: string
-  }>
+    id: string;
+    error: string;
+  }>;
 }
+
+// =============================================================================
+// Enum Arrays for Form Options
+// =============================================================================
+
+export const ORGANIZATION_TYPES: OrganizationType[] = [
+  'B2B', 'B2C', 'B2B2C', 'Non-Profit', 'Government', 'Other'
+];
+
+export const ORGANIZATION_SIZES: OrganizationSize[] = [
+  'Startup', 'Small', 'Medium', 'Large', 'Enterprise'
+];
+
+export const ORGANIZATION_STATUSES: OrganizationStatus[] = [
+  'Active', 'Inactive', 'Prospect', 'Customer', 'Partner', 'Vendor'
+];
+
+export const INTERACTION_TYPES: InteractionType[] = [
+  'Email', 'Phone', 'Meeting', 'Demo', 'Proposal', 'Contract', 
+  'Note', 'Task', 'Event', 'Social', 'Website', 'Other'
+];
+
+export const INTERACTION_DIRECTIONS: InteractionDirection[] = [
+  'Inbound', 'Outbound'
+];
+
+export const PERIOD_TYPES = [
+  'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
+] as const;
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
 
 /**
- * Export types
+ * Validates organization data against the schema
  */
-export type OrganizationExportFormat = 'csv' | 'xlsx' | 'json'
+export const validateOrganization = async (data: unknown): Promise<OrganizationFormData> => {
+  return await organizationSchema.validate(data, { abortEarly: false });
+};
 
-export interface OrganizationExportConfig {
-  format: OrganizationExportFormat
-  fields: string[]
-  filters?: OrganizationFilters
-  includeInteractions: boolean
-  includeAnalytics: boolean
-  dateRange?: {
-    start: Date
-    end: Date
+/**
+ * Validates organization interaction data against the schema
+ */
+export const validateOrganizationInteraction = async (data: unknown): Promise<OrganizationInteractionFormData> => {
+  return await organizationInteractionSchema.validate(data, { abortEarly: false });
+};
+
+/**
+ * Validates organization document data against the schema
+ */
+export const validateOrganizationDocument = async (data: unknown): Promise<OrganizationDocumentFormData> => {
+  return await organizationDocumentSchema.validate(data, { abortEarly: false });
+};
+
+/**
+ * Validates organization analytics data against the schema
+ */
+export const validateOrganizationAnalytics = async (data: unknown): Promise<OrganizationAnalyticsFormData> => {
+  return await organizationAnalyticsSchema.validate(data, { abortEarly: false });
+};
+
+/**
+ * Gets display label for organization type
+ */
+export const getOrganizationTypeLabel = (type: OrganizationType | null): string => {
+  if (!type) return 'Not specified';
+  return type;
+};
+
+/**
+ * Gets display label for organization status
+ */
+export const getOrganizationStatusLabel = (status: OrganizationStatus | null): string => {
+  if (!status) return 'Not specified';
+  return status;
+};
+
+/**
+ * Gets CSS class for organization status badge
+ */
+export const getOrganizationStatusClass = (status: OrganizationStatus | null): string => {
+  switch (status) {
+    case 'Active': return 'bg-green-100 text-green-800';
+    case 'Customer': return 'bg-blue-100 text-blue-800';
+    case 'Prospect': return 'bg-yellow-100 text-yellow-800';
+    case 'Partner': return 'bg-purple-100 text-purple-800';
+    case 'Vendor': return 'bg-indigo-100 text-indigo-800';
+    case 'Inactive': return 'bg-gray-100 text-gray-800';
+    default: return 'bg-gray-100 text-gray-800';
   }
-}
+};
+
+/**
+ * Gets CSS class for lead score indicator
+ */
+export const getLeadScoreClass = (score: number | null): string => {
+  if (!score) return 'bg-gray-100 text-gray-800';
+  if (score >= 80) return 'bg-red-100 text-red-800'; // Hot
+  if (score >= 60) return 'bg-orange-100 text-orange-800'; // Warm
+  if (score >= 40) return 'bg-yellow-100 text-yellow-800'; // Cool
+  return 'bg-blue-100 text-blue-800'; // Cold
+};
+
+/**
+ * Gets lead temperature label
+ */
+export const getLeadTemperatureLabel = (score: number | null): string => {
+  if (!score) return 'Cold';
+  if (score >= 80) return 'Hot';
+  if (score >= 60) return 'Warm';
+  if (score >= 40) return 'Cool';
+  return 'Cold';
+};
+
+// Re-export database types for convenience
+export type {
+  Organization,
+  OrganizationType,
+  OrganizationSize,
+  OrganizationStatus,
+  InteractionType,
+  InteractionDirection
+} from './database.types';

@@ -190,7 +190,6 @@ To connect to a real Supabase database:
 - Full type safety across database operations
 
 **Supabase Client Configuration:**
-- Graceful fallback to demo mode when credentials are missing
 - Production error handling with connection validation
 - Development utilities for debugging (`devUtils.logConnectionInfo()`)
 

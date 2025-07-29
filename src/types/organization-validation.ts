@@ -98,7 +98,7 @@ export class OrganizationValidator {
       const validData = await organizationSearchSchema.validate(data, { abortEarly: false })
       return {
         isValid: true,
-        data: validData,
+        data: validData as OrganizationSearchForm,
         errors: []
       }
     } catch (error) {
@@ -273,6 +273,7 @@ export class OrganizationValidator {
       lead_score: organization.lead_score,
       parent_org_id: organization.parent_org_id,
       tags: organization.tags ? JSON.parse(organization.tags as string) : null,
+      custom_fields: organization.custom_fields,
       next_follow_up_date: organization.next_follow_up_date ? new Date(organization.next_follow_up_date) : null
     }
   }
@@ -286,7 +287,7 @@ export class OrganizationValidator {
     schema: yup.ObjectSchema<any>
   ): Promise<string | null> {
     try {
-      await schema.validateAt(String(fieldName), { [fieldName]: value })
+      await schema.validateAt(fieldName as string, { [fieldName as string]: value })
       return null
     } catch (error) {
       if (error instanceof yup.ValidationError) {
