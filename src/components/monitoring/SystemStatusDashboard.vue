@@ -191,7 +191,7 @@
     <ErrorTracker />
 
     <!-- Health Checks -->
-    <HealthChecks />
+    <!-- <HealthChecks /> -->
 
     <!-- Real User Monitoring Summary -->
     <div class="bg-white rounded-lg border border-gray-200">
@@ -306,7 +306,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import {
   CircleStackIcon,
   CloudIcon,
@@ -320,7 +319,7 @@ import { useErrorTracking } from '@/composables/monitoring/useErrorTracking'
 import { useRealUserMonitoring } from '@/composables/monitoring/useRealUserMonitoring'
 import PerformanceMetrics from './PerformanceMetrics.vue'
 import ErrorTracker from './ErrorTracker.vue'
-import HealthChecks from './HealthChecks.vue'
+// import HealthChecks from './HealthChecks.vue'
 
 /**
  * System Status Dashboard

@@ -24,7 +24,7 @@ export interface UserSession {
   pageViews: PageView[]
   interactions: UserInteraction[]
   deviceInfo: DeviceInfo
-  connectionInfo: ConnectionInfo
+  // connectionInfo: ConnectionInfo // Removed - not used
   vitals: CoreWebVitals
   bounced: boolean
   converted: boolean
@@ -184,7 +184,7 @@ export function useRealUserMonitoring() {
       browserBreakdown[browser] = (browserBreakdown[browser] || 0) + 1
       
       // Connection type
-      const connection = session.deviceInfo?.connectionInfo?.effectiveType || 'unknown'
+      const connection = 'unknown' // connectionInfo not available in deviceInfo
       connectionBreakdown[connection] = (connectionBreakdown[connection] || 0) + 1
     })
     
@@ -294,16 +294,7 @@ export function useRealUserMonitoring() {
     }
   }
   
-  const getConnectionInfo = (): ConnectionInfo => {
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-    
-    return {
-      effectiveType: connection?.effectiveType || 'unknown',
-      downlink: connection?.downlink || 0,
-      rtt: connection?.rtt || 0,
-      saveData: connection?.saveData || false
-    }
-  }
+  // getConnectionInfo removed - not used in interface
   
   const startSession = (userId?: string) => {
     if (currentSession.value) {
@@ -319,7 +310,7 @@ export function useRealUserMonitoring() {
       pageViews: [],
       interactions: [],
       deviceInfo: getDeviceInfo(),
-      connectionInfo: getConnectionInfo(),
+      // connectionInfo: getConnectionInfo(), // Not used in interface
       vitals: { ...vitals.value },
       bounced: false,
       converted: false

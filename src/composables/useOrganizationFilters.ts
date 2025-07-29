@@ -5,7 +5,14 @@
  */
 
 import { ref, computed, watch, nextTick } from 'vue'
-import { debounce } from 'lodash-es'
+// Simple debounce function to avoid lodash dependency
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): T => {
+  let timeout: NodeJS.Timeout
+  return ((...args: any[]) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }) as T
+}
 import type {
   OrganizationFilters,
   OrganizationSortConfig,
