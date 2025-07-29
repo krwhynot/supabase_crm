@@ -105,7 +105,6 @@ Comprehensive constraints implemented:
 #### CRM Workflow Indexes  
 - Lead scoring (descending order)
 - Follow-up dates and last contact tracking
-- User assignment and territory management
 
 #### Relationship Indexes
 - Organization-to-contact relationships

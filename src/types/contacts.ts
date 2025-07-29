@@ -1,6 +1,7 @@
 /**
- * Contact validation schemas and form types
+ * Contact validation schemas and form types - Updated for Kitchen Pantry CRM
  * Uses Yup for schema validation with TypeScript inference
+ * Based on Contact Form documentation requirements
  */
 
 import * as yup from 'yup'
@@ -17,50 +18,147 @@ const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-
 const PHONE_REGEX = /^[+]?[1-9][\d]{0,15}$|^[+]?[()]?[\d\s\-()]{10,20}$/
 
 /**
- * Contact creation validation schema
+ * Position options for contact form dropdown
+ */
+export const POSITION_OPTIONS = [
+  'Executive Chef',
+  'Manager', 
+  'Buyer',
+  'Owner',
+  'F&B Director',
+  'Kitchen Manager',
+  'Assistant Manager',
+  'Head Chef',
+  'Sous Chef',
+  'Food Service Director'
+] as const
+
+/**
+ * Purchase influence levels
+ */
+export const PURCHASE_INFLUENCE_OPTIONS = [
+  'High',
+  'Medium', 
+  'Low',
+  'Unknown'
+] as const
+
+/**
+ * Decision authority roles
+ */
+export const DECISION_AUTHORITY_OPTIONS = [
+  'Decision Maker',
+  'Influencer',
+  'End User',
+  'Gatekeeper'
+] as const
+
+/**
+ * Contact creation validation schema - Updated for Kitchen Pantry CRM
  */
 export const contactCreateSchema = yup.object({
+  // Required fields
   first_name: yup
     .string()
     .required('First name is required')
     .min(1, 'First name cannot be empty')
-    .max(255, 'First name must be less than 255 characters')
+    .max(100, 'First name must be less than 100 characters')
     .trim(),
   
   last_name: yup
     .string()
     .required('Last name is required')
     .min(1, 'Last name cannot be empty')
-    .max(255, 'Last name must be less than 255 characters')
+    .max(100, 'Last name must be less than 100 characters')
     .trim(),
   
-  organization: yup
+  organization_id: yup
     .string()
     .required('Organization is required')
-    .min(1, 'Organization cannot be empty')
-    .max(255, 'Organization must be less than 255 characters')
+    .uuid('Organization ID must be valid'),
+  
+  position: yup
+    .string()
+    .required('Position is required')
+    .min(1, 'Position cannot be empty')
+    .max(100, 'Position must be less than 100 characters')
     .trim(),
-  
-  email: yup
+
+  // Important fields
+  purchase_influence: yup
     .string()
-    .required('Email is required')
-    .matches(EMAIL_REGEX, 'Please enter a valid email address')
-    .max(255, 'Email must be less than 255 characters')
-    .trim()
-    .lowercase(),
+    .required('Purchase influence is required')
+    .oneOf(PURCHASE_INFLUENCE_OPTIONS, 'Invalid purchase influence level'),
   
-  title: yup
+  decision_authority: yup
     .string()
+    .required('Decision authority is required')
+    .oneOf(DECISION_AUTHORITY_OPTIONS, 'Invalid decision authority role'),
+  
+  preferred_principals: yup
+    .array()
+    .of(yup.string().uuid('Principal ID must be valid'))
     .nullable()
-    .max(255, 'Title must be less than 255 characters')
-    .trim()
-    .transform((value) => value === '' ? null : value),
-  
+    .default([]),
+
+  // Optional fields
   phone: yup
     .string()
     .nullable()
-    .max(50, 'Phone number must be less than 50 characters')
+    .max(20, 'Phone number must be less than 20 characters')
     .matches(PHONE_REGEX, 'Please enter a valid phone number')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  email: yup
+    .string()
+    .nullable()
+    .matches(EMAIL_REGEX, 'Please enter a valid email address')
+    .max(255, 'Email must be less than 255 characters')
+    .trim()
+    .lowercase()
+    .transform((value) => value === '' ? null : value),
+
+  address: yup
+    .string()
+    .nullable()
+    .max(255, 'Address must be less than 255 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  city: yup
+    .string()
+    .nullable()
+    .max(100, 'City must be less than 100 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  state: yup
+    .string()
+    .nullable()
+    .max(50, 'State must be less than 50 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  zip_code: yup
+    .string()
+    .nullable()
+    .max(20, 'ZIP code must be less than 20 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  website: yup
+    .string()
+    .nullable()
+    .matches(/^https?:\/\/[^\s]+$/, 'Website must be a valid URL starting with http:// or https://')
+    .max(255, 'Website must be less than 255 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  account_manager: yup
+    .string()
+    .nullable()
+    .max(100, 'Account manager must be less than 100 characters')
     .trim()
     .transform((value) => value === '' ? null : value),
   
@@ -69,7 +167,12 @@ export const contactCreateSchema = yup.object({
     .nullable()
     .max(5000, 'Notes must be less than 5000 characters')
     .trim()
-    .transform((value) => value === '' ? null : value)
+    .transform((value) => value === '' ? null : value),
+
+  is_primary: yup
+    .boolean()
+    .nullable()
+    .default(false)
 })
 
 /**
@@ -290,11 +393,20 @@ export class ContactValidator {
     return {
       first_name: form.first_name,
       last_name: form.last_name,
-      organization: form.organization,
-      email: form.email,
-      title: form.title,
+      organization_id: form.organization_id,
+      position: form.position,
+      purchase_influence: form.purchase_influence,
+      decision_authority: form.decision_authority,
       phone: form.phone,
-      notes: form.notes
+      email: form.email,
+      address: form.address,
+      city: form.city,
+      state: form.state,
+      zip_code: form.zip_code,
+      website: form.website,
+      account_manager: form.account_manager,
+      notes: form.notes,
+      is_primary: form.is_primary || false
     }
   }
 
@@ -306,11 +418,20 @@ export class ContactValidator {
     
     if (form.first_name !== undefined) update.first_name = form.first_name
     if (form.last_name !== undefined) update.last_name = form.last_name
-    if (form.organization !== undefined) update.organization = form.organization
-    if (form.email !== undefined) update.email = form.email
-    if (form.title !== undefined) update.title = form.title
+    if (form.organization_id !== undefined) update.organization_id = form.organization_id
+    if (form.position !== undefined) update.position = form.position
+    if (form.purchase_influence !== undefined) update.purchase_influence = form.purchase_influence
+    if (form.decision_authority !== undefined) update.decision_authority = form.decision_authority
     if (form.phone !== undefined) update.phone = form.phone
+    if (form.email !== undefined) update.email = form.email
+    if (form.address !== undefined) update.address = form.address
+    if (form.city !== undefined) update.city = form.city
+    if (form.state !== undefined) update.state = form.state
+    if (form.zip_code !== undefined) update.zip_code = form.zip_code
+    if (form.website !== undefined) update.website = form.website
+    if (form.account_manager !== undefined) update.account_manager = form.account_manager
     if (form.notes !== undefined) update.notes = form.notes
+    if (form.is_primary !== undefined) update.is_primary = form.is_primary
     
     return update
   }
@@ -322,11 +443,21 @@ export class ContactValidator {
     return {
       first_name: contact.first_name,
       last_name: contact.last_name,
-      organization: contact.organization,
-      email: contact.email,
-      title: contact.title,
+      organization_id: contact.organization_id,
+      position: contact.position,
+      purchase_influence: contact.purchase_influence,
+      decision_authority: contact.decision_authority,
+      preferred_principals: [], // Will be loaded from junction table
       phone: contact.phone,
-      notes: contact.notes
+      email: contact.email,
+      address: contact.address,
+      city: contact.city,
+      state: contact.state,
+      zip_code: contact.zip_code,
+      website: contact.website,
+      account_manager: contact.account_manager,
+      notes: contact.notes,
+      is_primary: contact.is_primary
     }
   }
 }
@@ -369,6 +500,23 @@ export const fieldValidators = {
     if (value && !PHONE_REGEX.test(value)) return 'Please enter a valid phone number'
     if (value && value.length > 50) return 'Phone number must be less than 50 characters'
     return null
+  },
+
+  /**
+   * Validate required select field
+   */
+  requiredSelect: (value: string, fieldName: string): string | null => {
+    if (!value || value.trim() === '') return `${fieldName} is required`
+    return null
+  },
+
+  /**
+   * Validate website field
+   */
+  website: (value: string): string | null => {
+    if (value && !/^https?:\/\/[^\s]+$/.test(value)) return 'Website must be a valid URL starting with http:// or https://'
+    if (value && value.length > 255) return 'Website must be less than 255 characters'
+    return null
   }
 }
 
@@ -384,11 +532,44 @@ export const contactUtils = {
   },
 
   /**
-   * Get display name with organization
+   * Get display name with organization name (requires organization lookup)
    */
-  getDisplayName: (contact: Contact): string => {
+  getDisplayName: (contact: Contact, organizationName?: string): string => {
     const fullName = contactUtils.getFullName(contact)
-    return contact.organization ? `${fullName} (${contact.organization})` : fullName
+    return organizationName ? `${fullName} (${organizationName})` : fullName
+  },
+
+  /**
+   * Get position display label
+   */
+  getPositionLabel: (position: string): string => {
+    return position || 'No position specified'
+  },
+
+  /**
+   * Get purchase influence badge class
+   */
+  getPurchaseInfluenceClass: (influence: string): string => {
+    switch (influence) {
+      case 'High': return 'bg-red-100 text-red-800'
+      case 'Medium': return 'bg-yellow-100 text-yellow-800'
+      case 'Low': return 'bg-blue-100 text-blue-800'
+      case 'Unknown': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  },
+
+  /**
+   * Get decision authority badge class
+   */
+  getDecisionAuthorityClass: (authority: string): string => {
+    switch (authority) {
+      case 'Decision Maker': return 'bg-green-100 text-green-800'
+      case 'Influencer': return 'bg-purple-100 text-purple-800'
+      case 'End User': return 'bg-blue-100 text-blue-800'
+      case 'Gatekeeper': return 'bg-orange-100 text-orange-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   },
 
   /**
@@ -432,3 +613,56 @@ export const contactUtils = {
     })
   }
 }
+
+/**
+ * Contact Principal Advocacy Interface
+ */
+export interface ContactPrincipalAdvocacy {
+  contact_id: string
+  principal_id: string
+  advocacy_level: 'High' | 'Medium' | 'Low'
+  notes?: string
+}
+
+/**
+ * Contact list display utilities
+ */
+export const contactListUtils = {
+  /**
+   * Sort contacts by influence priority
+   */
+  sortByInfluence: (contacts: Contact[]): Contact[] => {
+    const influenceOrder = { 'High': 4, 'Medium': 3, 'Low': 2, 'Unknown': 1 }
+    return [...contacts].sort((a, b) => {
+      const aScore = influenceOrder[a.purchase_influence as keyof typeof influenceOrder] || 0
+      const bScore = influenceOrder[b.purchase_influence as keyof typeof influenceOrder] || 0
+      return bScore - aScore
+    })
+  },
+
+  /**
+   * Filter contacts by purchase influence
+   */
+  filterByInfluence: (contacts: Contact[], influences: string[]): Contact[] => {
+    return contacts.filter(contact => influences.includes(contact.purchase_influence))
+  },
+
+  /**
+   * Group contacts by decision authority
+   */
+  groupByAuthority: (contacts: Contact[]): Record<string, Contact[]> => {
+    return contacts.reduce((groups, contact) => {
+      const authority = contact.decision_authority || 'Unknown'
+      if (!groups[authority]) {
+        groups[authority] = []
+      }
+      groups[authority].push(contact)
+      return groups
+    }, {} as Record<string, Contact[]>)
+  }
+}
+
+// Type exports for external use
+export type PositionOption = typeof POSITION_OPTIONS[number]
+export type PurchaseInfluence = typeof PURCHASE_INFLUENCE_OPTIONS[number]
+export type DecisionAuthority = typeof DECISION_AUTHORITY_OPTIONS[number]

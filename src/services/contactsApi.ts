@@ -44,16 +44,16 @@ class ContactsApiService {
   async getContacts(options: ContactSearchOptions = {}): Promise<ApiResponse<Contact[]>> {
     try {
       let query = supabase
-        .from('contacts')
+        .from('contact_list_view')
         .select('*')
 
       // Apply search filter
       if (options.search) {
-        query = query.or(`first_name.ilike.%${options.search}%,last_name.ilike.%${options.search}%,organization.ilike.%${options.search}%,email.ilike.%${options.search}%`)
+        query = query.or(`first_name.ilike.%${options.search}%,last_name.ilike.%${options.search}%,organization_name.ilike.%${options.search}%,email.ilike.%${options.search}%,position.ilike.%${options.search}%`)
       }
 
-      // Apply sorting
-      const sortBy = options.sortBy || 'last_name'
+      // Apply sorting - map organization field to organization_name from view
+      const sortBy = options.sortBy === 'organization' ? 'organization_name' : (options.sortBy || 'last_name')
       const sortOrder = options.sortOrder || 'asc'
       query = query.order(sortBy, { ascending: sortOrder === 'asc' })
 
@@ -97,7 +97,7 @@ class ContactsApiService {
   async getContact(id: string): Promise<ApiResponse<Contact>> {
     try {
       const { data, error } = await supabase
-        .from('contacts')
+        .from('contact_detail_view')
         .select('*')
         .eq('id', id)
         .single()
@@ -261,14 +261,14 @@ class ContactsApiService {
       // Get unique organizations count
       const { data: orgData, error: orgError } = await supabase
         .from('contacts')
-        .select('organization')
-        .not('organization', 'is', null)
+        .select('organization_id')
+        .not('organization_id', 'is', null)
 
       if (orgError) {
         throw orgError
       }
 
-      const uniqueOrganizations = new Set(orgData?.map(item => item.organization)).size
+      const uniqueOrganizations = new Set(orgData?.map(item => item.organization_id)).size
 
       const stats: ContactStats = {
         total: total || 0,

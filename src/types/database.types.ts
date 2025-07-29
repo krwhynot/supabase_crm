@@ -19,45 +19,117 @@ export type Database = {
           id: string
           first_name: string
           last_name: string
-          organization: string
-          organization_id: string | null
-          email: string
-          title: string | null
+          organization_id: string
+          position: string
+          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
+          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone: string | null
+          email: string | null
+          address: string | null
+          city: string | null
+          state: string | null
+          zip_code: string | null
+          website: string | null
+          account_manager: string | null
+          notes: string | null
+          is_primary: boolean | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          organization_id: string
+          position: string
+          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
+          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
+          phone?: string | null
+          email?: string | null
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          zip_code?: string | null
+          website?: string | null
+          account_manager?: string | null
+          notes?: string | null
+          is_primary?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          organization_id?: string
+          position?: string
+          purchase_influence?: "High" | "Medium" | "Low" | "Unknown"
+          decision_authority?: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
+          phone?: string | null
+          email?: string | null
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          zip_code?: string | null
+          website?: string | null
+          account_manager?: string | null
+          notes?: string | null
+          is_primary?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      contact_principals: {
+        Row: {
+          id: string
+          contact_id: string
+          principal_id: string
+          advocacy_level: "High" | "Medium" | "Low"
           notes: string | null
           created_at: string | null
           updated_at: string | null
         }
         Insert: {
           id?: string
-          first_name: string
-          last_name: string
-          organization: string
-          organization_id?: string | null
-          email: string
-          title?: string | null
-          phone?: string | null
+          contact_id: string
+          principal_id: string
+          advocacy_level?: "High" | "Medium" | "Low"
           notes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
         Update: {
           id?: string
-          first_name?: string
-          last_name?: string
-          organization?: string
-          organization_id?: string | null
-          email?: string
-          title?: string | null
-          phone?: string | null
+          contact_id?: string
+          principal_id?: string
+          advocacy_level?: "High" | "Medium" | "Low"
           notes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "contacts_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "contact_principals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_principals_principal_id_fkey"
+            columns: ["principal_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -544,6 +616,59 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_list_view: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          full_name: string
+          organization_id: string
+          organization_name: string
+          organization_industry: string | null
+          position: string
+          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
+          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
+          phone: string | null
+          email: string | null
+          is_primary: boolean | null
+          created_at: string | null
+          updated_at: string | null
+          principal_advocacy_count: number | null
+          organization_contact_count: number | null
+        }
+        Relationships: []
+      }
+      contact_detail_view: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          full_name: string
+          organization_id: string
+          position: string
+          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
+          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
+          phone: string | null
+          email: string | null
+          address: string | null
+          city: string | null
+          state: string | null
+          zip_code: string | null
+          website: string | null
+          account_manager: string | null
+          notes: string | null
+          is_primary: boolean | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          organization_name: string
+          organization_industry: string | null
+          organization_type: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
+          organization_website: string | null
+          principal_advocacies: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
@@ -714,6 +839,20 @@ export type OrganizationAnalyticsUpdate = Database['public']['Tables']['organiza
 export type OrganizationSummaryAnalytics = Database['public']['Views']['organization_summary_analytics']['Row']
 export type MonthlyOrganizationPerformance = Database['public']['Views']['monthly_organization_performance']['Row']
 export type OrganizationLeadScoring = Database['public']['Views']['organization_lead_scoring']['Row']
+
+// Contact Principal types
+export type ContactPrincipal = Database['public']['Tables']['contact_principals']['Row']
+export type ContactPrincipalInsert = Database['public']['Tables']['contact_principals']['Insert']
+export type ContactPrincipalUpdate = Database['public']['Tables']['contact_principals']['Update']
+
+// Contact view types
+export type ContactListView = Database['public']['Views']['contact_list_view']['Row']
+export type ContactDetailView = Database['public']['Views']['contact_detail_view']['Row']
+
+// Contact enum types
+export type PurchaseInfluence = 'High' | 'Medium' | 'Low' | 'Unknown'
+export type DecisionAuthority = 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper'
+export type AdvocacyLevel = 'High' | 'Medium' | 'Low'
 
 // Organization enum types
 export type OrganizationType = 'B2B' | 'B2C' | 'B2B2C' | 'Non-Profit' | 'Government' | 'Other'

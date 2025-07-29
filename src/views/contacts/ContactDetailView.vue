@@ -82,8 +82,8 @@
             </div>
             <div class="flex-1">
               <h2 class="text-2xl font-bold text-gray-900">{{ getFullName(contact) }}</h2>
-              <p v-if="contact.title" class="text-lg text-gray-600 mt-1">{{ contact.title }}</p>
-              <p class="text-lg text-gray-600 mt-1">{{ contact.organization }}</p>
+              <p v-if="contact.position" class="text-lg text-gray-600 mt-1">{{ contact.position }}</p>
+              <p class="text-lg text-gray-600 mt-1">{{ contact.organization_name }}</p>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@
               </svg>
               <div>
                 <p class="text-sm font-medium text-gray-500">Organization</p>
-                <p class="text-gray-900">{{ contact.organization }}</p>
+                <p class="text-gray-900">{{ contact.organization_name }}</p>
               </div>
             </div>
 
@@ -199,7 +199,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { contactUtils } from '@/types/contacts'
-import type { Contact } from '@/types/database.types'
+import type { ContactDetailView } from '@/types/database.types'
 
 // Layout Components
 
@@ -210,7 +210,7 @@ const router = useRouter()
 const contactId = route.params.id as string
 
 // Reactive state
-const contact = ref<Contact | null>(null)
+const contact = ref<ContactDetailView | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
@@ -267,11 +267,11 @@ const deleteContact = async () => {
 }
 
 // Utility functions
-const getFullName = (contact: Contact): string => {
+const getFullName = (contact: ContactDetailView): string => {
   return contactUtils.getFullName(contact)
 }
 
-const getInitials = (contact: Contact): string => {
+const getInitials = (contact: ContactDetailView): string => {
   return contactUtils.getInitials(contact)
 }
 

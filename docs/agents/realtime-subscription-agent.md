@@ -283,7 +283,6 @@ export const useRealtimeStore = defineStore('realtime', () => {
 ### Business Metrics
 - User engagement with real-time features
 - Feature adoption rates
-- Real-time event volume
 - User satisfaction scores
 
 ## Troubleshooting Guide
