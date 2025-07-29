@@ -358,15 +358,15 @@ export function useOrganizationFilters() {
     callback?: (filters: OrganizationFilters) => void
   ) => {
     if (Array.isArray(filterState.value[key])) {
-      ;(filterState.value[key] as any) = []
+      (filterState.value[key] as any) = []
     } else if (typeof filterState.value[key] === 'object' && filterState.value[key] !== null) {
       if (key === 'lastContactDateRange') {
-        ;(filterState.value[key] as any) = { start: null, end: null }
+        (filterState.value[key] as any) = { start: null, end: null }
       } else {
-        ;(filterState.value[key] as any) = { min: null, max: null }
+        (filterState.value[key] as any) = { min: null, max: null }
       }
     } else {
-      ;(filterState.value[key] as any) = ''
+      (filterState.value[key] as any) = ''
     }
     
     if (callback) {
@@ -452,7 +452,7 @@ export function useOrganizationFilters() {
         filterState.value.leadScoreRange = { min: 80, max: 100 }
         filterState.value.revenueRange = { min: 1000000, max: null }
         break
-      case 'recent':
+      case 'recent': {
         const oneMonthAgo = new Date()
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
         filterState.value.lastContactDateRange = {
@@ -460,6 +460,7 @@ export function useOrganizationFilters() {
           end: new Date()
         }
         break
+      }
     }
     
     if (callback) {
