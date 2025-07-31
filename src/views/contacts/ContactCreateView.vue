@@ -43,7 +43,7 @@ import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outlin
 import ContactForm from '@/components/forms/ContactForm.vue'
 import { useContactStore } from '@/stores/contactStore'
 import { ContactValidator } from '@/types/contacts'
-import type { ContactCreateForm } from '@/types/contacts'
+// import type { ContactCreateForm } from '@/types/contacts' // Unused
 
 const router = useRouter()
 const contactStore = useContactStore()
@@ -52,7 +52,7 @@ const contactStore = useContactStore()
 const submitError = ref<string | null>(null)
 
 // Handle form submission
-const handleSubmit = async (formData: ContactCreateForm & { _principalIds?: string[] }) => {
+const handleSubmit = async (formData: any) => {
   try {
     submitError.value = null
     

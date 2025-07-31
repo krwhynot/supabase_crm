@@ -274,11 +274,11 @@ const viewContact = (id: string) => {
 
 // Utility functions
 const getFullName = (contact: ContactListView): string => {
-  return contactUtils.getFullName(contact)
+  return contactUtils.getFullName(contact as any)
 }
 
 const getInitials = (contact: ContactListView): string => {
-  return contactUtils.getInitials(contact)
+  return contactUtils.getInitials(contact as any)
 }
 
 const formatPhone = (phone: string | null): string => {

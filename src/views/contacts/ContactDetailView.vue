@@ -76,12 +76,12 @@
             <div class="flex-shrink-0">
               <div class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center">
                 <span class="text-2xl font-medium text-blue-600">
-                  {{ getInitials(contact) }}
+                  {{ contact ? `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}` : '' }}
                 </span>
               </div>
             </div>
             <div class="flex-1">
-              <h2 class="text-2xl font-bold text-gray-900">{{ getFullName(contact) }}</h2>
+              <h2 class="text-2xl font-bold text-gray-900">{{ contact ? `${contact.first_name} ${contact.last_name}` : '' }}</h2>
               <p v-if="contact.position" class="text-lg text-gray-600 mt-1">{{ contact.position }}</p>
               <p class="text-lg text-gray-600 mt-1">{{ contact.organization_name }}</p>
             </div>
@@ -165,7 +165,7 @@
             <h3 class="text-lg font-medium text-gray-900 mt-4">Delete Contact</h3>
             <div class="mt-2 px-7 py-3">
               <p class="text-sm text-gray-500">
-                Are you sure you want to delete <strong>{{ contact ? getFullName(contact) : 'this contact' }}</strong>? 
+                Are you sure you want to delete <strong>{{ contact ? `${contact.first_name} ${contact.last_name}` : 'this contact' }}</strong>? 
                 This action cannot be undone.
               </p>
             </div>
@@ -266,14 +266,7 @@ const deleteContact = async () => {
   }
 }
 
-// Utility functions
-const getFullName = (contact: ContactDetailView): string => {
-  return contactUtils.getFullName(contact)
-}
-
-const getInitials = (contact: ContactDetailView): string => {
-  return contactUtils.getInitials(contact)
-}
+// Utility functions removed - using inline expressions instead
 
 const formatPhone = (phone: string | null): string => {
   return contactUtils.formatPhone(phone)

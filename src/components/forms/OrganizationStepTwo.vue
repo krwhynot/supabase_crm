@@ -277,12 +277,14 @@ const updateCustomField = (fieldName: string, value: any) => {
   updateField('custom_fields', updatedCustomFields)
 }
 
-const updateIsPrincipal = (value: boolean) => {
-  updateCustomField('is_principal', value)
+const updateIsPrincipal = (value: boolean | (string | number)[]) => {
+  const boolValue = Array.isArray(value) ? value.length > 0 : value
+  updateCustomField('is_principal', boolValue)
 }
 
-const updateIsDistributor = (value: boolean) => {
-  updateCustomField('is_distributor', value)
+const updateIsDistributor = (value: boolean | (string | number)[]) => {
+  const boolValue = Array.isArray(value) ? value.length > 0 : value
+  updateCustomField('is_distributor', boolValue)
 }
 
 /**

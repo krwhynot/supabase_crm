@@ -84,7 +84,7 @@
         :error="errors.address_line_1"
         placeholder="e.g., 123 Main Street"
         description="Street address, building number, and street name"
-        autocomplete="address-line1"
+        autocomplete="street-address"
         @update:model-value="updateField('address_line_1', $event)"
         @validate="validateField('address_line_1', $event)"
       />
@@ -98,7 +98,7 @@
         :error="errors.address_line_2"
         placeholder="e.g., Suite 100"
         description="Apartment, suite, unit, or floor (optional)"
-        autocomplete="address-line2"
+        autocomplete="off"
         @update:model-value="updateField('address_line_2', $event)"
         @validate="validateField('address_line_2', $event)"
       />
@@ -114,7 +114,7 @@
           :error="errors.city"
           placeholder="e.g., New York"
           description="City or locality"
-          autocomplete="address-level2"
+          autocomplete="off"
           @update:model-value="updateField('city', $event)"
           @validate="validateField('city', $event)"
         />
@@ -128,7 +128,7 @@
           :error="errors.state_province"
           placeholder="e.g., NY"
           description="State, province, or region"
-          autocomplete="address-level1"
+          autocomplete="off"
           @update:model-value="updateField('state_province', $event)"
           @validate="validateField('state_province', $event)"
         />

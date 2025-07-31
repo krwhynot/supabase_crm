@@ -94,8 +94,8 @@ export const useContactStore = defineStore('contact', () => {
       const response = await contactsApi.getContact(id)
 
       if (response.success && response.data) {
-        currentContact.value = response.data
-        return response.data
+        currentContact.value = response.data as ContactDetailView
+        return response.data as ContactDetailView
       } else {
         throw new Error(response.error || 'Failed to fetch contact')
       }
@@ -123,7 +123,7 @@ export const useContactStore = defineStore('contact', () => {
       if (response.success && response.data) {
         // Refresh the current view to include the new contact
         await fetchContacts()
-        return response.data
+        return response.data as ContactDetailView
       } else {
         throw new Error(response.error || 'Failed to create contact')
       }
@@ -148,10 +148,10 @@ export const useContactStore = defineStore('contact', () => {
       const response = await contactsApi.updateContact(id, updates)
 
       if (response.success && response.data) {
-        currentContact.value = response.data
+        currentContact.value = response.data as ContactDetailView
         // Refresh the current view
         await fetchContacts()
-        return response.data
+        return response.data as ContactDetailView
       } else {
         throw new Error(response.error || 'Failed to update contact')
       }
