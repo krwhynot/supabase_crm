@@ -49,11 +49,11 @@
       <!-- Loading Spinner -->
       <div
         v-if="loading"
-        class="absolute inset-y-0 right-0 flex items-center pr-3"
+        class="absolute inset-y-0 right-0 flex items-center pr-4"
         aria-hidden="true"
       >
         <svg
-          class="h-4 w-4 animate-spin text-gray-400"
+          class="h-5 w-5 animate-spin text-gray-400"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -76,11 +76,11 @@
       <!-- Success Icon -->
       <div
         v-if="showValidIcon && !hasError && modelValue && !loading"
-        class="absolute inset-y-0 right-0 flex items-center pr-3"
+        class="absolute inset-y-0 right-0 flex items-center pr-4"
         aria-hidden="true"
       >
         <svg
-          class="h-4 w-4 text-green-500"
+          class="h-5 w-5 text-success-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -100,7 +100,7 @@
       v-if="error"
       :id="errorId"
       role="alert"
-      class="text-sm text-danger flex items-center space-x-1"
+      class="form-error"
     >
       <svg
         class="h-4 w-4 flex-shrink-0"
@@ -123,7 +123,7 @@
     <p
       v-if="helpText && !error"
       :id="helpTextId"
-      class="text-sm text-gray-500"
+      class="form-help"
     >
       {{ helpText }}
     </p>
@@ -262,11 +262,11 @@ const ariaDescribedBy = computed(() => {
  * Enhanced styling with state-aware classes
  */
 const labelClasses = computed(() => {
-  const base = 'block text-sm font-medium transition-colors duration-200'
+  const base = 'form-label transition-colors duration-200'
   const stateClasses = hasError.value 
-    ? 'text-red-700' 
+    ? 'text-danger-700' 
     : isFocused.value 
-      ? 'text-primary' 
+      ? 'text-primary-600' 
       : 'text-gray-700'
   const disabledClasses = props.disabled ? 'opacity-60' : ''
   const customClasses = props.labelClass || ''
@@ -275,26 +275,26 @@ const labelClasses = computed(() => {
 })
 
 const inputClasses = computed(() => {
-  const base = 'w-full px-3 py-2 border rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent'
+  const base = 'w-full min-h-input px-4 py-3 border rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:border-transparent'
   
-  // State-specific styling
+  // State-specific styling with new design tokens
   const stateClasses = hasError.value
-    ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:bg-white'
+    ? 'border-danger-300 bg-danger-50 focus:ring-danger-500 focus:bg-white text-gray-900'
     : isFocused.value
-      ? 'border-primary bg-white focus:ring-primary'
-      : 'border-gray-300 bg-white hover:border-gray-400 focus:ring-primary'
+      ? 'border-primary-500 bg-white focus:ring-primary-500'
+      : 'border-gray-300 bg-white hover:border-gray-400 focus:ring-primary-500'
   
-  // Interaction states
+  // Interaction states with enhanced styling
   const disabledClasses = props.disabled 
-    ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+    ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200' 
     : ''
   const readonlyClasses = props.readonly 
-    ? 'bg-gray-50 cursor-default' 
+    ? 'bg-gray-50 cursor-default border-gray-200' 
     : ''
   
-  // Loading and icon padding
+  // Enhanced padding for icons with touch-friendly sizing
   const paddingClasses = (props.loading || (props.showValidIcon && !hasError.value && props.modelValue)) 
-    ? 'pr-10' 
+    ? 'pr-12' 
     : ''
   
   const customClasses = props.inputClass || ''

@@ -150,14 +150,14 @@
                       <div class="text-sm font-medium text-gray-900">
                         {{ getFullName(contact) }}
                       </div>
-                      <div v-if="contact.title" class="text-sm text-gray-500">
-                        {{ contact.title }}
+                      <div v-if="contact.position" class="text-sm text-gray-500">
+                        {{ contact.position }}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ contact.organization }}
+                  {{ contact.organization_name }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <a :href="`mailto:${contact.email}`" class="hover:text-blue-600" @click.stop>
@@ -209,14 +209,14 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { contactUtils } from '@/types/contacts'
-import type { Contact } from '@/types/database.types'
+import type { ContactListView } from '@/types/database.types'
 
 // Remove DashboardLayout import
 
 const router = useRouter()
 
 // Reactive state
-const contacts = ref<Contact[]>([])
+const contacts = ref<ContactListView[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
@@ -273,11 +273,11 @@ const viewContact = (id: string) => {
 }
 
 // Utility functions
-const getFullName = (contact: Contact): string => {
+const getFullName = (contact: ContactListView): string => {
   return contactUtils.getFullName(contact)
 }
 
-const getInitials = (contact: Contact): string => {
+const getInitials = (contact: ContactListView): string => {
   return contactUtils.getInitials(contact)
 }
 

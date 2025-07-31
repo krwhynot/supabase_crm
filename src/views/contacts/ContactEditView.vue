@@ -152,7 +152,7 @@
                   <template #default="{ fieldId, hasError, errorId }">
                     <input
                       :id="fieldId"
-                      v-model="form.organization"
+                      v-model="form.organization_id"
                       type="text"
                       required
                       placeholder="Enter organization or company name"
@@ -175,7 +175,7 @@
                   <template #default="{ fieldId, hasError, errorId }">
                     <input
                       :id="fieldId"
-                      v-model="form.title"
+                      v-model="form.position"
                       type="text"
                       placeholder="Enter job title"
                       :aria-describedby="hasError ? errorId : undefined"
@@ -256,7 +256,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { ContactValidator } from '@/types/contacts'
-import type { Contact } from '@/types/database.types'
+import type { ContactDetailView } from '@/types/database.types'
 import type { ContactCreateForm, ValidationError } from '@/types/contacts'
 
 // Layout Components
@@ -270,7 +270,7 @@ const router = useRouter()
 const contactId = route.params.id as string
 
 // State
-const contact = ref<Contact | null>(null)
+const contact = ref<ContactDetailView | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
@@ -278,11 +278,21 @@ const error = ref<string | null>(null)
 const form = reactive<ContactCreateForm>({
   first_name: '',
   last_name: '',
-  email: '',
-  phone: '',
-  organization: '',
-  title: '',
-  notes: ''
+  organization_id: '',
+  position: '',
+  purchase_influence: 'Unknown',
+  decision_authority: 'End User',
+  preferred_principals: [],
+  phone: null,
+  email: null,
+  address: null,
+  city: null,
+  state: null,
+  zip_code: null,
+  website: null,
+  account_manager: null,
+  notes: null,
+  is_primary: false
 })
 
 // Validation and submission state

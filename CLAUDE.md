@@ -61,6 +61,9 @@ This is a Vue 3 TypeScript CRM application with a modern dashboard interface, co
 - `@headlessui/vue` - Unstyled, accessible UI components
 - `@heroicons/vue` - Beautiful hand-crafted SVG icons
 - `yup` - Schema-based validation with TypeScript inference
+- `@supabase/supabase-js` - Real-time database and authentication
+- `@playwright/test` - End-to-end testing framework
+- `lodash-es` - Utility library with ES modules
 
 ## Component Architecture Patterns
 
@@ -222,13 +225,48 @@ To connect to a real Supabase database:
 ├── /contacts (Contact List with Sidebar)
 ├── /contacts/new (Create Contact with Sidebar)
 ├── /contacts/:id (Contact Details with Sidebar)
-└── /contacts/:id/edit (Edit Contact with Sidebar)
+├── /contacts/:id/edit (Edit Contact with Sidebar)
+├── /organizations (Organization List with Sidebar)
+├── /organizations/new (Create Organization with Sidebar)
+├── /organizations/:id (Organization Details with Sidebar)
+└── /organizations/:id/edit (Edit Organization with Sidebar)
 ```
 
 **Documentation:**
 - User Guide: `docs/user-guide/Dashboard_User_Guide.md`
 - Technical Docs: `docs/technical/Dashboard_Technical_Documentation.md`
 - Implementation Checklist: `docs/checklists/Dashboard_Migration_Plan_Checklist.md`
+
+## Design System Architecture
+
+**Comprehensive Design System (`src/design-system/`):**
+- **Token-Based Design**: CSS custom properties for consistent theming
+- **Component Library**: Organized by category (forms, layout, feedback, navigation)
+- **Theme Management**: Light/dark mode with `useTheme` composable
+- **Accessibility**: WCAG 2.1 AA compliant components with proper ARIA support
+- **Performance**: Tree-shakable components and CSS variables for efficient theming
+
+**Key Design System Components:**
+- Form components with validation and accessibility
+- Layout components (Card, Container, Stack, Grid)
+- Feedback components (Alert, Badge, Spinner, Toast)
+- Navigation components (Breadcrumb, Tabs, Pagination)
+- Overlay components (Modal, Dropdown, Tooltip, Popover)
+
+## Testing Strategy
+
+**End-to-End Testing:**
+- Playwright test suite in `/tests/` directory
+- UI healing validation with automated screenshot capture
+- Navigation validation tests for accessibility compliance
+- Custom test configuration in `playwright.config.ts`
+
+**Test Commands:**
+```bash
+npx playwright test              # Run all tests
+npx playwright test --ui        # Run tests with UI mode
+npx playwright show-report      # View test results
+```
 
 ## Live Deployment
 

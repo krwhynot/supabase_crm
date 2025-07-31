@@ -10,9 +10,9 @@
       ]"
     >
       <!-- Sidebar Header -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between p-5 border-b border-gray-200">
         <div v-if="!sidebarCollapsed" class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center shadow-sm">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
@@ -22,7 +22,7 @@
         
         <button
           @click="toggleSidebar"
-          class="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="touch-target p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200"
           :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,20 +32,20 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 p-4">
+      <nav class="flex-1 p-5">
         <!-- Main Section -->
         <div class="space-y-2">
-          <div v-if="!sidebarCollapsed" class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <div v-if="!sidebarCollapsed" class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             Main
           </div>
           
           <router-link
             to="/"
             :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              'nav-item',
               $route.path === '/'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                ? 'nav-item-active'
+                : 'nav-item-inactive'
             ]"
           >
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,18 +57,18 @@
         </div>
 
         <!-- CRM Section -->
-        <div class="mt-6 space-y-2">
-          <div v-if="!sidebarCollapsed" class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div class="mt-8 space-y-2">
+          <div v-if="!sidebarCollapsed" class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             CRM
           </div>
           
           <router-link
             to="/organizations"
             :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              'nav-item',
               $route.path.startsWith('/organizations')
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                ? 'nav-item-active'
+                : 'nav-item-inactive'
             ]"
           >
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,10 +80,10 @@
           <router-link
             to="/contacts"
             :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              'nav-item',
               $route.path.startsWith('/contacts')
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                ? 'nav-item-active'
+                : 'nav-item-inactive'
             ]"
           >
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,73 +92,22 @@
             <span v-if="!sidebarCollapsed" class="ml-3">Contacts</span>
           </router-link>
 
-          <router-link
-            to="/opportunities"
-            :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              $route.path.startsWith('/opportunities')
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
-            <span v-if="!sidebarCollapsed" class="ml-3">Opportunities</span>
-          </router-link>
         </div>
 
-        <!-- Settings Section -->
-        <div v-if="!sidebarCollapsed" class="mt-6 space-y-2">
-          <div class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Settings
-          </div>
-          
-          <router-link
-            to="/profile"
-            :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              $route.path.startsWith('/profile')
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span class="ml-3">Profile</span>
-          </router-link>
-
-          <router-link
-            to="/preferences"
-            :class="[
-              'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              $route.path.startsWith('/preferences')
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span class="ml-3">Preferences</span>
-          </router-link>
-        </div>
 
         <!-- Current Week Filter (if not collapsed) -->
-        <div v-if="!sidebarCollapsed" class="mt-6 pt-6 border-t border-gray-200">
-          <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <div v-if="!sidebarCollapsed" class="mt-8 pt-6 border-t border-gray-200">
+          <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             Filters
           </h3>
-          <div class="mt-2 space-y-1">
+          <div class="space-y-1">
             <button
               @click="toggleWeekFilter"
               :class="[
-                'flex items-center w-full px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                'nav-item w-full',
                 weekFilterActive
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'nav-item-active'
+                  : 'nav-item-inactive'
               ]"
             >
               <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,10 +125,10 @@
       </nav>
 
       <!-- Sidebar Footer -->
-      <div class="p-4 border-t border-gray-200">
+      <div class="p-5 border-t border-gray-200">
         <div v-if="!sidebarCollapsed" class="flex items-center">
-          <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
@@ -205,7 +154,7 @@
         <div class="flex items-center justify-between">
           <button
             @click="openMobileSidebar"
-            class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="touch-target p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200"
             aria-label="Open sidebar"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

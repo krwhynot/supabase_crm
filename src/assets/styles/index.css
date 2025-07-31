@@ -1,5 +1,239 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global Professional CRM Styling Enhancements */
+@layer base {
+  /* Enhanced focus management for accessibility */
+  *:focus {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+
+  /* Remove default focus rings for mouse users, keep for keyboard users */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Enhanced focus-visible for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px theme('colors.primary.100');
+  }
+
+  /* Professional typography hierarchy */
+  h1 {
+    @apply text-3xl font-semibold text-gray-900 leading-tight tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold text-gray-900 leading-tight tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-medium text-gray-900 leading-snug;
+  }
+
+  h4 {
+    @apply text-lg font-medium text-gray-800 leading-snug;
+  }
+
+  h5 {
+    @apply text-base font-medium text-gray-800 leading-normal;
+  }
+
+  h6 {
+    @apply text-sm font-medium text-gray-700 leading-normal;
+  }
+
+  /* Enhanced body text readability */
+  body {
+    @apply text-base text-gray-700 leading-relaxed;
+  }
+
+  /* Professional link styling */
+  a {
+    @apply text-primary-600 hover:text-primary-700 transition-colors duration-200;
+  }
+
+  /* Touch-friendly interactive elements */
+  button, 
+  [role="button"], 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"] {
+    @apply min-h-touch touch-manipulation;
+  }
+
+  /* Touch-friendly clickable areas */
+  a, 
+  label {
+    @apply touch-manipulation;
+  }
+
+  /* Enhanced form element styling */
+  input, 
+  textarea, 
+  select {
+    @apply min-h-input;
+  }
+}
+
+@layer components {
+  /* Professional spacing patterns for content organization */
+  .space-comfortable > * + * {
+    @apply mt-6;
+  }
+
+  .space-compact > * + * {
+    @apply mt-4;
+  }
+
+  .space-dense > * + * {
+    @apply mt-2;
+  }
+
+  .space-loose > * + * {
+    @apply mt-8;
+  }
+
+  /* Professional card styling with subtle elevation */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+
+  .card-compact {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-lg shadow-md border border-gray-200 p-6;
+  }
+
+  /* Professional button base styling */
+  .btn-base {
+    @apply inline-flex items-center justify-center min-h-button min-w-button px-4 py-2 
+           text-sm font-medium rounded-md border transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Form label styling for consistency */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .form-label-required::after {
+    @apply text-danger-500 ml-1;
+    content: '*';
+  }
+
+  /* Error message styling */
+  .form-error {
+    @apply text-sm text-danger-600 mt-1 flex items-center space-x-1;
+  }
+
+  /* Help text styling */
+  .form-help {
+    @apply text-sm text-gray-500 mt-1;
+  }
+
+  /* Professional navigation styling */
+  .nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md 
+           transition-colors duration-200 min-h-touch;
+  }
+
+  .nav-item-active {
+    @apply bg-primary-100 text-primary-700 border-r-2 border-primary-500;
+  }
+
+  .nav-item-inactive {
+    @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900;
+  }
+
+  /* Professional data table styling */
+  .table-header {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  /* Status badge styling */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-success-100 text-success-800;
+  }
+
+  .badge-warning {
+    @apply bg-warning-100 text-warning-800;
+  }
+
+  .badge-danger {
+    @apply bg-danger-100 text-danger-800;
+  }
+
+  .badge-info {
+    @apply bg-info-100 text-info-800;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800;
+  }
+}
+
+@layer utilities {
+  /* Touch-friendly utilities */
+  .touch-target {
+    @apply min-h-touch min-w-touch;
+  }
+
+  .touch-comfortable {
+    @apply min-h-touch-comfortable;
+  }
+
+  /* Professional shadow utilities */
+  .shadow-soft {
+    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 2px 4px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-professional {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -1px rgb(0 0 0 / 0.03);
+  }
+
+  /* Accessibility utilities */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  /* High contrast utilities for better accessibility */
+  .text-contrast-high {
+    @apply text-gray-900;
+  }
+
+  .text-contrast-medium {
+    @apply text-gray-700;
+  }
+
+  .text-contrast-low {
+    @apply text-gray-500;
+  }
+
+  /* Professional gradient utilities */
+  .gradient-primary {
+    background: linear-gradient(135deg, theme('colors.primary.500'), theme('colors.primary.600'));
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, theme('colors.success.500'), theme('colors.success.600'));
+  }
+}

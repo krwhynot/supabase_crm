@@ -37,7 +37,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     recentContacts: Math.min(contactStore.totalCount, 5),
     organizations: new Set(
       contactStore.contacts
-        .map(c => c.organization)
+        .map(c => c.organization_id)
         .filter(Boolean)
     ).size,
     activeContacts: contactStore.contacts.filter(c => {
@@ -191,7 +191,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       recentContacts: Math.min(weekContacts.length, 5),
       organizations: new Set(
         weekContacts
-          .map(c => c.organization)
+          .map(c => c.organization_id)
           .filter(Boolean)
       ).size,
       activeContacts: weekContacts.length

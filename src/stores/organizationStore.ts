@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { supabase } from '@/config/supabaseClient'
-import { usePerformanceMonitoring } from '@/composables/monitoring/usePerformanceMonitoring'
-import { useErrorTracking } from '@/composables/monitoring/useErrorTracking'
 import type {
   Organization,
   OrganizationInsert,
@@ -38,8 +36,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   // MONITORING INTEGRATION
   // ===============================
   
-  const { measureFunction, recordMetric } = usePerformanceMonitoring()
-  const { recordDatabaseError, recordUserActionError } = useErrorTracking()
+  // Monitoring functionality removed - was unused
   
   // ===============================
   // STATE MANAGEMENT
@@ -261,10 +258,9 @@ export const useOrganizationStore = defineStore('organization', () => {
     useCache?: boolean
     resetList?: boolean
   } = {}): Promise<OrganizationListResponse | null> => {
-    return await measureFunction(async () => {
-      try {
-        loading.organizations = true
-        clearError('organizations')
+    try {
+      loading.organizations = true
+      clearError('organizations')
       
       // Update pagination and filters
       if (options.page !== undefined) pagination.value.page = options.page
@@ -431,7 +427,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       const message = error instanceof Error ? error.message : 'Failed to fetch organizations'
       setError('organizations', message)
       
-      recordDatabaseError(`Failed to fetch organizations: ${message}`, 'SELECT FROM organizations', {
+      console.error(`Failed to fetch organizations: ${message}`, {
         operation: 'fetch_organizations',
         options
       })
@@ -440,12 +436,6 @@ export const useOrganizationStore = defineStore('organization', () => {
     } finally {
       loading.organizations = false
     }
-    }, 'Fetch Organizations', 'database_query', { 
-      operation: 'fetch',
-      filters: options.filters,
-      page: options.page,
-      limit: options.limit
-    })
   }
   
   /**
@@ -479,7 +469,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       const [contactsResult, interactionsResult, documentsResult] = await Promise.all([
         supabase
           .from('contacts')
-          .select('id, first_name, last_name, email, title')
+          .select('id, first_name, last_name, email, position')
           .eq('organization_id', id),
         
         supabase
@@ -533,10 +523,9 @@ export const useOrganizationStore = defineStore('organization', () => {
    * Create new organization
    */
   const createOrganization = async (organizationData: OrganizationInsert): Promise<Organization | null> => {
-    return await measureFunction(async () => {
-      try {
-        loading.creating = true
-        clearError('creating')
+    try {
+      loading.creating = true
+      clearError('creating')
         
         const { data, error } = await supabase
           .from('organizations')
@@ -545,7 +534,7 @@ export const useOrganizationStore = defineStore('organization', () => {
           .single()
         
         if (error) {
-          recordDatabaseError(`Failed to create organization: ${error.message}`, 'INSERT INTO organizations', {
+          console.error(`Failed to create organization: ${error.message}`, {
             operation: 'create_organization',
             data: organizationData
           })
@@ -557,7 +546,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         await fetchOrganizations({ resetList: true })
         
         // Record successful user action
-        recordMetric('create_organization_success', 'user_interaction', 0, true, {
+        console.log('Organization created successfully', {
           organizationName: organizationData.name,
           organizationIndustry: organizationData.industry
         })
@@ -568,7 +557,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         const message = error instanceof Error ? error.message : 'Failed to create organization'
         setError('creating', message)
         
-        recordUserActionError('create_organization', message, {
+        console.error('Failed to create organization', message, {
           organizationData
         })
         
@@ -576,8 +565,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       } finally {
         loading.creating = false
       }
-    }, 'Create Organization', 'database_query', { operation: 'create' })
-  }
+    }
   
   /**
    * Update existing organization

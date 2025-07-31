@@ -5,7 +5,7 @@
  */
 
 import { supabase } from '@/config/supabaseClient'
-import type { Contact, ContactInsert, ContactUpdate } from '@/types/database.types'
+import type { Contact, ContactInsert, ContactUpdate, ContactListView, ContactDetailView } from '@/types/database.types'
 
 /**
  * API Response wrapper for consistent error handling
@@ -41,7 +41,7 @@ class ContactsApiService {
   /**
    * Get all contacts with optional search and pagination
    */
-  async getContacts(options: ContactSearchOptions = {}): Promise<ApiResponse<Contact[]>> {
+  async getContacts(options: ContactSearchOptions = {}): Promise<ApiResponse<ContactListView[]>> {
     try {
       let query = supabase
         .from('contact_list_view')
@@ -94,7 +94,7 @@ class ContactsApiService {
   /**
    * Get a single contact by ID
    */
-  async getContact(id: string): Promise<ApiResponse<Contact>> {
+  async getContact(id: string): Promise<ApiResponse<ContactDetailView>> {
     try {
       const { data, error } = await supabase
         .from('contact_detail_view')

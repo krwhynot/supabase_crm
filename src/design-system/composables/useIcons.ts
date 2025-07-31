@@ -86,10 +86,21 @@ export const solidIcons = {
   users: UsersIconSolid,
   settings: Cog6ToothIconSolid,
   bell: BellIconSolid,
+  search: MagnifyingGlassIcon, // Add missing solid icons
+  plus: PlusIcon,
+  pencil: PencilIcon,
+  trash: TrashIcon,
+  eye: EyeIcon,
   check: CheckIconSolid,
   x: XMarkIconSolid,
   warning: ExclamationTriangleIconSolid,
   info: InformationCircleIconSolid,
+  chevronLeft: ChevronLeftIcon,
+  chevronRight: ChevronRightIcon,
+  chevronUp: ChevronUpIcon,
+  chevronDown: ChevronDownIcon,
+  menu: Bars3Icon,
+  dots: EllipsisVerticalIcon,
 };
 
 export type IconName = keyof typeof outlineIcons;
@@ -97,8 +108,8 @@ export type IconVariant = 'outline' | 'solid';
 
 export function useIcons() {
   const getIcon = (name: IconName, variant: IconVariant = 'outline') => {
-    if (variant === 'solid' && solidIcons[name]) {
-      return solidIcons[name];
+    if (variant === 'solid' && name in solidIcons) {
+      return solidIcons[name as keyof typeof solidIcons];
     }
     return outlineIcons[name];
   };

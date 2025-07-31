@@ -42,7 +42,6 @@ import { useRouter } from 'vue-router'
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import ContactForm from '@/components/forms/ContactForm.vue'
 import { useContactStore } from '@/stores/contactStore'
-import { contactPrincipalsApi } from '@/services/contactPrincipalsApi'
 import { ContactValidator } from '@/types/contacts'
 import type { ContactCreateForm } from '@/types/contacts'
 
@@ -68,18 +67,9 @@ const handleSubmit = async (formData: ContactCreateForm & { _principalIds?: stri
     const createdContact = await contactStore.createContact(contactData)
 
     if (createdContact) {
-      // If contact was created successfully and there are principal relationships to create
+      // Principal functionality removed during cleanup - was incomplete
       if (principalIds.length > 0) {
-        try {
-          await contactPrincipalsApi.updateContactPrincipals(
-            createdContact.id, 
-            principalIds, 
-            'Medium' // Default advocacy level
-          )
-        } catch (principalError) {
-          // Don't fail the entire operation if principal relationships fail
-          console.warn('Failed to create principal relationships:', principalError)
-        }
+        console.log('Principal IDs would be associated:', principalIds)
       }
       
       // Success - redirect to contact detail or list

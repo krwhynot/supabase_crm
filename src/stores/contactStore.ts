@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { contactsApi } from '@/services/contactsApi'
-import type { Contact, ContactInsert, ContactUpdate } from '@/types/database.types'
+import type { Contact, ContactInsert, ContactUpdate, ContactListView, ContactDetailView } from '@/types/database.types'
 import type { ContactSearchForm } from '@/types/contacts'
 
 /**
@@ -10,8 +10,8 @@ import type { ContactSearchForm } from '@/types/contacts'
  */
 export const useContactStore = defineStore('contact', () => {
   // State
-  const contacts = ref<Contact[]>([])
-  const currentContact = ref<Contact | null>(null)
+  const contacts = ref<ContactListView[]>([])
+  const currentContact = ref<ContactDetailView | null>(null)
   const isLoading = ref(false)
   const isSubmitting = ref(false)
   const errorMessage = ref('')
@@ -86,7 +86,7 @@ export const useContactStore = defineStore('contact', () => {
   /**
    * Fetch a single contact by ID
    */
-  const fetchContact = async (id: string): Promise<Contact | null> => {
+  const fetchContact = async (id: string): Promise<ContactDetailView | null> => {
     try {
       isLoading.value = true
       clearError()
@@ -113,7 +113,7 @@ export const useContactStore = defineStore('contact', () => {
   /**
    * Create a new contact
    */
-  const createContact = async (contactData: ContactInsert): Promise<Contact | null> => {
+  const createContact = async (contactData: ContactInsert): Promise<ContactDetailView | null> => {
     try {
       isSubmitting.value = true
       clearError()
@@ -140,7 +140,7 @@ export const useContactStore = defineStore('contact', () => {
   /**
    * Update an existing contact
    */
-  const updateContact = async (id: string, updates: ContactUpdate): Promise<Contact | null> => {
+  const updateContact = async (id: string, updates: ContactUpdate): Promise<ContactDetailView | null> => {
     try {
       isSubmitting.value = true
       clearError()

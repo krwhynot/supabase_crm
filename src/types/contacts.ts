@@ -5,7 +5,7 @@
  */
 
 import * as yup from 'yup'
-import type { Contact, ContactInsert, ContactUpdate } from './database.types'
+import type { Contact, ContactInsert, ContactUpdate, ContactDetailView } from './database.types'
 
 /**
  * Email validation regex (RFC 5322 compliant)
@@ -182,40 +182,89 @@ export const contactUpdateSchema = yup.object({
   first_name: yup
     .string()
     .min(1, 'First name cannot be empty')
-    .max(255, 'First name must be less than 255 characters')
+    .max(100, 'First name must be less than 100 characters')
     .trim(),
   
   last_name: yup
     .string()
     .min(1, 'Last name cannot be empty')
-    .max(255, 'Last name must be less than 255 characters')
+    .max(100, 'Last name must be less than 100 characters')
     .trim(),
   
-  organization: yup
+  organization_id: yup
     .string()
-    .min(1, 'Organization cannot be empty')
-    .max(255, 'Organization must be less than 255 characters')
+    .uuid('Organization ID must be valid'),
+  
+  position: yup
+    .string()
+    .max(100, 'Position must be less than 100 characters')
     .trim(),
+
+  purchase_influence: yup
+    .string()
+    .oneOf(PURCHASE_INFLUENCE_OPTIONS, 'Invalid purchase influence level'),
+
+  decision_authority: yup
+    .string()
+    .oneOf(DECISION_AUTHORITY_OPTIONS, 'Invalid decision authority role'),
   
   email: yup
     .string()
+    .nullable()
     .matches(EMAIL_REGEX, 'Please enter a valid email address')
     .max(255, 'Email must be less than 255 characters')
     .trim()
-    .lowercase(),
-  
-  title: yup
-    .string()
-    .nullable()
-    .max(255, 'Title must be less than 255 characters')
-    .trim()
+    .lowercase()
     .transform((value) => value === '' ? null : value),
   
   phone: yup
     .string()
     .nullable()
-    .max(50, 'Phone number must be less than 50 characters')
+    .max(20, 'Phone number must be less than 20 characters')
     .matches(PHONE_REGEX, 'Please enter a valid phone number')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  address: yup
+    .string()
+    .nullable()
+    .max(255, 'Address must be less than 255 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  city: yup
+    .string()
+    .nullable()
+    .max(100, 'City must be less than 100 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  state: yup
+    .string()
+    .nullable()
+    .max(50, 'State must be less than 50 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  zip_code: yup
+    .string()
+    .nullable()
+    .max(20, 'ZIP code must be less than 20 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  website: yup
+    .string()
+    .nullable()
+    .matches(/^https?:\/\/[^\s]+$/, 'Website must be a valid URL starting with http:// or https://')
+    .max(255, 'Website must be less than 255 characters')
+    .trim()
+    .transform((value) => value === '' ? null : value),
+
+  account_manager: yup
+    .string()
+    .nullable()
+    .max(100, 'Account manager must be less than 100 characters')
     .trim()
     .transform((value) => value === '' ? null : value),
   
@@ -224,7 +273,12 @@ export const contactUpdateSchema = yup.object({
     .nullable()
     .max(5000, 'Notes must be less than 5000 characters')
     .trim()
-    .transform((value) => value === '' ? null : value)
+    .transform((value) => value === '' ? null : value),
+
+  is_primary: yup
+    .boolean()
+    .nullable()
+    .default(false)
 })
 
 /**
@@ -437,9 +491,9 @@ export class ContactValidator {
   }
 
   /**
-   * Convert Contact to form data
+   * Convert Contact or ContactDetailView to form data
    */
-  static contactToForm(contact: Contact): ContactCreateForm {
+  static contactToForm(contact: Contact | ContactDetailView): ContactCreateForm {
     return {
       first_name: contact.first_name,
       last_name: contact.last_name,

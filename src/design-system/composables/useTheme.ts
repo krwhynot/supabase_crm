@@ -97,6 +97,6 @@ export function useTheme() {
   };
 }
 
-function readonly<T>(value: any) {
+function readonly(value: any) {
   return computed(() => value.value);
 }
