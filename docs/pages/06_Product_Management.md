@@ -121,21 +121,6 @@ Product Management handles the complex relationships between Principal organizat
 
 ## 💾 PostgreSQL Schema
 ```sql
--- Products table - Principal-owned products
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    principal_id INTEGER NOT NULL REFERENCES organizations(id),
-    category VARCHAR(100),
-    description TEXT,
-    cost_price DECIMAL(10,2),
-    list_price DECIMAL(10,2),
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INTEGER REFERENCES users(id),
-    UNIQUE(name, principal_id)
-);
 
 -- Product-Distributor junction table
 CREATE TABLE product_distributors (

@@ -202,7 +202,7 @@
         <!-- Step Components -->
         <component
           :is="currentStepComponent"
-          v-model="formData"
+          :model-value="formData"
           :errors="stepErrors"
           :loading="isValidating"
           @validate="handleStepValidation"
@@ -371,21 +371,21 @@ const steps = [
   {
     id: 1,
     title: 'Basic Info',
-    description: 'Enter the organization name, priority, and segment',
+    description: 'Enter organization name, priority, segment, and business type',
     component: 'OrganizationStepOne',
     requiredFields: ['name', 'industry', 'lead_score']
   },
   {
     id: 2,
-    title: 'Organization Type',
-    description: 'Specify if this is a principal or distributor organization',
+    title: 'Organization Info',
+    description: 'Add address, phone, and additional notes',
     component: 'OrganizationStepTwo',
     requiredFields: []
   },
   {
     id: 3,
-    title: 'Contact Details',
-    description: 'Add address, phone, website, and additional information',
+    title: 'Contact Info',
+    description: 'Select existing contacts or create new contacts',
     component: 'OrganizationStepThree',
     requiredFields: []
   }
@@ -540,6 +540,14 @@ const handleSubmit = async () => {
       }
     }
     
+    // Extract contact data from custom_fields
+    const customFields = formData.custom_fields as any
+    const contactData = {
+      mode: customFields?.contact_mode || 'select',
+      selectedContactIds: customFields?.selected_contact_ids || [],
+      newContacts: customFields?.new_contacts || []
+    }
+    
     // Transform form data for submission
     const organizationData = {
       ...formData,
@@ -548,15 +556,29 @@ const handleSubmit = async () => {
       industry: formData.industry || null,
       lead_score: formData.lead_score || null,
       // Clean up tags array to remove undefined values
-      tags: formData.tags?.filter(tag => tag !== undefined) || null
+      tags: formData.tags?.filter(tag => tag !== undefined) || null,
+      // Remove contact data from custom_fields as it will be handled separately
+      custom_fields: customFields ? {
+        ...customFields,
+        contact_mode: undefined,
+        selected_contact_ids: undefined,
+        new_contacts: undefined
+      } : {}
     }
     
-    // Submit to store
+    // Submit to store with contact data
     let result
     if (props.isEditing && props.organizationId) {
-      result = await organizationStore.updateOrganization(props.organizationId, organizationData as any)
+      result = await organizationStore.updateOrganizationWithContacts(
+        props.organizationId, 
+        organizationData as any,
+        contactData
+      )
     } else {
-      result = await organizationStore.createOrganization(organizationData as any)
+      result = await organizationStore.createOrganizationWithContacts(
+        organizationData as any,
+        contactData
+      )
     }
     
     if (result) {

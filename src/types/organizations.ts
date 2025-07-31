@@ -2,7 +2,8 @@
 // Organization Types and Validation Schemas
 // =============================================================================
 // TypeScript types and Yup validation schemas for organizations functionality
-// Generated from Supabase database schema - Stage 1 Database Implementation
+// Generated from Supabase database schema - Stage 3 Enhanced Implementation
+// Updated for Organization Form Redesign with A/B/C/D Priority System
 // =============================================================================
 
 import * as yup from 'yup';
@@ -14,6 +15,38 @@ import type {
   InteractionType,
   InteractionDirection
 } from './database.types';
+
+// =============================================================================
+// Enhanced Organization Types for Form Redesign - Stage 3.1
+// =============================================================================
+
+// Priority mapping types (A/B/C/D system)
+export type OrganizationPriority = 'A' | 'B' | 'C' | 'D';
+
+export interface PriorityOption {
+  value: number; // 90, 70, 50, 30
+  label: OrganizationPriority; // A, B, C, D
+  description: string;
+}
+
+// Enhanced status options for new business requirements
+export type EnhancedOrganizationStatus = 
+  | 'Prospect' 
+  | 'Active Customer' 
+  | 'Inactive Customer' 
+  | 'Other'
+  | 'Principal'
+  | 'Distributor';
+
+// Principal/Distributor custom fields interface
+export interface OrganizationCustomFields {
+  is_principal?: boolean;
+  is_distributor?: boolean;
+  distributor_id?: string; // Reference to distributor organization
+  account_manager_id?: string;
+  food_beverage_segment?: string;
+  [key: string]: any;
+}
 
 // =============================================================================
 // Organization Validation Schemas
@@ -167,7 +200,26 @@ export const organizationSchema = yup.object({
   
   next_follow_up_date: yup
     .date()
+    .nullable(),
+
+  // Principal/Distributor fields for new business logic
+  is_principal: yup
+    .boolean()
+    .nullable(),
+
+  is_distributor: yup
+    .boolean()
+    .nullable(),
+
+  distributor_id: yup
+    .string()
     .nullable()
+    .uuid('Distributor ID must be a valid UUID'),
+
+  account_manager_id: yup
+    .string()
+    .nullable()
+    .uuid('Account Manager ID must be a valid UUID')
 });
 
 // Schema for creating new organizations
@@ -472,10 +524,41 @@ export type OrganizationCreateForm = CreateOrganizationFormData;
 export type OrganizationUpdateForm = UpdateOrganizationFormData;
 export type OrganizationInteractionCreateForm = CreateOrganizationInteractionFormData;
 
+// Enhanced form data interface for redesigned form
+export interface EnhancedOrganizationCreateForm extends Omit<OrganizationCreateForm, 'status' | 'custom_fields'> {
+  status: EnhancedOrganizationStatus;
+  custom_fields: OrganizationCustomFields;
+  priority_letter: OrganizationPriority; // UI-friendly priority representation
+  assigned_contacts?: string[]; // Array of contact IDs to associate
+}
+
 // Schema exports for composables
 export const organizationCreateSchema = createOrganizationSchema;
 export const organizationUpdateSchema = updateOrganizationSchema;
 export const organizationInteractionCreateSchema = createOrganizationInteractionSchema;
+
+// Enhanced validation schema for redesigned form
+export const enhancedOrganizationCreateSchema = organizationCreateSchema.shape({
+  status: yup.mixed<EnhancedOrganizationStatus>()
+    .oneOf(['Prospect', 'Active Customer', 'Inactive Customer', 'Other', 'Principal', 'Distributor'])
+    .required('Organization status is required'),
+  
+  custom_fields: yup.object({
+    is_principal: yup.boolean().nullable(),
+    is_distributor: yup.boolean().nullable(),
+    distributor_id: yup.string().nullable().uuid('Distributor ID must be valid UUID'),
+    account_manager_id: yup.string().nullable().uuid('Account Manager ID must be valid UUID'),
+    food_beverage_segment: yup.string().nullable().max(255)
+  }).test('principal-distributor-exclusive', 'Cannot be both Principal and Distributor', function(value) {
+    return !(value?.is_principal && value?.is_distributor);
+  }),
+  
+  priority_letter: yup.mixed<OrganizationPriority>()
+    .oneOf(['A', 'B', 'C', 'D'])
+    .required('Priority is required'),
+    
+  assigned_contacts: yup.array().of(yup.string().uuid()).nullable()
+});
 
 // =============================================================================
 // Organization List and Detail Types
@@ -765,6 +848,19 @@ export const ORGANIZATION_STATUSES: OrganizationStatus[] = [
   'Active', 'Inactive', 'Prospect', 'Customer', 'Partner', 'Vendor'
 ];
 
+// Enhanced status options for redesigned form
+export const ENHANCED_ORGANIZATION_STATUSES: EnhancedOrganizationStatus[] = [
+  'Prospect', 'Active Customer', 'Inactive Customer', 'Other', 'Principal', 'Distributor'
+];
+
+// Priority options with mapping values
+export const PRIORITY_OPTIONS: PriorityOption[] = [
+  { value: 90, label: 'A', description: 'Highest priority - Strategic accounts' },
+  { value: 70, label: 'B', description: 'High priority - Major opportunities' },
+  { value: 50, label: 'C', description: 'Medium priority - Qualified prospects' },
+  { value: 30, label: 'D', description: 'Lower priority - New prospects' }
+];
+
 export const INTERACTION_TYPES: InteractionType[] = [
   'Email', 'Phone', 'Meeting', 'Demo', 'Proposal', 'Contract', 
   'Note', 'Task', 'Event', 'Social', 'Website', 'Other'
@@ -837,6 +933,53 @@ export const getOrganizationStatusClass = (status: OrganizationStatus | null): s
     case 'Partner': return 'bg-purple-100 text-purple-800';
     case 'Vendor': return 'bg-indigo-100 text-indigo-800';
     case 'Inactive': return 'bg-gray-100 text-gray-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+/**
+ * Gets CSS class for enhanced organization status badge
+ */
+export const getEnhancedOrganizationStatusClass = (status: EnhancedOrganizationStatus | null): string => {
+  switch (status) {
+    case 'Active Customer': return 'bg-green-100 text-green-800';
+    case 'Inactive Customer': return 'bg-gray-100 text-gray-800';
+    case 'Prospect': return 'bg-yellow-100 text-yellow-800';
+    case 'Principal': return 'bg-purple-100 text-purple-800';
+    case 'Distributor': return 'bg-indigo-100 text-indigo-800';
+    case 'Other': return 'bg-blue-100 text-blue-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+/**
+ * Maps priority letter to lead score value
+ */
+export const priorityLetterToScore = (letter: OrganizationPriority): number => {
+  const mapping = { 'A': 90, 'B': 70, 'C': 50, 'D': 30 };
+  return mapping[letter];
+};
+
+/**
+ * Maps lead score to priority letter
+ */
+export const scoreToPriorityLetter = (score: number | null): OrganizationPriority => {
+  if (!score) return 'D';
+  if (score >= 90) return 'A';
+  if (score >= 70) return 'B';
+  if (score >= 50) return 'C';
+  return 'D';
+};
+
+/**
+ * Gets CSS class for priority badge
+ */
+export const getPriorityClass = (priority: OrganizationPriority): string => {
+  switch (priority) {
+    case 'A': return 'bg-red-100 text-red-800';
+    case 'B': return 'bg-orange-100 text-orange-800';
+    case 'C': return 'bg-yellow-100 text-yellow-800';
+    case 'D': return 'bg-blue-100 text-blue-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 };

@@ -56,6 +56,12 @@ CREATE TABLE IF NOT EXISTS public.organizations (
     parent_org_id UUID REFERENCES public.organizations(id),
     assigned_user_id UUID, -- For future auth integration
     
+    -- Principal/Distributor Business Logic
+    is_principal BOOLEAN DEFAULT FALSE,
+    is_distributor BOOLEAN DEFAULT FALSE,
+    distributor_id UUID REFERENCES public.organizations(id),
+    account_manager_id UUID, -- For future user/employee integration
+    
     -- Tracking
     last_contact_date TIMESTAMPTZ,
     next_follow_up_date TIMESTAMPTZ,
@@ -89,6 +95,10 @@ COMMENT ON COLUMN public.organizations.parent_org_id IS 'Reference to parent org
 COMMENT ON COLUMN public.organizations.assigned_user_id IS 'User responsible for this organization';
 COMMENT ON COLUMN public.organizations.last_contact_date IS 'Date of last contact/interaction';
 COMMENT ON COLUMN public.organizations.next_follow_up_date IS 'Scheduled next follow-up date';
+COMMENT ON COLUMN public.organizations.is_principal IS 'Whether this organization is a principal (mutually exclusive with is_distributor)';
+COMMENT ON COLUMN public.organizations.is_distributor IS 'Whether this organization is a distributor (mutually exclusive with is_principal)';
+COMMENT ON COLUMN public.organizations.distributor_id IS 'Reference to distributor organization (only if not a distributor itself)';
+COMMENT ON COLUMN public.organizations.account_manager_id IS 'User responsible for managing this account';
 COMMENT ON COLUMN public.organizations.deleted_at IS 'Soft delete timestamp (NULL = active)';
 
 -- Add constraints
@@ -137,6 +147,16 @@ ADD CONSTRAINT organizations_currency_format CHECK (
 -- Prevent self-referencing parent organization
 ALTER TABLE public.organizations 
 ADD CONSTRAINT organizations_no_self_parent CHECK (id != parent_org_id);
+
+-- Ensure Principal/Distributor mutual exclusivity
+ALTER TABLE public.organizations 
+ADD CONSTRAINT organizations_principal_distributor_exclusive CHECK (
+    NOT (is_principal = TRUE AND is_distributor = TRUE)
+);
+
+-- Prevent self-referencing distributor
+ALTER TABLE public.organizations 
+ADD CONSTRAINT organizations_no_self_distributor CHECK (id != distributor_id);
 
 -- Add updated_at trigger (reuse existing function)
 CREATE TRIGGER update_organizations_updated_at 

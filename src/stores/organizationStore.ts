@@ -23,7 +23,14 @@ import type {
   PaginationConfig,
   OrganizationMetrics,
   BulkOrganizationOperation,
-  BulkOperationResult
+  BulkOperationResult,
+  EnhancedOrganizationCreateForm,
+  PriorityOption
+} from '@/types/organizations'
+import {
+  PRIORITY_OPTIONS,
+  priorityLetterToScore,
+  scoreToPriorityLetter
 } from '@/types/organizations'
 
 /**
@@ -168,6 +175,55 @@ export const useOrganizationStore = defineStore('organization', () => {
       return new Date(org.created_at) >= thirtyDaysAgo
     })
   })
+
+  // ===============================
+  // ENHANCED FORM REDESIGN COMPUTED PROPERTIES - Stage 3.1
+  // ===============================
+
+  // Priority options for A/B/C/D system
+  const priorityOptions = computed<PriorityOption[]>(() => PRIORITY_OPTIONS)
+
+  // Food & Beverage segments prioritized list
+  const foodBeverageSegments = computed(() => [
+    { value: 'Food & Beverage - Restaurants', label: 'Food & Beverage - Restaurants', priority: true },
+    { value: 'Food & Beverage - Manufacturing', label: 'Food & Beverage - Manufacturing', priority: true },
+    { value: 'Food & Beverage - Distribution', label: 'Food & Beverage - Distribution', priority: true },
+    { value: 'Food & Beverage - Retail', label: 'Food & Beverage - Retail', priority: true },
+    { value: 'Food & Beverage - Service', label: 'Food & Beverage - Service', priority: true },
+    // Add other industry segments with lower priority
+    { value: 'Technology', label: 'Technology', priority: false },
+    { value: 'Healthcare', label: 'Healthcare', priority: false },
+    { value: 'Manufacturing', label: 'Manufacturing', priority: false },
+    { value: 'Retail', label: 'Retail', priority: false },
+    { value: 'Financial Services', label: 'Financial Services', priority: false },
+    { value: 'Real Estate', label: 'Real Estate', priority: false },
+    { value: 'Education', label: 'Education', priority: false },
+    { value: 'Government', label: 'Government', priority: false },
+    { value: 'Non-Profit', label: 'Non-Profit', priority: false },
+    { value: 'Other', label: 'Other', priority: false }
+  ])
+
+  // Distributor organizations for dropdown
+  const distributorOrganizations = computed(() => 
+    organizations.value.filter(org => {
+      const orgWithFields = org as any
+      return orgWithFields.custom_fields && 
+        typeof orgWithFields.custom_fields === 'object' && 
+        'is_distributor' in orgWithFields.custom_fields &&
+        orgWithFields.custom_fields.is_distributor === true
+    })
+  )
+
+  // Principal organizations for reference
+  const principalOrganizations = computed(() => 
+    organizations.value.filter(org => {
+      const orgWithFields = org as any
+      return orgWithFields.custom_fields && 
+        typeof orgWithFields.custom_fields === 'object' && 
+        'is_principal' in orgWithFields.custom_fields &&
+        orgWithFields.custom_fields.is_principal === true
+    })
+  )
   
   // ===============================
   // ERROR MANAGEMENT
@@ -566,6 +622,216 @@ export const useOrganizationStore = defineStore('organization', () => {
         loading.creating = false
       }
     }
+
+  /**
+   * Create new organization with contact associations
+   */
+  const createOrganizationWithContacts = async (
+    organizationData: OrganizationInsert,
+    contactData: {
+      mode: 'select' | 'create'
+      selectedContactIds: string[]
+      newContacts: Array<{
+        first_name: string
+        last_name: string
+        email: string
+        phone?: string
+        title?: string
+        department?: string
+      }>
+    }
+  ): Promise<Organization | null> => {
+    try {
+      loading.creating = true
+      clearError('creating')
+
+      // Start transaction by creating organization first
+      const { data: organization, error: orgError } = await supabase
+        .from('organizations')
+        .insert(organizationData)
+        .select()
+        .single()
+
+      if (orgError) {
+        throw new Error(orgError.message)
+      }
+
+      // Handle contacts based on mode
+      if (contactData.mode === 'create' && contactData.newContacts.length > 0) {
+        // Create new contacts and associate with organization
+        const contactInserts = contactData.newContacts.map(contact => ({
+          organization_id: organization.id,
+          first_name: contact.first_name,
+          last_name: contact.last_name,
+          email: contact.email,
+          phone: contact.phone || null,
+          position: contact.title || 'Unknown', // Map title to position
+          purchase_influence: 'Unknown' as 'High' | 'Medium' | 'Low' | 'Unknown',
+          decision_authority: 'End User' as 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper',
+          department: contact.department || null
+        }))
+
+        const { error: contactError } = await supabase
+          .from('contacts')
+          .insert(contactInserts)
+
+        if (contactError) {
+          console.warn('Failed to create some contacts:', contactError.message)
+          // Don't fail the entire operation for contact creation errors
+        }
+      } else if (contactData.mode === 'select' && contactData.selectedContactIds.length > 0) {
+        // Update existing contacts to associate with this organization
+        const { error: updateError } = await supabase
+          .from('contacts')
+          .update({ organization_id: organization.id })
+          .in('id', contactData.selectedContactIds)
+
+        if (updateError) {
+          console.warn('Failed to associate some contacts:', updateError.message)
+          // Don't fail the entire operation for contact association errors
+        }
+      }
+
+      // Clear cache and refresh list
+      clearCache()
+      await fetchOrganizations({ resetList: true })
+
+      // Record successful user action
+      console.log('Organization with contacts created successfully', {
+        organizationName: organizationData.name,
+        organizationIndustry: organizationData.industry,
+        contactMode: contactData.mode,
+        contactCount: contactData.mode === 'create' 
+          ? contactData.newContacts.length 
+          : contactData.selectedContactIds.length
+      })
+
+      return organization
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create organization with contacts'
+      setError('creating', message)
+
+      console.error('Failed to create organization with contacts', message, {
+        organizationData,
+        contactData
+      })
+
+      return null
+    } finally {
+      loading.creating = false
+    }
+  }
+
+  /**
+   * Enhanced creation method for redesigned form - Stage 3.1
+   */
+  const createOrganizationWithEnhancedForm = async (
+    formData: EnhancedOrganizationCreateForm
+  ): Promise<{ success: boolean; data?: Organization; error?: string }> => {
+    try {
+      loading.creating = true
+      clearError('creating')
+
+      // Transform priority letter to lead_score and filter out non-database fields
+      const { priority_letter, ...organizationData } = formData
+      
+      // Clean up the data for database insertion
+      const transformedData: OrganizationInsert = {
+        ...organizationData,
+        lead_score: priorityLetterToScore(priority_letter),
+        status: getAutoStatus(formData) as any, // Cast to allow enhanced status values
+        // Ensure tags is properly formatted for JSON field
+        tags: organizationData.tags ? organizationData.tags.filter(tag => tag !== undefined) : null,
+        // Ensure custom_fields is properly typed
+        custom_fields: organizationData.custom_fields as any,
+        // Convert Date objects to ISO strings for database
+        last_contact_date: organizationData.last_contact_date instanceof Date 
+          ? organizationData.last_contact_date.toISOString() 
+          : organizationData.last_contact_date,
+        next_follow_up_date: organizationData.next_follow_up_date instanceof Date 
+          ? organizationData.next_follow_up_date.toISOString() 
+          : organizationData.next_follow_up_date
+      }
+
+      // Create organization
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .insert(transformedData)
+        .select()
+        .single()
+
+      if (orgError) throw orgError
+
+      // Create contact relationships if specified
+      if (formData.assigned_contacts?.length && orgData) {
+        await createContactRelationships(orgData.id, formData.assigned_contacts)
+      }
+
+      // Refresh organization list
+      clearCache()
+      await fetchOrganizations({ resetList: true })
+
+      console.log('Enhanced organization created successfully', {
+        organizationName: formData.name,
+        priority: formData.priority_letter,
+        leadScore: transformedData.lead_score,
+        isPrincipal: formData.custom_fields?.is_principal,
+        isDistributor: formData.custom_fields?.is_distributor,
+        contactCount: formData.assigned_contacts?.length || 0
+      })
+
+      return { success: true, data: orgData }
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create organization'
+      setError('creating', message)
+      return { success: false, error: message }
+    } finally {
+      loading.creating = false
+    }
+  }
+
+  // Helper methods for enhanced form
+  const getAutoStatus = (formData: EnhancedOrganizationCreateForm): string => {
+    if (formData.custom_fields?.is_principal) return 'Principal'
+    if (formData.custom_fields?.is_distributor) return 'Distributor'
+    return formData.status
+  }
+
+  const createContactRelationships = async (organizationId: string, contactIds: string[]) => {
+    // This would create entries in organization_contacts junction table when implemented
+    // For now, update existing contacts table with organization_id (legacy approach)
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .update({ organization_id: organizationId })
+        .in('id', contactIds)
+
+      if (error) throw error
+    } catch (error) {
+      console.warn('Failed to create contact relationships:', error)
+      throw error
+    }
+  }
+
+  // ===============================
+  // ENHANCED HELPER METHODS - Stage 4.1
+  // ===============================
+
+  /**
+   * Convert priority letter (A/B/C/D) to lead score value
+   */
+  const convertPriorityLetterToScore = (letter: 'A' | 'B' | 'C' | 'D'): number => {
+    return priorityLetterToScore(letter)
+  }
+
+  /**
+   * Convert lead score value to priority letter (A/B/C/D)
+   */
+  const convertScoreToPriorityLetter = (score: number | null): 'A' | 'B' | 'C' | 'D' => {
+    return scoreToPriorityLetter(score)
+  }
   
   /**
    * Update existing organization
@@ -599,6 +865,106 @@ export const useOrganizationStore = defineStore('organization', () => {
       
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to update organization'
+      setError('updating', message)
+      return null
+    } finally {
+      loading.updating = false
+    }
+  }
+
+  /**
+   * Update existing organization with contact associations
+   */
+  const updateOrganizationWithContacts = async (
+    id: string,
+    updates: OrganizationUpdate,
+    contactData: {
+      mode: 'select' | 'create'
+      selectedContactIds: string[]
+      newContacts: Array<{
+        first_name: string
+        last_name: string
+        email: string
+        phone?: string
+        title?: string
+        department?: string
+      }>
+    }
+  ): Promise<Organization | null> => {
+    try {
+      loading.updating = true
+      clearError('updating')
+
+      // Update the organization first
+      const { data: organization, error: orgError } = await supabase
+        .from('organizations')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (orgError) {
+        throw new Error(orgError.message)
+      }
+
+      // Handle contacts based on mode
+      if (contactData.mode === 'create' && contactData.newContacts.length > 0) {
+        // Create new contacts and associate with organization
+        const contactInserts = contactData.newContacts.map(contact => ({
+          organization_id: id,
+          first_name: contact.first_name,
+          last_name: contact.last_name,
+          email: contact.email,
+          phone: contact.phone || null,
+          position: contact.title || 'Unknown', // Map title to position
+          purchase_influence: 'Unknown' as 'High' | 'Medium' | 'Low' | 'Unknown',
+          decision_authority: 'End User' as 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper',
+          department: contact.department || null
+        }))
+
+        const { error: contactError } = await supabase
+          .from('contacts')
+          .insert(contactInserts)
+
+        if (contactError) {
+          console.warn('Failed to create some contacts:', contactError.message)
+          // Don't fail the entire operation for contact creation errors
+        }
+      } else if (contactData.mode === 'select' && contactData.selectedContactIds.length > 0) {
+        // Update existing contacts to associate with this organization
+        const { error: updateError } = await supabase
+          .from('contacts')
+          .update({ organization_id: id })
+          .in('id', contactData.selectedContactIds)
+
+        if (updateError) {
+          console.warn('Failed to associate some contacts:', updateError.message)
+          // Don't fail the entire operation for contact association errors
+        }
+      }
+
+      // Update current organization if it's the one being updated
+      if (currentOrganization.value?.id === id) {
+        await fetchOrganization(id)
+      }
+
+      // Clear cache and refresh list
+      clearCache()
+      await fetchOrganizations({ resetList: true })
+
+      // Record successful user action
+      console.log('Organization with contacts updated successfully', {
+        organizationId: id,
+        contactMode: contactData.mode,
+        contactCount: contactData.mode === 'create' 
+          ? contactData.newContacts.length 
+          : contactData.selectedContactIds.length
+      })
+
+      return organization
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update organization with contacts'
       setError('updating', message)
       return null
     } finally {
@@ -1205,11 +1571,20 @@ export const useOrganizationStore = defineStore('organization', () => {
     organizationsByStatus,
     recentOrganizations,
     
+    // Enhanced form redesign computed properties
+    priorityOptions,
+    foodBeverageSegments,
+    distributorOrganizations,
+    principalOrganizations,
+    
     // Core CRUD operations
     fetchOrganizations,
     fetchOrganization,
     createOrganization,
+    createOrganizationWithContacts,
+    createOrganizationWithEnhancedForm,
     updateOrganization,
+    updateOrganizationWithContacts,
     deleteOrganization,
     
     // Search and filtering
@@ -1248,6 +1623,12 @@ export const useOrganizationStore = defineStore('organization', () => {
     resetStore,
     clearErrors,
     clearError,
-    clearCache
+    clearCache,
+    
+    // Enhanced helper methods - Stage 4.1
+    convertPriorityLetterToScore,
+    convertScoreToPriorityLetter,
+    getAutoStatus,
+    createContactRelationships
   }
 })

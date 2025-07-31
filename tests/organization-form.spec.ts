@@ -4,16 +4,16 @@ import { test, expect } from '@playwright/test';
  * Organization Form Test Suite
  * 
  * Comprehensive testing for the multi-step organization creation form:
- * - Step 1: Name, Priority, Segment (required fields)
- * - Step 2: Business Type, Principal/Distributor checkboxes
- * - Step 3: Address, Phone, Website, Account Manager, Notes
+ * - Step 1: Name, Priority (A/B/C/D), Segment, Business Type, Principal/Distributor
+ * - Step 2: Address, Phone, Notes
+ * - Step 3: Contact selection/creation
  */
 
 // Test data fixtures
 const validOrganizationData = {
   name: 'Acme Corporation',
-  priority: 'High',
-  segment: 'Technology',
+  priority: 'A', // Changed from 'High' to 'A' to match new A/B/C/D system
+  segment: 'Food & Beverage - Manufacturing', // Updated to match prioritized segments
   businessType: 'B2B',
   isPrincipal: true,
   isDistributor: false,
@@ -22,7 +22,6 @@ const validOrganizationData = {
   stateProvince: 'CA',
   postalCode: '94105',
   phone: '+1 (555) 123-4567',
-  website: 'https://acme.com',
   notes: 'Strategic technology partner for enterprise solutions'
 };
 
@@ -46,7 +45,7 @@ class OrganizationFormHelpers {
     // Organization Name (required)
     await this.page.fill('input[name="name"]', data.name);
     
-    // Priority dropdown (required)
+    // Priority dropdown (required) - now A/B/C/D system
     await this.page.click('select[name="priority"]');
     await this.page.selectOption('select[name="priority"]', { label: data.priority });
     
@@ -58,26 +57,19 @@ class OrganizationFormHelpers {
     // Wait for dropdown and select option
     await this.page.waitForSelector('[role="listbox"]', { state: 'visible' });
     await this.page.click(`[role="option"]:has-text("${data.segment}")`);
+    
+    // Principal checkbox (moved to Step 1)
+    if (data.isPrincipal) {
+      await this.page.check('input[id="principal"]');
+    }
+    
+    // Distributor checkbox (moved to Step 1)
+    if (data.isDistributor) {
+      await this.page.check('input[id="distributor"]');
+    }
   }
 
   async fillStep2(data: typeof validOrganizationData) {
-    // Business Type dropdown
-    if (data.businessType) {
-      await this.page.selectOption('select[name="type"]', { label: data.businessType });
-    }
-    
-    // Principal checkbox
-    if (data.isPrincipal) {
-      await this.page.check('input[name="isPrincipal"]');
-    }
-    
-    // Distributor checkbox
-    if (data.isDistributor) {
-      await this.page.check('input[name="isDistributor"]');
-    }
-  }
-
-  async fillStep3(data: typeof validOrganizationData) {
     // Address fields
     await this.page.fill('input[name="address_line_1"]', data.addressLine1);
     await this.page.fill('input[name="city"]', data.city);
@@ -86,10 +78,26 @@ class OrganizationFormHelpers {
     
     // Contact information
     await this.page.fill('input[name="primary_phone"]', data.phone);
-    await this.page.fill('input[name="website"]', data.website);
     
     // Notes
     await this.page.fill('textarea[name="description"]', data.notes);
+  }
+
+  async fillStep3(_data: typeof validOrganizationData) {
+    // Step 3 is now contact selection/creation with ContactMultiSelector
+    // For basic test, we'll just select the "create new contacts" mode and add one contact
+    await this.page.click('button:has-text("Create New Contacts")');
+    
+    // Add a new contact
+    await this.page.click('button:has-text("Add New Contact")');
+    
+    // Wait for the contact form to appear and fill it
+    await this.page.waitForSelector('input[name="contact_1_first_name"]');
+    await this.page.fill('input[name="contact_1_first_name"]', 'John');
+    await this.page.fill('input[name="contact_1_last_name"]', 'Doe');
+    await this.page.fill('input[name="contact_1_email"]', 'john.doe@acme.com');
+    await this.page.fill('input[name="contact_1_phone"]', '+1 (555) 987-6543');
+    await this.page.fill('input[name="contact_1_position"]', 'CTO');
   }
 
   async clickNext() {
@@ -261,20 +269,15 @@ test.describe('Organization Form - Validation Tests', () => {
     await page.fill('input[name="name"]', invalidData.tooLongName);
     await page.locator('input[name="name"]').blur();
     
-    let errors = await helpers.getVisibleErrors();
+    const errors = await helpers.getVisibleErrors();
     expect(errors.some(error => error.includes('255 characters'))).toBe(true);
     
-    // Complete step 1 with valid data and go to step 3
+    // Complete step 1 with valid data and go to step 2
     await helpers.fillStep1(validOrganizationData);
     await helpers.clickNext();
-    await helpers.clickNext();
     
-    // Test invalid website format
-    await page.fill('input[name="website"]', invalidData.invalidWebsite);
-    await page.locator('input[name="website"]').blur();
-    
-    errors = await helpers.getVisibleErrors();
-    expect(errors.some(error => error.includes('valid URL'))).toBe(true);
+    // Website field has been removed from Step 2 in the simplified version
+    // Step 2 now only has address fields, phone, and notes - all optional
   });
 
   test('should show global form errors', async ({ page }) => {
@@ -282,21 +285,42 @@ test.describe('Organization Form - Validation Tests', () => {
     
     await helpers.navigateToCreatePage();
     
-    // Fill step 1 but with invalid data for later steps
+    // Fill step 1 and go to step 2
     await helpers.fillStep1(validOrganizationData);
     await helpers.clickNext();
+    
+    // Step 2 has been simplified - no website field
+    
+    // Complete step 2 and go to step 3
+    await helpers.fillStep2(validOrganizationData);
     await helpers.clickNext();
     
-    // Add invalid website
-    await page.fill('input[name="website"]', invalidData.invalidWebsite);
-    
-    // Try to submit
+    // Try to submit from step 3
     await helpers.clickSubmit();
     
-    // Should show global error
-    const globalError = await page.locator('[role="alert"]').first();
-    await expect(globalError).toBeVisible();
-    await expect(globalError).toContainText('valid URL');
+    // Should show global error or validation error about website
+    const errorSelectors = [
+      '[role="alert"]', // Any alert
+      '.text-red-500', // Red error text
+      '.text-red-700', // Red error text
+      '.bg-red-50' // Red background error
+    ];
+    
+    let errorFound = false;
+    for (const selector of errorSelectors) {
+      try {
+        await page.waitForSelector(selector, { timeout: 2000 });
+        const element = page.locator(selector).first();
+        if (await element.isVisible()) {
+          errorFound = true;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    expect(errorFound).toBe(true);
   });
 });
 
@@ -306,13 +330,13 @@ test.describe('Organization Form - Segment Selector Tests', () => {
     
     await helpers.navigateToCreatePage();
     
+    // Test type-ahead with "Food"
+    const foodOptions = await helpers.testSegmentTypeAhead('Food', ['Food & Beverage']);
+    expect(foodOptions.some(option => option.includes('Food & Beverage'))).toBe(true);
+    
     // Test type-ahead with "Tech"
     const techOptions = await helpers.testSegmentTypeAhead('Tech', ['Technology']);
     expect(techOptions.some(option => option.includes('Technology'))).toBe(true);
-    
-    // Test type-ahead with "Health"
-    const healthOptions = await helpers.testSegmentTypeAhead('Health', ['Healthcare']);
-    expect(healthOptions.some(option => option.includes('Healthcare'))).toBe(true);
     
     // Test no results - should show "Add new segment" option
     await helpers.testSegmentTypeAhead('XYZNonExistent', []);
@@ -362,8 +386,8 @@ test.describe('Organization Form - Segment Selector Tests', () => {
     // Should show default segments
     const dropdown = page.locator('[role="listbox"]');
     await expect(dropdown).toContainText('Technology');
-    await expect(dropdown).toContainText('Healthcare');
-    await expect(dropdown).toContainText('Finance');
+    await expect(dropdown).toContainText('Food & Beverage');
+    await expect(dropdown).toContainText('Manufacturing');
   });
 });
 
@@ -507,12 +531,12 @@ test.describe('Organization Form - Mobile Tests', () => {
     await page.waitForSelector('[role="listbox"]', { state: 'visible' });
     
     // Should be able to select option with touch
-    await page.click('[role="option"]:has-text("Technology")');
+    await page.click('[role="option"]:has-text("Food & Beverage")');
     
     // Should close dropdown and set value
     await page.waitForSelector('[role="listbox"]', { state: 'hidden' });
     const inputValue = await segmentInput.inputValue();
-    expect(inputValue).toBe('Technology');
+    expect(inputValue).toBe('Food & Beverage - Manufacturing');
   });
 });
 

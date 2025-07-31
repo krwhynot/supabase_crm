@@ -27,7 +27,7 @@ Log touchpoints that move deals forward and support opportunity advancement.
 ## Form Structure
 
 ### Required Fields
-- **Type*** - Email, Call, In-Person, Demo/sampled, Quoted price, Follow-up (dropdown)
+- **Type*** - Email, Call, In-Person, Demo/sampled,Follow-up (dropdown)
 - **Date/Time*** - When interaction occurred
 - **Subject*** - Brief description
 - **Opportunity*** - Link to existing opportunity (dropdown) - shows opportunities for this organization
@@ -91,7 +91,6 @@ Log touchpoints that move deals forward and support opportunity advancement.
 - **Call** - Phone conversations
 - **In-Person** - Face-to-face meetings
 - **Demo/Sampled** - Product demonstrations or sampling
-- **Quoted Price** - Pricing discussions
 - **Follow-up** - Follow-up communications
 
 ### GPS Tracking
