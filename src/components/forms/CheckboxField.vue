@@ -30,40 +30,6 @@
           @keydown="handleKeydown"
         />
 
-        <!-- Custom checkbox styling overlay -->
-        <div
-          v-if="!disabled"
-          :class="checkboxOverlayClasses"
-          aria-hidden="true"
-        >
-          <!-- Check mark -->
-          <svg
-            v-show="isChecked"
-            class="w-3 h-3 text-white"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
-
-          <!-- Indeterminate mark -->
-          <svg
-            v-show="isIndeterminate"
-            class="w-3 h-3 text-white"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </div>
       </div>
 
       <!-- Label and content -->
@@ -199,8 +165,8 @@ const isChecked = computed(() => {
   return false
 })
 
-// Determine if checkbox is in indeterminate state
-const isIndeterminate = computed(() => props.indeterminate && !isChecked.value)
+// Determine if checkbox is in indeterminate state (unused for now)
+// const _isIndeterminate = computed(() => props.indeterminate && !isChecked.value)
 
 /**
  * Enhanced styling with state management
@@ -219,31 +185,18 @@ const labelClasses = computed(() => {
 })
 
 const checkboxClasses = computed(() => {
-  const base = 'sr-only' // Hide default checkbox, use custom styling
-  const customClasses = props.checkboxClass || ''
-  
-  return `${base} ${customClasses}`.trim()
-})
-
-const checkboxOverlayClasses = computed(() => {
-  const base = 'absolute inset-0 flex items-center justify-center w-5 h-5 border-2 rounded transition-all duration-200 cursor-pointer'
-  
-  // State-specific styling
+  const base = 'w-5 h-5 border-2 rounded transition-colors duration-200 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-primary'
   const stateClasses = hasError.value
     ? 'border-red-500'
-    : isChecked.value || isIndeterminate.value
-      ? 'border-primary bg-primary'
-      : isFocused.value
-        ? 'border-primary bg-primary/10'
-        : 'border-gray-300 hover:border-primary'
+    : isChecked.value
+      ? 'border-primary bg-primary text-white'
+      : 'border-gray-300 hover:border-primary'
+  const disabledClasses = props.disabled ? 'opacity-50 cursor-not-allowed' : ''
+  const customClasses = props.checkboxClass || ''
   
-  // Disabled state
-  const disabledClasses = props.disabled 
-    ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-300' 
-    : ''
-  
-  return `${base} ${stateClasses} ${disabledClasses}`.trim()
+  return `${base} ${stateClasses} ${disabledClasses} ${customClasses}`.trim()
 })
+
 
 /**
  * Event handlers with enhanced functionality

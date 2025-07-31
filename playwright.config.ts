@@ -10,7 +10,7 @@ export default defineConfig({
   reporter: 'html',
   
   use: {
-    baseURL: 'http://localhost:3003',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -27,21 +27,23 @@ export default defineConfig({
       name: 'tablet',
       use: { 
         ...devices['iPad'],
-        viewport: { width: 768, height: 1024 }
+        viewport: { width: 768, height: 1024 },
+        hasTouch: true
       },
     },
     {
       name: 'mobile',
       use: { 
         ...devices['iPhone 12'],
-        viewport: { width: 375, height: 667 }
+        viewport: { width: 375, height: 667 },
+        hasTouch: true
       },
     },
   ],
 
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3003',
+    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },
 });

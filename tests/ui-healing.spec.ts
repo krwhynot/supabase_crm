@@ -1,6 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
 import fs from 'fs';
-import path from 'path';
 
 interface ComponentScore {
   name: string;
@@ -108,10 +107,10 @@ class UIHealer {
       violations.push(`Font size ${styles.fontSize} not in design system (14px, 16px, 18px, 24px)`);
     }
 
-    // Color validation - check for design system colors
-    const primaryBlue = 'rgb(59, 130, 246)'; // #3b82f6
-    const successGreen = 'rgb(22, 163, 74)'; // #16a34a
-    const dangerRed = 'rgb(220, 38, 38)'; // #dc2626
+    // Color validation - check for design system colors (unused for now)
+    // const primaryBlue = 'rgb(59, 130, 246)'; // #3b82f6
+    // const successGreen = 'rgb(22, 163, 74)'; // #16a34a
+    // const dangerRed = 'rgb(220, 38, 38)'; // #dc2626
 
     // Font weight validation
     const validWeights = ['400', '600'];
@@ -125,7 +124,7 @@ class UIHealer {
       // Check for proper ARIA attributes
       const ariaLabel = await element.getAttribute('aria-label');
       const ariaLabelledBy = await element.getAttribute('aria-labelledby');
-      const ariaDescribedBy = await element.getAttribute('aria-describedby');
+      // const _ariaDescribedBy = await element.getAttribute('aria-describedby'); // unused for now
       
       // Interactive elements should have accessible names
       const tagName = await element.evaluate((el: Element) => el.tagName.toLowerCase());

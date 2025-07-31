@@ -60,7 +60,8 @@ const handleSubmit = async (formData: ContactCreateForm & { _principalIds?: stri
     const principalIds = formData._principalIds || []
     
     // Convert form data (removing the _principalIds helper field)
-    const { _principalIds: _, ...cleanFormData } = formData
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _principalIds, ...cleanFormData } = formData
     const contactData = ContactValidator.formToInsert(cleanFormData)
     
     // Create the contact first

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { contactsApi } from '@/services/contactsApi'
-import type { Contact, ContactInsert, ContactUpdate, ContactListView, ContactDetailView } from '@/types/database.types'
+import type { ContactInsert, ContactUpdate, ContactListView, ContactDetailView } from '@/types/database.types'
 import type { ContactSearchForm } from '@/types/contacts'
 
 /**
