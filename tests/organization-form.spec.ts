@@ -58,14 +58,26 @@ class OrganizationFormHelpers {
     await this.page.waitForSelector('[role="listbox"]', { state: 'visible' });
     await this.page.click(`[role="option"]:has-text("${data.segment}")`);
     
-    // Principal checkbox (moved to Step 1)
-    if (data.isPrincipal) {
-      await this.page.check('input[id="principal"]');
-    }
-    
-    // Distributor checkbox (moved to Step 1)
-    if (data.isDistributor) {
-      await this.page.check('input[id="distributor"]');
+    // Expand advanced options if needed for Principal/Distributor checkboxes
+    if (data.isPrincipal || data.isDistributor) {
+      // Check if advanced options are collapsed
+      const advancedToggle = this.page.locator('button:has-text("Advanced Options")');
+      const isCollapsed = await advancedToggle.getAttribute('aria-expanded') === 'false';
+      
+      if (isCollapsed) {
+        await advancedToggle.click();
+        await this.page.waitForSelector('#advanced-options', { state: 'visible' });
+      }
+      
+      // Principal checkbox (now in advanced options)
+      if (data.isPrincipal) {
+        await this.page.check('input[id="principal"]');
+      }
+      
+      // Distributor checkbox (now in advanced options)
+      if (data.isDistributor) {
+        await this.page.check('input[id="distributor"]');
+      }
     }
   }
 
@@ -115,7 +127,8 @@ class OrganizationFormHelpers {
   }
 
   async getCurrentStep(): Promise<number> {
-    const stepIndicator = await this.page.textContent('.mt-4.text-center.text-sm.text-gray-500');
+    // Look for the new step indicator in the floating action bar
+    const stepIndicator = await this.page.textContent('.text-xs.text-gray-500');
     if (!stepIndicator) return 1;
     
     const match = stepIndicator.match(/Step (\d+) of (\d+)/);
@@ -460,9 +473,9 @@ test.describe('Organization Form - Accessibility Tests', () => {
     // Now aria-invalid should be false
     await expect(nameInput).toHaveAttribute('aria-invalid', 'false');
     
-    // Check progress indicator
-    const progressNav = page.locator('nav[aria-label="Progress"]');
-    await expect(progressNav).toBeVisible();
+    // Check progress indicator (new compact design)
+    const progressIndicator = page.locator('.h-1\\.5.w-6.rounded-full');
+    await expect(progressIndicator.first()).toBeVisible();
   });
 
   test('should announce errors to screen readers', async ({ page }) => {

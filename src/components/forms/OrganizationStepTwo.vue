@@ -1,37 +1,43 @@
 <template>
-  <div class="space-y-6">
-    <!-- Address Information -->
-    <div class="space-y-4">
-      <div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Address Information</h3>
-        <p class="text-sm text-gray-600 mb-4">
-          Provide the organization's address and contact details
-        </p>
+  <!-- Two-Column Layout for Tablet+ Screens -->
+  <div class="space-y-4 md:space-y-6">
+    <!-- Address Information Header -->
+    <div>
+      <h3 class="text-base font-medium text-gray-900 mb-1">Address Information</h3>
+      <p class="text-sm text-gray-600 mb-4">
+        Provide the organization's address and contact details
+      </p>
+    </div>
+
+    <!-- Address Fields Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <!-- Address Line 1 (Full Width) -->
+      <div class="md:col-span-2">
+        <BaseInputField
+          name="address_line_1"
+          label="Address Line 1"
+          type="text"
+          :model-value="modelValue.address_line_1 || ''"
+          :error="errors.address_line_1"
+          placeholder="Enter street address"
+          @update:model-value="updateField('address_line_1', $event)"
+          @validate="validateField('address_line_1', $event)"
+        />
       </div>
 
-      <!-- Address Line 1 -->
-      <BaseInputField
-        name="address_line_1"
-        label="Address Line 1"
-        type="text"
-        :model-value="modelValue.address_line_1 || ''"
-        :error="errors.address_line_1"
-        placeholder="Enter street address"
-        @update:model-value="updateField('address_line_1', $event)"
-        @validate="validateField('address_line_1', $event)"
-      />
-
-      <!-- Address Line 2 -->
-      <BaseInputField
-        name="address_line_2"
-        label="Address Line 2"
-        type="text"
-        :model-value="modelValue.address_line_2 || ''"
-        :error="errors.address_line_2"
-        placeholder="Apt, suite, unit, etc. (optional)"
-        @update:model-value="updateField('address_line_2', $event)"
-        @validate="validateField('address_line_2', $event)"
-      />
+      <!-- Address Line 2 (Full Width) -->
+      <div class="md:col-span-2">
+        <BaseInputField
+          name="address_line_2"
+          label="Address Line 2"
+          type="text"
+          :model-value="modelValue.address_line_2 || ''"
+          :error="errors.address_line_2"
+          placeholder="Apt, suite, unit, etc. (optional)"
+          @update:model-value="updateField('address_line_2', $event)"
+          @validate="validateField('address_line_2', $event)"
+        />
+      </div>
 
       <!-- City -->
       <BaseInputField
@@ -57,14 +63,14 @@
         @validate="validateField('state_province', $event)"
       />
 
-      <!-- Zip Code -->
+      <!-- Postal Code -->
       <BaseInputField
         name="postal_code"
-        label="Zip Code"
+        label="Postal Code"
         type="text"
         :model-value="modelValue.postal_code || ''"
         :error="errors.postal_code"
-        placeholder="Enter zip code"
+        placeholder="Enter postal/zip code"
         @update:model-value="updateField('postal_code', $event)"
         @validate="validateField('postal_code', $event)"
       />

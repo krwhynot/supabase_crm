@@ -1,92 +1,25 @@
 <template>
   <div class="max-w-4xl mx-auto">
-    <!-- Multi-step Progress Indicator -->
-    <div class="mb-8">
-      <nav aria-label="Progress">
-        <ol role="list" class="flex items-center justify-center">
-          <li
-            v-for="(step, index) in steps"
-            :key="step.id"
-            :class="[
-              index !== steps.length - 1 ? 'pr-8 sm:pr-20' : '',
-              'relative'
-            ]"
-          >
-            <!-- Step Connector Line -->
-            <div
-              v-if="index !== steps.length - 1"
-              class="absolute inset-0 flex items-center"
-              aria-hidden="true"
-            >
-              <div
-                :class="[
-                  'h-0.5 w-full',
-                  index + 1 < currentStep ? 'bg-primary-600' : 'bg-gray-200'
-                ]"
-              />
-            </div>
-
-            <!-- Step Content -->
-            <div
-              :class="[
-                'relative flex h-10 w-10 items-center justify-center rounded-full',
-                getStepClasses(index + 1)
-              ]"
-            >
-              <!-- Completed Step -->
-              <template v-if="index + 1 < currentStep">
-                <svg
-                  class="h-5 w-5 text-white"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </template>
-              
-              <!-- Current or Future Step -->
-              <template v-else>
-                <span
-                  :class="[
-                    'text-sm font-semibold',
-                    index + 1 === currentStep ? 'text-white' : 'text-gray-500'
-                  ]"
-                >
-                  {{ index + 1 }}
-                </span>
-              </template>
-            </div>
-
-            <!-- Step Label -->
-            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-              <span
-                :class="[
-                  'text-sm font-medium',
-                  index + 1 === currentStep 
-                    ? 'text-primary-600' 
-                    : index + 1 < currentStep
-                      ? 'text-green-600'
-                      : 'text-gray-500'
-                ]"
-              >
-                {{ step.title }}
-              </span>
-            </div>
-          </li>
-        </ol>
-      </nav>
-
-      <!-- Step Description -->
-      <div class="mt-12 text-center">
-        <h2 class="text-2xl font-bold text-gray-900">
+    <!-- Compact Progress Indicator -->
+    <div class="mb-3">
+      <div class="flex items-center justify-center space-x-2 mb-2">
+        <div
+          v-for="(step, index) in steps"
+          :key="step.id"
+          :class="[
+            'h-1.5 w-6 rounded-full transition-colors duration-200',
+            index + 1 <= currentStep ? 'bg-primary-600' : 'bg-gray-200'
+          ]"
+          :aria-label="`Step ${index + 1}: ${step.title}`"
+        />
+      </div>
+      
+      <!-- Compact Step Header -->
+      <div class="text-center">
+        <h2 class="text-base font-medium text-gray-900">
           {{ currentStepData.title }}
         </h2>
-        <p class="mt-2 text-gray-600">
+        <p class="text-xs text-gray-600 mt-0.5">
           {{ currentStepData.description }}
         </p>
       </div>
@@ -95,7 +28,7 @@
     <!-- Auto-save Status -->
     <div
       v-if="autoSaveStatus"
-      class="mb-4 flex items-center justify-center text-sm"
+      class="mb-3 flex items-center justify-center text-xs"
     >
       <div
         :class="[
@@ -172,7 +105,7 @@
     <!-- Global Form Errors -->
     <div
       v-if="globalError"
-      class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md"
+      class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md"
       role="alert"
     >
       <div class="flex items-start">
@@ -196,9 +129,9 @@
       </div>
     </div>
 
-    <!-- Form Content -->
+    <!-- Form Content with Reduced Padding -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
-      <div class="p-6">
+      <div class="p-3 md:p-4">
         <!-- Step Components -->
         <component
           :is="currentStepComponent"
@@ -209,14 +142,17 @@
           @update:modelValue="handleFormDataUpdate"
         />
       </div>
+    </div>
 
-      <!-- Form Actions -->
-      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+    <!-- Floating Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:relative md:bg-gray-50 md:border-0 md:shadow-none md:mt-3 md:rounded-lg">
+      <div class="max-w-4xl mx-auto px-3 py-2 md:px-4 md:py-3">
         <div class="flex items-center justify-between">
           <!-- Back Button -->
           <Button
             v-if="currentStep > 1"
             variant="secondary"
+            size="sm"
             :disabled="isSubmitting"
             @click="goToPreviousStep"
           >
@@ -237,44 +173,41 @@
           </Button>
           <div v-else></div>
 
-          <!-- Next/Submit Button -->
-          <Button
-            :variant="isLastStep ? 'success' : 'primary'"
-            :loading="isSubmitting || isValidating"
-            :disabled="!isCurrentStepValid || isSubmitting"
-            @click="handleNextOrSubmit"
-          >
-            {{ isLastStep ? 'Create Organization' : 'Next' }}
-            <svg
-              v-if="!isLastStep"
-              class="h-4 w-4 ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div class="flex items-center space-x-3">
+            <!-- Step Indicator -->
+            <div class="text-xs text-gray-500">
+              Step {{ currentStep }} of {{ totalSteps }}
+            </div>
+            
+            <!-- Next/Submit Button -->
+            <Button
+              :variant="isLastStep ? 'success' : 'primary'"
+              size="sm"
+              :loading="isSubmitting || isValidating"
+              :disabled="!isCurrentStepValid || isSubmitting"
+              @click="handleNextOrSubmit"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Button>
-        </div>
-
-        <!-- Step Indicator -->
-        <div class="mt-4 text-center text-sm text-gray-500">
-          Step {{ currentStep }} of {{ totalSteps }}
+              {{ isLastStep ? 'Create Organization' : 'Next' }}
+              <svg
+                v-if="!isLastStep"
+                class="h-4 w-4 ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Contact Status Warning -->
-    <ContactStatusWarning
-      v-if="showContactWarning"
-      :organization-name="formData.name"
-      class="mt-6"
-    />
   </div>
 </template>
 
@@ -288,7 +221,6 @@ import Button from '@/components/atomic/Button.vue'
 import OrganizationStepOne from './OrganizationStepOne.vue'
 import OrganizationStepTwo from './OrganizationStepTwo.vue'
 import OrganizationStepThree from './OrganizationStepThree.vue'
-import ContactStatusWarning from './ContactStatusWarning.vue'
 
 /**
  * Props interface for form wrapper
@@ -300,13 +232,10 @@ interface Props {
   isEditing?: boolean
   /** Organization ID for editing */
   organizationId?: string
-  /** Show contact warning */
-  showContactWarning?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isEditing: false,
-  showContactWarning: true
+  isEditing: false
 })
 
 /**
@@ -410,19 +339,6 @@ const isLastStep = computed(() => currentStep.value === totalSteps)
 const stepErrors = computed(() => formErrors[currentStep.value] || {})
 
 const isCurrentStepValid = computed(() => stepValidation[currentStep.value as keyof typeof stepValidation])
-
-/**
- * Step styling
- */
-const getStepClasses = (stepNumber: number) => {
-  if (stepNumber < currentStep.value) {
-    return 'bg-primary-600' // Completed
-  } else if (stepNumber === currentStep.value) {
-    return 'bg-primary-600' // Current
-  } else {
-    return 'bg-gray-200' // Future
-  }
-}
 
 /**
  * Form data handling

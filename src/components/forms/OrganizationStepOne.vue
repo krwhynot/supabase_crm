@@ -1,33 +1,51 @@
 <template>
-  <div class="space-y-6">
-    <!-- Organization Name (Required) -->
-    <BaseInputField
-      name="name"
-      label="Organization Name"
-      type="text"
-      :model-value="modelValue.name || ''"
-      :error="errors.name"
-      placeholder="Enter the organization name"
-      required
-      autocomplete="organization"
-      @update:model-value="updateField('name', $event)"
-      @validate="validateField('name', $event)"
-    />
+  <!-- Two-Column Layout for Tablet+ Screens -->
+  <div class="space-y-4 md:space-y-6">
+    <!-- Required Fields (Column 1) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <!-- Organization Name (Required) -->
+      <div class="md:col-span-2">
+        <BaseInputField
+          name="name"
+          label="Organization Name"
+          type="text"
+          :model-value="modelValue.name || ''"
+          :error="errors.name"
+          placeholder="Enter the organization name"
+          required
+          autocomplete="organization"
+          @update:model-value="updateField('name', $event)"
+          @validate="validateField('name', $event)"
+        />
+      </div>
 
-    <!-- Priority (Required - A/B/C/D mapped to lead_score) -->
-    <SelectField
-      name="priority"
-      label="Priority"
-      :model-value="priorityValue"
-      :options="priorityOptions"
-      :error="errors.priority || errors.lead_score"
-      placeholder="Select organization priority"
-      required
-      @update:model-value="updatePriority"
-      @validate="validateField('priority', $event)"
-    />
+      <!-- Priority (Required - A/B/C/D mapped to lead_score) -->
+      <SelectField
+        name="priority"
+        label="Priority"
+        :model-value="priorityValue"
+        :options="priorityOptions"
+        :error="errors.priority || errors.lead_score"
+        placeholder="Select organization priority"
+        required
+        @update:model-value="updatePriority"
+        @validate="validateField('priority', $event)"
+      />
 
-    <!-- Segment (Required - mapped to industry with Food & Beverage prioritized) -->
+      <!-- Organization Status -->
+      <SelectField
+        name="status"
+        label="Organization Status"
+        :model-value="modelValue.status || 'Prospect'"
+        :options="statusOptions"
+        :error="errors.status"
+        placeholder="Select organization status"
+        @update:model-value="updateField('status', $event)"
+        @validate="validateField('status', $event)"
+      />
+    </div>
+
+    <!-- Segment (Required - Full Width) -->
     <SegmentSelector
       name="segment"
       label="Segment"
@@ -44,82 +62,114 @@
       @validate="validateField('segment', $event)"
     />
 
-    <!-- Principal/Distributor Selection (Mutually Exclusive) -->
+    <!-- Advanced Options (Progressive Disclosure) -->
     <div class="space-y-4">
-      <label class="block text-sm font-medium text-gray-700">
-        Business Type
-      </label>
-      <div class="space-y-3">
-        <div class="flex items-center">
-          <input
-            id="principal"
-            name="business-type"
-            type="checkbox"
-            :checked="isPrincipal"
-            @change="updateBusinessType('principal', ($event.target as HTMLInputElement).checked)"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+      <button
+        type="button"
+        @click="showAdvancedOptions = !showAdvancedOptions"
+        class="flex items-center justify-between w-full p-3 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        :aria-expanded="showAdvancedOptions"
+        aria-controls="advanced-options"
+      >
+        <span class="flex items-center">
+          <svg
+            :class="[
+              'h-4 w-4 mr-2 transition-transform duration-200',
+              showAdvancedOptions ? 'rotate-90' : ''
+            ]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+          Advanced Options
+        </span>
+        <span class="text-xs text-gray-500">
+          {{ showAdvancedOptions ? 'Hide' : 'Show' }} additional fields
+        </span>
+      </button>
+
+      <!-- Collapsible Advanced Fields -->
+      <div
+        v-show="showAdvancedOptions"
+        id="advanced-options"
+        class="space-y-4 pl-6 border-l-2 border-gray-200 animate-in slide-in-from-top-2 duration-200"
+      >
+        <!-- Business Type & Additional Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <!-- Principal/Distributor Selection (Mutually Exclusive) -->
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700">
+              Business Type
+            </label>
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <input
+                  id="principal"
+                  name="business-type"
+                  type="checkbox"
+                  :checked="isPrincipal"
+                  @change="updateBusinessType('principal', ($event.target as HTMLInputElement).checked)"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label for="principal" class="ml-2 block text-sm text-gray-900">
+                  Principal
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  id="distributor"
+                  name="business-type"
+                  type="checkbox"
+                  :checked="isDistributor"
+                  @change="updateBusinessType('distributor', ($event.target as HTMLInputElement).checked)"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label for="distributor" class="ml-2 block text-sm text-gray-900">
+                  Distributor
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Manager -->
+          <SelectField
+            name="account_manager_id"
+            label="Account Manager"
+            :model-value="modelValue.account_manager_id || ''"
+            :options="accountManagerOptions"
+            :error="errors.account_manager_id"
+            placeholder="Select an account manager"
+            @update:model-value="updateField('account_manager_id', $event)"
+            @validate="validateField('account_manager_id', $event)"
           />
-          <label for="principal" class="ml-2 block text-sm text-gray-900">
-            Principal
-          </label>
         </div>
-        <div class="flex items-center">
-          <input
-            id="distributor"
-            name="business-type"
-            type="checkbox"
-            :checked="isDistributor"
-            @change="updateBusinessType('distributor', ($event.target as HTMLInputElement).checked)"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label for="distributor" class="ml-2 block text-sm text-gray-900">
-            Distributor
-          </label>
-        </div>
+
+        <!-- Distributor Selection (Only if NOT Distributor) -->
+        <SelectField
+          v-if="!isDistributor"
+          name="distributor_id"
+          label="Distributor"
+          :model-value="modelValue.distributor_id || ''"
+          :options="distributorOptions"
+          :error="errors.distributor_id"
+          placeholder="Select a distributor"
+          @update:model-value="updateField('distributor_id', $event)"
+          @validate="validateField('distributor_id', $event)"
+        />
       </div>
     </div>
-
-    <!-- Distributor Selection (Only if NOT Distributor) -->
-    <SelectField
-      v-if="!isDistributor"
-      name="distributor_id"
-      label="Distributor"
-      :model-value="modelValue.distributor_id || ''"
-      :options="distributorOptions"
-      :error="errors.distributor_id"
-      placeholder="Select a distributor"
-      @update:model-value="updateField('distributor_id', $event)"
-      @validate="validateField('distributor_id', $event)"
-    />
-
-    <!-- Account Manager -->
-    <SelectField
-      name="account_manager_id"
-      label="Account Manager"
-      :model-value="modelValue.account_manager_id || ''"
-      :options="accountManagerOptions"
-      :error="errors.account_manager_id"
-      placeholder="Select an account manager"
-      @update:model-value="updateField('account_manager_id', $event)"
-      @validate="validateField('account_manager_id', $event)"
-    />
-
-    <!-- Organization Status -->
-    <SelectField
-      name="status"
-      label="Organization Status"
-      :model-value="modelValue.status || 'Prospect'"
-      :options="statusOptions"
-      :error="errors.status"
-      placeholder="Select organization status"
-      @update:model-value="updateField('status', $event)"
-      @validate="validateField('status', $event)"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { organizationCreateSchema } from '@/types/organizations'
 import type { OrganizationCreateForm } from '@/types/organizations'
 import type { OrganizationStatus } from '@/types/database.types'
@@ -152,6 +202,9 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>()
+
+// Progressive disclosure state
+const showAdvancedOptions = ref(false)
 
 /**
  * Priority options (A/B/C/D mapped to lead_score)
