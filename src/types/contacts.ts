@@ -311,11 +311,57 @@ export const contactSearchSchema = yup.object({
 })
 
 /**
+ * Step-specific validation schemas for multi-step contact form
+ */
+
+// Step 1: Basic Info (Required: first_name, last_name, organization_id, position)
+export const contactStepOneSchema = contactCreateSchema.pick([
+  'first_name', 'last_name', 'organization_id', 'position', 'email', 'phone'
+])
+
+// Step 2: Authority & Influence (Required: purchase_influence, decision_authority)
+export const contactStepTwoSchema = contactCreateSchema.pick([
+  'purchase_influence', 'decision_authority', 'preferred_principals'
+])
+
+// Step 3: Contact Details (All optional)
+export const contactStepThreeSchema = contactCreateSchema.pick([
+  'address', 'city', 'state', 'zip_code', 'website', 'account_manager', 'notes', 'is_primary'
+])
+
+/**
  * TypeScript types inferred from Yup schemas
  */
 export type ContactCreateForm = yup.InferType<typeof contactCreateSchema>
 export type ContactUpdateForm = yup.InferType<typeof contactUpdateSchema>
 export type ContactSearchForm = yup.InferType<typeof contactSearchSchema>
+
+// Step-specific form types
+export type ContactStepOneForm = yup.InferType<typeof contactStepOneSchema>
+export type ContactStepTwoForm = yup.InferType<typeof contactStepTwoSchema>
+export type ContactStepThreeForm = yup.InferType<typeof contactStepThreeSchema>
+
+/**
+ * Multi-step form interfaces
+ */
+export interface ContactFormStep {
+  id: number
+  title: string
+  description: string
+  component: string
+  requiredFields: string[]
+  optionalFields: string[]
+}
+
+export interface ContactStepValidation {
+  [stepNumber: number]: boolean
+}
+
+export interface ContactFormData extends ContactCreateForm {
+  // Form-specific helpers
+  _organizationSearch?: string
+  _principalIds?: string[]
+}
 
 /**
  * Form validation helper types
@@ -418,6 +464,93 @@ export class ContactValidator {
       return {
         isValid: false,
         errors: [{ field: 'general', message: 'Validation failed' }]
+      }
+    }
+  }
+
+  /**
+   * Validate contact step one form
+   */
+  static async validateStepOne(data: unknown): Promise<FormValidationResult<ContactStepOneForm>> {
+    try {
+      const validData = await contactStepOneSchema.validate(data, { abortEarly: false })
+      return {
+        isValid: true,
+        data: validData,
+        errors: []
+      }
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        return {
+          isValid: false,
+          errors: error.inner.map(err => ({
+            field: err.path || 'unknown',
+            message: err.message
+          }))
+        }
+      }
+      
+      return {
+        isValid: false,
+        errors: [{ field: 'general', message: 'Step 1 validation failed' }]
+      }
+    }
+  }
+
+  /**
+   * Validate contact step two form
+   */
+  static async validateStepTwo(data: unknown): Promise<FormValidationResult<ContactStepTwoForm>> {
+    try {
+      const validData = await contactStepTwoSchema.validate(data, { abortEarly: false })
+      return {
+        isValid: true,
+        data: validData,
+        errors: []
+      }
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        return {
+          isValid: false,
+          errors: error.inner.map(err => ({
+            field: err.path || 'unknown',
+            message: err.message
+          }))
+        }
+      }
+      
+      return {
+        isValid: false,
+        errors: [{ field: 'general', message: 'Step 2 validation failed' }]
+      }
+    }
+  }
+
+  /**
+   * Validate contact step three form
+   */
+  static async validateStepThree(data: unknown): Promise<FormValidationResult<ContactStepThreeForm>> {
+    try {
+      const validData = await contactStepThreeSchema.validate(data, { abortEarly: false })
+      return {
+        isValid: true,
+        data: validData,
+        errors: []
+      }
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        return {
+          isValid: false,
+          errors: error.inner.map(err => ({
+            field: err.path || 'unknown',
+            message: err.message
+          }))
+        }
+      }
+      
+      return {
+        isValid: false,
+        errors: [{ field: 'general', message: 'Step 3 validation failed' }]
       }
     }
   }

@@ -12,15 +12,16 @@
         <h1 class="text-3xl font-bold text-gray-900">Create New Contact</h1>
       </div>
       <p class="text-gray-600">
-        Add a key contact who influences Principal product purchases within their organization.
+        Add a new contact with their organization, authority level, and contact details in three simple steps.
       </p>
     </div>
 
-    <!-- Contact Form -->
-    <ContactForm
+    <!-- Multi-Step Contact Form -->
+    <ContactFormWrapper
       :is-editing="false"
-      @submit="handleSubmit"
+      @success="handleSuccess"
       @cancel="handleCancel"
+      @draft-saved="handleDraftSaved"
     />
     
     <!-- Error Display -->
@@ -40,48 +41,23 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import ContactForm from '@/components/forms/ContactForm.vue'
-import { useContactStore } from '@/stores/contactStore'
-import { ContactValidator } from '@/types/contacts'
-// import type { ContactCreateForm } from '@/types/contacts' // Unused
-
+import ContactFormWrapper from '@/components/forms/ContactFormWrapper.vue'
 const router = useRouter()
-const contactStore = useContactStore()
 
 // State
 const submitError = ref<string | null>(null)
 
-// Handle form submission
-const handleSubmit = async (formData: any) => {
-  try {
-    submitError.value = null
-    
-    // Extract principal IDs before converting form data
-    const principalIds = formData._principalIds || []
-    
-    // Convert form data (removing the _principalIds helper field)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _principalIds, ...cleanFormData } = formData
-    const contactData = ContactValidator.formToInsert(cleanFormData)
-    
-    // Create the contact first
-    const createdContact = await contactStore.createContact(contactData)
+// Handle successful form submission
+const handleSuccess = (contactId: string) => {
+  // ContactFormWrapper already handles the creation and navigation
+  // This event is fired after successful contact creation
+  console.log('Contact created successfully with ID:', contactId)
+  submitError.value = null
+}
 
-    if (createdContact) {
-      // Principal functionality removed during cleanup - was incomplete
-      if (principalIds.length > 0) {
-        console.log('Principal IDs would be associated:', principalIds)
-      }
-      
-      // Success - redirect to contact detail or list
-      router.push(`/contacts/${createdContact.id}`)
-    } else {
-      submitError.value = contactStore.errorMessage || 'Failed to create contact'
-    }
-  } catch (error) {
-    console.error('Error creating contact:', error)
-    submitError.value = 'An unexpected error occurred while creating the contact'
-  }
+// Handle draft saving
+const handleDraftSaved = (formData: any) => {
+  console.log('Contact form draft saved:', formData)
 }
 
 // Handle form cancellation
