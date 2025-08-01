@@ -248,6 +248,16 @@
           
           <div class="px-6 py-6 space-y-3">
             <router-link
+              :to="createOpportunityRoute"
+              class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            >
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Create Opportunity
+            </router-link>
+            
+            <router-link
               :to="`/organizations/${organization.id}/edit`"
               class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
@@ -341,6 +351,18 @@ const hasAddress = computed(() => {
     organization.value.postal_code ||
     organization.value.country
   )
+})
+
+const createOpportunityRoute = computed(() => {
+  if (!organization.value) return '/opportunities/new'
+  
+  const queryParams = new URLSearchParams({
+    contextType: 'organization',
+    organizationId: organization.value.id,
+    organizationName: organization.value.name || ''
+  })
+  
+  return `/opportunities/new?${queryParams.toString()}`
 })
 
 // Methods

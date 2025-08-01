@@ -51,6 +51,15 @@
             </div>
             <div class="flex space-x-3">
               <router-link
+                :to="createOpportunityRoute"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
+              >
+                <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create Opportunity
+              </router-link>
+              <router-link
                 :to="`/contacts/${contact.id}/edit`"
                 class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
@@ -195,7 +204,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
 import { contactUtils } from '@/types/contacts'
@@ -215,6 +224,20 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
 const deleting = ref(false)
+
+// Computed properties
+const createOpportunityRoute = computed(() => {
+  if (!contact.value) return '/opportunities/new'
+  
+  const queryParams = new URLSearchParams({
+    contextType: 'contact',
+    contactId: contact.value.id,
+    organizationName: contact.value.organization_name || '',
+    contactName: `${contact.value.first_name} ${contact.value.last_name}`.trim()
+  })
+  
+  return `/opportunities/new?${queryParams.toString()}`
+})
 
 // Load contact details
 const loadContact = async () => {
