@@ -530,6 +530,325 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          id: string
+          name: string
+          organization_id: string
+          principal_id: string | null
+          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          product_id: string | null
+          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
+          probability_percent: number
+          expected_close_date: string | null
+          estimated_value: number | null
+          actual_value: number | null
+          currency_code: string
+          deal_owner: string | null
+          lead_source: string | null
+          competitor_info: string | null
+          is_won: boolean
+          is_lost: boolean
+          lost_reason: string | null
+          won_date: string | null
+          lost_date: string | null
+          notes: string | null
+          internal_notes: string | null
+          tags: Json | null
+          custom_fields: Json | null
+          auto_generated_name: boolean
+          name_template: string | null
+          last_activity_date: string | null
+          next_follow_up_date: string | null
+          stage_changed_at: string | null
+          stage_changed_by: string | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          organization_id: string
+          principal_id?: string | null
+          stage?: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          product_id?: string | null
+          context?: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
+          probability_percent?: number
+          expected_close_date?: string | null
+          estimated_value?: number | null
+          actual_value?: number | null
+          currency_code?: string
+          deal_owner?: string | null
+          lead_source?: string | null
+          competitor_info?: string | null
+          is_won?: boolean
+          is_lost?: boolean
+          lost_reason?: string | null
+          won_date?: string | null
+          lost_date?: string | null
+          notes?: string | null
+          internal_notes?: string | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          auto_generated_name?: boolean
+          name_template?: string | null
+          last_activity_date?: string | null
+          next_follow_up_date?: string | null
+          stage_changed_at?: string | null
+          stage_changed_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          organization_id?: string
+          principal_id?: string | null
+          stage?: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          product_id?: string | null
+          context?: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
+          probability_percent?: number
+          expected_close_date?: string | null
+          estimated_value?: number | null
+          actual_value?: number | null
+          currency_code?: string
+          deal_owner?: string | null
+          lead_source?: string | null
+          competitor_info?: string | null
+          is_won?: boolean
+          is_lost?: boolean
+          lost_reason?: string | null
+          won_date?: string | null
+          lost_date?: string | null
+          notes?: string | null
+          internal_notes?: string | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          auto_generated_name?: boolean
+          name_template?: string | null
+          last_activity_date?: string | null
+          next_follow_up_date?: string | null
+          stage_changed_at?: string | null
+          stage_changed_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      products: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          category: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
+          sku: string | null
+          unit_size: string | null
+          unit_cost: number | null
+          suggested_retail_price: number | null
+          currency_code: string
+          is_active: boolean
+          launch_date: string | null
+          discontinue_date: string | null
+          ingredients: string | null
+          allergen_info: string | null
+          nutritional_info: Json | null
+          certifications: Json | null
+          tags: Json | null
+          custom_fields: Json | null
+          created_at: string | null
+          updated_at: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          category?: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
+          sku?: string | null
+          unit_size?: string | null
+          unit_cost?: number | null
+          suggested_retail_price?: number | null
+          currency_code?: string
+          is_active?: boolean
+          launch_date?: string | null
+          discontinue_date?: string | null
+          ingredients?: string | null
+          allergen_info?: string | null
+          nutritional_info?: Json | null
+          certifications?: Json | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          category?: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
+          sku?: string | null
+          unit_size?: string | null
+          unit_cost?: number | null
+          suggested_retail_price?: number | null
+          currency_code?: string
+          is_active?: boolean
+          launch_date?: string | null
+          discontinue_date?: string | null
+          ingredients?: string | null
+          allergen_info?: string | null
+          nutritional_info?: Json | null
+          certifications?: Json | null
+          tags?: Json | null
+          custom_fields?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Relationships: []
+      }
+      product_principals: {
+        Row: {
+          id: string
+          product_id: string
+          principal_id: string
+          is_primary_principal: boolean
+          exclusive_rights: boolean
+          territory_restrictions: Json | null
+          wholesale_price: number | null
+          minimum_order_quantity: number | null
+          lead_time_days: number | null
+          contract_start_date: string | null
+          contract_end_date: string | null
+          auto_renewal: boolean
+          is_active: boolean
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          principal_id: string
+          is_primary_principal?: boolean
+          exclusive_rights?: boolean
+          territory_restrictions?: Json | null
+          wholesale_price?: number | null
+          minimum_order_quantity?: number | null
+          lead_time_days?: number | null
+          contract_start_date?: string | null
+          contract_end_date?: string | null
+          auto_renewal?: boolean
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          principal_id?: string
+          is_primary_principal?: boolean
+          exclusive_rights?: boolean
+          territory_restrictions?: Json | null
+          wholesale_price?: number | null
+          minimum_order_quantity?: number | null
+          lead_time_days?: number | null
+          contract_start_date?: string | null
+          contract_end_date?: string | null
+          auto_renewal?: boolean
+          is_active?: boolean
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_principals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_principals_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      opportunity_principals: {
+        Row: {
+          id: string
+          opportunity_id: string
+          principal_id: string
+          is_primary: boolean
+          contribution_percent: number | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          opportunity_id: string
+          principal_id: string
+          is_primary?: boolean
+          contribution_percent?: number | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          opportunity_id?: string
+          principal_id?: string
+          is_primary?: boolean
+          contribution_percent?: number | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_principals_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_principals_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       dashboard_contact_analytics: {
@@ -656,6 +975,203 @@ export type Database = {
           organization_type: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
           organization_website: string | null
           principal_advocacies: Json | null
+        }
+        Relationships: []
+      }
+      opportunity_list_view: {
+        Row: {
+          id: string
+          name: string
+          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
+          probability_percent: number
+          expected_close_date: string | null
+          estimated_value: number | null
+          actual_value: number | null
+          currency_code: string
+          is_won: boolean
+          is_lost: boolean
+          deal_owner: string | null
+          auto_generated_name: boolean
+          created_at: string | null
+          updated_at: string | null
+          stage_changed_at: string | null
+          last_activity_date: string | null
+          next_follow_up_date: string | null
+          organization_id: string
+          organization_name: string
+          organization_type: string | null
+          organization_status: string | null
+          organization_city: string | null
+          organization_state: string | null
+          organization_country: string | null
+          organization_lead_score: number | null
+          principal_id: string | null
+          principal_name: string | null
+          principal_type: string | null
+          product_id: string | null
+          product_name: string | null
+          product_category: string | null
+          product_sku: string | null
+          days_to_close: number | null
+          days_to_followup: number | null
+          notes_summary: string | null
+          stage_order: number
+          has_activity: boolean
+          overdue_followup: boolean
+          overdue_close: boolean
+        }
+        Relationships: []
+      }
+      opportunity_detail_view: {
+        Row: {
+          id: string
+          name: string
+          organization_id: string
+          principal_id: string | null
+          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          product_id: string | null
+          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
+          probability_percent: number
+          expected_close_date: string | null
+          estimated_value: number | null
+          actual_value: number | null
+          currency_code: string
+          deal_owner: string | null
+          lead_source: string | null
+          competitor_info: string | null
+          is_won: boolean
+          is_lost: boolean
+          lost_reason: string | null
+          won_date: string | null
+          lost_date: string | null
+          notes: string | null
+          internal_notes: string | null
+          tags: Json | null
+          custom_fields: Json | null
+          auto_generated_name: boolean
+          name_template: string | null
+          last_activity_date: string | null
+          next_follow_up_date: string | null
+          stage_changed_at: string | null
+          stage_changed_by: string | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          organization_id_check: string | null
+          organization_name: string | null
+          organization_legal_name: string | null
+          organization_type: string | null
+          organization_size: string | null
+          organization_status: string | null
+          organization_industry: string | null
+          organization_website: string | null
+          organization_email: string | null
+          organization_phone: string | null
+          organization_address1: string | null
+          organization_address2: string | null
+          organization_city: string | null
+          organization_state: string | null
+          organization_postal_code: string | null
+          organization_country: string | null
+          organization_employees: number | null
+          organization_revenue: number | null
+          organization_lead_score: number | null
+          organization_tags: Json | null
+          principal_id_check: string | null
+          principal_name: string | null
+          principal_legal_name: string | null
+          principal_type: string | null
+          principal_size: string | null
+          principal_industry: string | null
+          principal_website: string | null
+          principal_email: string | null
+          principal_phone: string | null
+          principal_is_principal_flag: boolean | null
+          product_id_check: string | null
+          product_name: string | null
+          product_description: string | null
+          product_category: string | null
+          product_sku: string | null
+          product_unit_size: string | null
+          product_unit_cost: number | null
+          product_suggested_price: number | null
+          product_is_active: boolean | null
+          product_launch_date: string | null
+          product_ingredients: string | null
+          product_allergen_info: string | null
+          product_nutritional_info: Json | null
+          product_certifications: Json | null
+          product_tags: Json | null
+          principal_wholesale_price: number | null
+          principal_min_order_qty: number | null
+          principal_lead_time: number | null
+          is_primary_principal: boolean | null
+          principal_exclusive_rights: boolean | null
+          territory_restrictions: Json | null
+          principal_contract_start: string | null
+          principal_contract_end: string | null
+          days_to_close: number | null
+          days_to_followup: number | null
+          stage_order: number
+          has_activity: boolean
+          overdue_followup: boolean
+          overdue_close: boolean
+          opportunity_age_days: number
+          days_in_current_stage: number
+          value_variance: number | null
+        }
+        Relationships: []
+      }
+      opportunity_kpi_view: {
+        Row: {
+          total_opportunities: number
+          active_opportunities: number
+          won_opportunities: number
+          lost_opportunities: number
+          won_this_month: number
+          created_this_month: number
+          total_pipeline_value: number
+          avg_opportunity_value: number
+          total_won_value: number
+          won_value_this_month: number
+          avg_probability: number
+          weighted_pipeline_value: number
+          new_lead_count: number
+          initial_outreach_count: number
+          sample_visit_count: number
+          awaiting_response_count: number
+          feedback_logged_count: number
+          demo_scheduled_count: number
+          closed_won_count: number
+          overdue_opportunities: number
+          overdue_followups: number
+          win_rate_percent: number
+          avg_days_to_close: number
+        }
+        Relationships: []
+      }
+      product_principal_availability_view: {
+        Row: {
+          product_id: string
+          product_name: string
+          product_category: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
+          product_sku: string | null
+          product_is_active: boolean
+          principal_id: string
+          principal_name: string
+          wholesale_price: number | null
+          minimum_order_quantity: number | null
+          lead_time_days: number | null
+          is_primary_principal: boolean
+          exclusive_rights: boolean
+          relationship_is_active: boolean
+          is_available: boolean
+          territory_restrictions: Json | null
+          contract_start_date: string | null
+          contract_end_date: string | null
+          auto_renewal: boolean
+          contract_is_active: boolean
         }
         Relationships: []
       }
@@ -848,3 +1364,38 @@ export type OrganizationSize = 'Startup' | 'Small' | 'Medium' | 'Large' | 'Enter
 export type OrganizationStatus = 'Active' | 'Inactive' | 'Prospect' | 'Customer' | 'Partner' | 'Vendor'
 export type InteractionType = 'Email' | 'Phone' | 'Meeting' | 'Demo' | 'Proposal' | 'Contract' | 'Note' | 'Task' | 'Event' | 'Social' | 'Website' | 'Other'
 export type InteractionDirection = 'Inbound' | 'Outbound'
+
+// Opportunity entity types
+export type Opportunity = Database['public']['Tables']['opportunities']['Row']
+export type OpportunityInsert = Database['public']['Tables']['opportunities']['Insert']
+export type OpportunityUpdate = Database['public']['Tables']['opportunities']['Update']
+
+// Opportunity principal types
+export type OpportunityPrincipal = Database['public']['Tables']['opportunity_principals']['Row']
+export type OpportunityPrincipalInsert = Database['public']['Tables']['opportunity_principals']['Insert']
+export type OpportunityPrincipalUpdate = Database['public']['Tables']['opportunity_principals']['Update']
+
+// Opportunity view types
+export type OpportunityListView = Database['public']['Views']['opportunity_list_view']['Row']
+export type OpportunityDetailView = Database['public']['Views']['opportunity_detail_view']['Row']
+export type OpportunityKpiView = Database['public']['Views']['opportunity_kpi_view']['Row']
+
+// Product entity types
+export type Product = Database['public']['Tables']['products']['Row']
+export type ProductInsert = Database['public']['Tables']['products']['Insert']
+export type ProductUpdate = Database['public']['Tables']['products']['Update']
+
+// Product-Principal relationship types
+export type ProductPrincipal = Database['public']['Tables']['product_principals']['Row']
+export type ProductPrincipalInsert = Database['public']['Tables']['product_principals']['Insert']
+export type ProductPrincipalUpdate = Database['public']['Tables']['product_principals']['Update']
+
+// Product view types
+export type ProductPrincipalAvailabilityView = Database['public']['Views']['product_principal_availability_view']['Row']
+
+// Opportunity enum types
+export type OpportunityStage = 'New Lead' | 'Initial Outreach' | 'Sample/Visit Offered' | 'Awaiting Response' | 'Feedback Logged' | 'Demo Scheduled' | 'Closed - Won'
+export type OpportunityContext = 'Site Visit' | 'Food Show' | 'New Product Interest' | 'Follow-up' | 'Demo Request' | 'Sampling' | 'Custom'
+
+// Product enum types
+export type ProductCategory = 'Protein' | 'Sauce' | 'Seasoning' | 'Beverage' | 'Snack' | 'Frozen' | 'Dairy' | 'Bakery' | 'Other'

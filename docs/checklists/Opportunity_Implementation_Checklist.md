@@ -50,69 +50,69 @@ The Opportunity Form and List page will serve as the central hub for sales pipel
 ## Phase 2: Database Schema & Types (Day 1-2)
 
 ### 2.1 Database Schema Implementation
-- [ ] **SAFETY CHECKPOINT**: `git commit -m "ROLLBACK_POINT: Before database schema changes"`
-- [ ] Create `sql/30_opportunities_schema.sql`:
+- [x] **SAFETY CHECKPOINT**: `git commit -m "ROLLBACK_POINT: Before database schema changes"`
+- [x] Create `sql/30_opportunities_schema.sql`:
   - Opportunities table with 7-stage enum
   - Products table with name, description, category
   - Product_principals junction table
   - Proper RLS policies and indexes
-- [ ] Create `sql/31_opportunities_views.sql`:
+- [x] Create `sql/31_opportunities_views.sql`:
   - `opportunity_list_view` with joined data
   - `opportunity_detail_view` with relationships
-- [ ] Apply migration in Supabase dashboard
-- [ ] Generate TypeScript types: `npx supabase gen types typescript --local > src/types/database.types.ts`
-- [ ] **VALIDATION**: Verify migration runs without errors, test RLS policies
+- [x] Apply migration in Supabase dashboard
+- [x] Generate TypeScript types: `npx supabase gen types typescript --local > src/types/database.types.ts`
+- [x] **VALIDATION**: Verify migration runs without errors, test RLS policies
 
 ### 2.2 Feature-Specific Types
-- [ ] Create `src/types/opportunities.ts`:
+- [x] Create `src/types/opportunities.ts`:
   - OpportunityStage enum (7 stages)
   - OpportunityContext enum
   - Opportunity interfaces (base, insert, update, list view, detail view)
   - OpportunityFormData interface
   - Yup validation schema
-- [ ] Create `src/types/products.ts`:
+- [x] Create `src/types/products.ts`:
   - Product interfaces and types
   - Principal-product relationship types
-- [ ] **VALIDATION**: `npm run type-check` passes without errors
-- [ ] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): database schema and type definitions complete"`
+- [x] **VALIDATION**: `npm run type-check` passes without errors
+- [x] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): database schema and type definitions complete"`
 
 ---
 
 ## Phase 3: Core Services & API Layer (Day 2-3)
 
 ### 3.1 API Services
-- [ ] Create `src/services/opportunitiesApi.ts`:
+- [x] Create `src/services/opportunitiesApi.ts`:
   - CRUD operations following `contactsApi.ts` patterns
   - Search and filtering capabilities
   - Batch creation for multiple principals
   - Proper error handling and TypeScript types
-- [ ] Create `src/services/productsApi.ts`:
+- [x] Create `src/services/productsApi.ts`:
   - Product catalog management
   - Principal-product filtering logic
-- [ ] **VALIDATION**: Test API functions in isolation
-- [ ] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): API services implemented"`
+- [x] **VALIDATION**: Test API functions in isolation
+- [x] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): API services implemented"`
 
 ### 3.2 Auto-Naming Service
-- [ ] Create `src/services/opportunityNaming.ts`:
+- [x] Create `src/services/opportunityNaming.ts`:
   - Auto-name generation logic
   - Format: `[Organization] - [Principal] - [Context] - [Month Year]`
   - Preview generation for multiple principals
   - Manual override handling
-- [ ] **VALIDATION**: Test naming logic with various inputs
+- [x] **VALIDATION**: Test naming logic with various inputs
 
 ---
 
 ## Phase 4: Store Implementation (Day 3-4)
 
 ### 4.1 Pinia Stores
-- [ ] **SAFETY CHECKPOINT**: `git commit -m "ROLLBACK_POINT: Before store implementation"`
-- [ ] Create `src/stores/opportunityStore.ts`:
+- [x] **SAFETY CHECKPOINT**: `git commit -m "ROLLBACK_POINT: Before store implementation"`
+- [x] Create `src/stores/opportunityStore.ts`:
   - State management following existing store patterns
   - CRUD operations with proper error handling
   - Search, filter, and pagination logic
   - KPI computed properties (total, active, avg probability, won this month)
   - Batch creation handling
-- [ ] Create `src/stores/productStore.ts`:
+- [x] Create `src/stores/productStore.ts`:
   - Product catalog state management
   - Principal filtering logic
 - [ ] Update `src/stores/organizationStore.ts`:
@@ -147,23 +147,23 @@ The Opportunity Form and List page will serve as the central hub for sales pipel
 - [ ] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): Core form components implemented"`
 
 ### 5.2 Display Components  
-- [ ] Create `src/components/opportunities/OpportunityKPICards.vue`:
+- [x] Create `src/components/opportunities/OpportunityKPICards.vue`:
   - 4 metric cards with computed values
   - Responsive grid layout for iPad
   - Color-coded metrics
-- [ ] Create `src/components/opportunities/StageTag.vue`:
+- [x] Create `src/components/opportunities/StageTag.vue`:
   - Color-coded stage pills
   - Consistent with 7-stage color scheme
-- [ ] Create `src/components/opportunities/ProbabilityBar.vue`:
+- [x] Create `src/components/opportunities/ProbabilityBar.vue`:
   - Progress bar with percentage display
   - Visual probability indicator
-- [ ] Create `src/components/opportunities/OpportunityTable.vue`:
+- [x] Create `src/components/opportunities/OpportunityTable.vue`:
   - Sortable table with all required columns
   - Bulk selection checkboxes
   - Action buttons (edit, delete, more)
   - Pagination controls
-- [ ] **VALIDATION**: Visual testing on iPad viewport, accessibility check
-- [ ] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): Display components implemented with iPad optimization"`
+- [x] **VALIDATION**: Visual testing on iPad viewport, accessibility check
+- [x] **SAFETY CHECKPOINT**: `git commit -m "feat(opportunities): Display components implemented with iPad optimization"`
 
 ---
 

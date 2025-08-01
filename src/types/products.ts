@@ -1,15 +1,17 @@
 import * as yup from 'yup'
 
 /**
- * Product Category Enum
+ * Product Category Enum - Matching database schema
  */
 export enum ProductCategory {
+  PROTEIN = 'Protein',
   SAUCE = 'Sauce',
-  MARINADE = 'Marinade', 
   SEASONING = 'Seasoning',
-  RUB = 'Rub',
-  CONDIMENT = 'Condiment',
-  SPECIALTY = 'Specialty',
+  BEVERAGE = 'Beverage',
+  SNACK = 'Snack',
+  FROZEN = 'Frozen',
+  DAIRY = 'Dairy',
+  BAKERY = 'Bakery',
   OTHER = 'Other'
 }
 
@@ -20,13 +22,13 @@ export interface Product {
   id: string
   name: string
   description: string | null
-  category: ProductCategory
-  unit_price: number | null
+  category: ProductCategory | null
+  unit_price?: number | null  // Made optional to match database variations
   sku: string | null
   is_active: boolean
-  created_at: string
-  updated_at: string
-  created_by: string | null
+  created_at: string | null
+  updated_at: string | null
+  created_by?: string | null  // Made optional to match database
   deleted_at: string | null
 }
 
@@ -36,7 +38,7 @@ export interface Product {
 export interface ProductInsert {
   name: string
   description?: string | null
-  category: ProductCategory
+  category: ProductCategory | null
   unit_price?: number | null
   sku?: string | null
   is_active?: boolean
@@ -49,7 +51,7 @@ export interface ProductInsert {
 export interface ProductUpdate {
   name?: string
   description?: string | null
-  category?: ProductCategory
+  category?: ProductCategory | null
   unit_price?: number | null
   sku?: string | null
   is_active?: boolean
@@ -62,12 +64,12 @@ export interface ProductWithPrincipals {
   id: string
   name: string
   description: string | null
-  category: ProductCategory
-  unit_price: number | null
+  category: ProductCategory | null
+  unit_price?: number | null
   sku: string | null
   is_active: boolean
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
   
   // Principal relationships
   principal_ids: string[]
@@ -82,11 +84,11 @@ export interface ProductPrincipal {
   id: string
   product_id: string
   principal_id: string
-  created_at: string
+  created_at: string | null
   
   // Related data
   product_name: string
-  product_category: ProductCategory
+  product_category: ProductCategory | null
   principal_name: string
   principal_type: string
 }
@@ -97,9 +99,9 @@ export interface ProductPrincipal {
 export interface ProductOption {
   id: string
   name: string
-  category: ProductCategory
+  category: ProductCategory | null
   description: string | null
-  unit_price: number | null
+  unit_price?: number | null
   available_principals: string[]  // Principal IDs that can access this product
 }
 
@@ -204,7 +206,8 @@ export const productValidationSchema = yup.object({
   category: yup
     .string()
     .required('Category is required')
-    .oneOf(Object.values(ProductCategory), 'Invalid category selected'),
+    .oneOf(Object.values(ProductCategory), 'Invalid category selected')
+    .nullable(),
     
   unit_price: yup
     .number()
@@ -250,12 +253,14 @@ export const productPrincipalValidationSchema = yup.object({
  * Category color coding for UI components
  */
 export const CATEGORY_COLORS: { [K in ProductCategory]: string } = {
-  [ProductCategory.SAUCE]: 'red',
-  [ProductCategory.MARINADE]: 'orange', 
+  [ProductCategory.PROTEIN]: 'red',
+  [ProductCategory.SAUCE]: 'orange',
   [ProductCategory.SEASONING]: 'green',
-  [ProductCategory.RUB]: 'brown',
-  [ProductCategory.CONDIMENT]: 'blue',
-  [ProductCategory.SPECIALTY]: 'purple',
+  [ProductCategory.BEVERAGE]: 'blue',
+  [ProductCategory.SNACK]: 'yellow',
+  [ProductCategory.FROZEN]: 'cyan',
+  [ProductCategory.DAIRY]: 'purple',
+  [ProductCategory.BAKERY]: 'pink',
   [ProductCategory.OTHER]: 'gray'
 }
 
@@ -263,12 +268,14 @@ export const CATEGORY_COLORS: { [K in ProductCategory]: string } = {
  * Category icons for UI components
  */
 export const CATEGORY_ICONS: { [K in ProductCategory]: string } = {
+  [ProductCategory.PROTEIN]: '🥩',
   [ProductCategory.SAUCE]: '🥫',
-  [ProductCategory.MARINADE]: '🍖',
   [ProductCategory.SEASONING]: '🧂',
-  [ProductCategory.RUB]: '🫚',
-  [ProductCategory.CONDIMENT]: '🥪',
-  [ProductCategory.SPECIALTY]: '⭐',
+  [ProductCategory.BEVERAGE]: '🥤',
+  [ProductCategory.SNACK]: '🍿',
+  [ProductCategory.FROZEN]: '🧊',
+  [ProductCategory.DAIRY]: '🥛',
+  [ProductCategory.BAKERY]: '🍞',
   [ProductCategory.OTHER]: '📦'
 }
 
@@ -278,9 +285,9 @@ export const CATEGORY_ICONS: { [K in ProductCategory]: string } = {
 export interface ProductSearchResult {
   id: string
   name: string
-  category: ProductCategory
+  category: ProductCategory | null
   description: string | null
-  unit_price: number | null
+  unit_price?: number | null
   match_score: number  // Search relevance score
   available_for_principals: string[]  // Principal IDs
   highlight_fields: string[]  // Fields that matched the search
