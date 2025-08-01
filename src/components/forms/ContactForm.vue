@@ -1,11 +1,11 @@
 <template>
-  <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+  <div class="bg-white shadow-lg rounded-lg border-2 border-gray-300 ring-1 ring-gray-100">
     <!-- Form Header -->
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-medium text-gray-900">
+    <div class="px-6 py-4 border-b-2 border-gray-300 bg-gray-50">
+      <h3 class="text-xl font-semibold text-gray-900">
         {{ isEditing ? 'Edit Contact' : 'Create New Contact' }}
       </h3>
-      <p class="mt-1 text-sm text-gray-600">
+      <p class="mt-1 text-base font-medium text-gray-700">
         Add a key contact who influences Principal product purchases within their organization.
       </p>
     </div>
@@ -14,8 +14,8 @@
     <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
       <!-- Required Fields Section -->
       <div class="grid grid-cols-1 gap-6">
-        <div class="border-b border-gray-200 pb-6">
-          <h4 class="text-md font-medium text-gray-900 mb-4">Required Information</h4>
+        <div class="border-b-2 border-gray-200 pb-6 bg-blue-50 rounded-lg p-4 mb-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Required Information</h4>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- First Name -->
@@ -108,62 +108,10 @@
           </div>
         </div>
 
-        <!-- Important Fields Section -->
-        <div class="border-b border-gray-200 pb-6">
-          <h4 class="text-md font-medium text-gray-900 mb-4">Purchase Decision Information</h4>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Purchase Influence -->
-            <SelectField
-              v-model="formData.purchase_influence"
-              name="purchase_influence"
-              label="Purchase Influence"
-              required
-              :options="purchaseInfluenceOptions"
-              :error="errors.purchase_influence"
-              placeholder="Select influence level..."
-              @blur="validateField('purchase_influence')"
-            />
-
-            <!-- Decision Authority -->
-            <SelectField
-              v-model="formData.decision_authority"
-              name="decision_authority"
-              label="Decision Authority"
-              required
-              :options="decisionAuthorityOptions"
-              :error="errors.decision_authority"
-              placeholder="Select decision role..."
-              @blur="validateField('decision_authority')"
-            />
-          </div>
-
-          <!-- Preferred Principals Multi-Select -->
-          <div class="mt-4">
-            <label for="preferred_principals" class="block text-sm font-medium text-gray-700">
-              Preferred Principal Brands
-            </label>
-            <div class="mt-1">
-              <SelectField
-                v-model="formData.preferred_principals"
-                name="preferred_principals"
-                label="Preferred Principal Brands"
-                :options="principalOptions"
-                :error="errors.preferred_principals"
-                placeholder="Select Principal brands this contact advocates for..."
-                multiple
-                @blur="validateField('preferred_principals')"
-              />
-            </div>
-            <p class="mt-1 text-xs text-gray-500">
-              Select the Principal brands this contact champions within their organization
-            </p>
-          </div>
-        </div>
 
         <!-- Optional Fields Section -->
-        <div class="space-y-4">
-          <h4 class="text-md font-medium text-gray-900">Contact Details (Optional)</h4>
+        <div class="space-y-4 bg-gray-50 rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-900">Contact Details (Optional)</h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Phone -->
@@ -191,7 +139,7 @@
 
           <!-- Address Fields -->
           <div class="space-y-4">
-            <h5 class="text-sm font-medium text-gray-700">Address</h5>
+            <h5 class="text-base font-semibold text-gray-800">Address</h5>
             
             <BaseInputField
               v-model="formData.address"
@@ -277,7 +225,7 @@
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+      <div class="flex justify-end space-x-3 pt-6 border-t-2 border-gray-300 bg-gray-50 rounded-b-lg px-4 py-4 -mx-6 -mb-6">
         <button
           type="button"
           @click="$emit('cancel')"
@@ -334,8 +282,6 @@ import {
   ContactUpdateForm,
   ContactValidator,
   POSITION_OPTIONS,
-  PURCHASE_INFLUENCE_OPTIONS,
-  DECISION_AUTHORITY_OPTIONS,
   fieldValidators
 } from '@/types/contacts'
 import { useOrganizationStore } from '@/stores/organizationStore'
@@ -347,9 +293,6 @@ interface ContactFormData {
   last_name: string
   organization_id: string
   position: string
-  purchase_influence: 'High' | 'Medium' | 'Low' | 'Unknown'
-  decision_authority: 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper'
-  preferred_principals: string[]
   phone: string
   email: string
   address: string
@@ -393,9 +336,6 @@ const formData = reactive<ContactFormData>({
   last_name: '',
   organization_id: '',
   position: '',
-  purchase_influence: 'Unknown',
-  decision_authority: 'End User',
-  preferred_principals: [],
   phone: '',
   email: '',
   address: '',
@@ -426,13 +366,12 @@ if (props.isEditing && props.contact) {
     website: contactData.website || '',
     account_manager: contactData.account_manager || '',
     notes: contactData.notes || '',
-    preferred_principals: contactData.preferred_principals || []
   })
 }
 
 // Computed properties
 const isFormValid = computed(() => {
-  const requiredFields = ['first_name', 'last_name', 'organization_id', 'position', 'purchase_influence', 'decision_authority']
+  const requiredFields = ['first_name', 'last_name', 'organization_id', 'position']
   return requiredFields.every(field => formData[field as keyof ContactFormData]) && 
          Object.keys(errors).every(key => !errors[key])
 })
@@ -451,57 +390,7 @@ const positionOptions = ref<Array<{value: string, label: string}>>([
   ...POSITION_OPTIONS.map(pos => ({ value: pos, label: pos }))
 ])
 
-// Purchase influence options
-const purchaseInfluenceOptions = PURCHASE_INFLUENCE_OPTIONS.map(influence => ({
-  value: influence,
-  label: influence,
-  description: getInfluenceDescription(influence)
-}))
 
-// Decision authority options
-const decisionAuthorityOptions = DECISION_AUTHORITY_OPTIONS.map(authority => ({
-  value: authority,
-  label: authority,
-  description: getAuthorityDescription(authority)
-}))
-
-// Principal options from organizations filtered as Principals
-const principalOptions = computed(() => {
-  // Filter organizations that could be considered Principal brands
-  // This could be based on organization type, tags, or a specific field
-  return organizationStore.organizations
-    .filter(org => 
-      org.name.toLowerCase().includes('principal') || // Name contains 'principal'
-      org.status === 'Partner' || // Based on partner status
-      org.status === 'Vendor' // Or vendor status - adjust based on your Principal identification criteria
-    )
-    .map(org => ({
-      value: org.id,
-      label: org.name,
-      subtitle: org.industry || undefined
-    }))
-})
-
-// Helper functions
-function getInfluenceDescription(influence: string): string {
-  switch (influence) {
-    case 'High': return 'Significant decision-making power'
-    case 'Medium': return 'Moderate influence on purchases'
-    case 'Low': return 'Limited purchase decision impact'
-    case 'Unknown': return 'Influence level needs assessment'
-    default: return ''
-  }
-}
-
-function getAuthorityDescription(authority: string): string {
-  switch (authority) {
-    case 'Decision Maker': return 'Final approval authority'
-    case 'Influencer': return 'Influences purchase decisions'
-    case 'End User': return 'Uses the products/services'
-    case 'Gatekeeper': return 'Controls access to decision makers'
-    default: return ''
-  }
-}
 
 // Validation methods
 const validateField = async (fieldName: string) => {
@@ -516,9 +405,6 @@ const validateField = async (fieldName: string) => {
       errors[fieldName] = error || ''
     } else if (fieldName === 'position') {
       const error = fieldValidators.requiredText(value as string, 'Position')
-      errors[fieldName] = error || ''
-    } else if (fieldName === 'purchase_influence' || fieldName === 'decision_authority') {
-      const error = fieldValidators.requiredSelect(value as string, fieldName.replace('_', ' '))
       errors[fieldName] = error || ''
     } else if (fieldName === 'phone') {
       const error = fieldValidators.phone(value as string)
@@ -552,9 +438,6 @@ const handleSubmit = async () => {
       last_name: formData.last_name,
       organization_id: formData.organization_id,
       position: formData.position,
-      purchase_influence: formData.purchase_influence,
-      decision_authority: formData.decision_authority,
-      preferred_principals: formData.preferred_principals,
       phone: formData.phone || null,
       email: formData.email || null,
       address: formData.address || null,
@@ -580,12 +463,8 @@ const handleSubmit = async () => {
       return
     }
 
-    // Emit validated data with principal relationships
-    const submitData = {
-      ...result.data!,
-      _principalIds: formData.preferred_principals // Include principal IDs for relationship handling
-    }
-    emit('submit', submitData)
+    // Emit validated data
+    emit('submit', result.data!)
     
   } catch (error) {
     console.error('Form validation error:', error)

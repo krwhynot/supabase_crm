@@ -3,7 +3,7 @@
   <div class="space-y-4 md:space-y-6">
     <!-- Address Information (2-column) -->
     <div class="space-y-4">
-      <h3 class="text-sm font-medium text-gray-900">Address Information</h3>
+      <h3 class="text-lg font-semibold text-gray-900">Address Information</h3>
       
       <!-- Address Line 1 (Full Width) -->
       <BaseInputField
@@ -61,7 +61,7 @@
 
     <!-- Additional Information (2-column) -->
     <div class="space-y-4">
-      <h3 class="text-sm font-medium text-gray-900">Additional Information</h3>
+      <h3 class="text-lg font-semibold text-gray-900">Additional Information</h3>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <!-- Website -->
@@ -102,8 +102,8 @@
         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
       />
       <label for="is_primary" class="flex-1">
-        <span class="text-sm font-medium text-gray-900">Primary Contact</span>
-        <p class="text-xs text-gray-500 mt-0.5">
+        <span class="text-base font-semibold text-gray-900">Primary Contact</span>
+        <p class="text-sm font-medium text-gray-600 mt-0.5">
           Mark this as the primary contact for the organization
         </p>
       </label>

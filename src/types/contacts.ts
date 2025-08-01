@@ -33,25 +33,6 @@ export const POSITION_OPTIONS = [
   'Food Service Director'
 ] as const
 
-/**
- * Purchase influence levels
- */
-export const PURCHASE_INFLUENCE_OPTIONS = [
-  'High',
-  'Medium', 
-  'Low',
-  'Unknown'
-] as const
-
-/**
- * Decision authority roles
- */
-export const DECISION_AUTHORITY_OPTIONS = [
-  'Decision Maker',
-  'Influencer',
-  'End User',
-  'Gatekeeper'
-] as const
 
 /**
  * Contact creation validation schema - Updated for Kitchen Pantry CRM
@@ -83,23 +64,6 @@ export const contactCreateSchema = yup.object({
     .min(1, 'Position cannot be empty')
     .max(100, 'Position must be less than 100 characters')
     .trim(),
-
-  // Important fields
-  purchase_influence: yup
-    .string()
-    .required('Purchase influence is required')
-    .oneOf(PURCHASE_INFLUENCE_OPTIONS, 'Invalid purchase influence level'),
-  
-  decision_authority: yup
-    .string()
-    .required('Decision authority is required')
-    .oneOf(DECISION_AUTHORITY_OPTIONS, 'Invalid decision authority role'),
-  
-  preferred_principals: yup
-    .array()
-    .of(yup.string().uuid('Principal ID must be valid'))
-    .nullable()
-    .default([]),
 
   // Optional fields
   phone: yup
@@ -199,14 +163,6 @@ export const contactUpdateSchema = yup.object({
     .string()
     .max(100, 'Position must be less than 100 characters')
     .trim(),
-
-  purchase_influence: yup
-    .string()
-    .oneOf(PURCHASE_INFLUENCE_OPTIONS, 'Invalid purchase influence level'),
-
-  decision_authority: yup
-    .string()
-    .oneOf(DECISION_AUTHORITY_OPTIONS, 'Invalid decision authority role'),
   
   email: yup
     .string()
@@ -319,12 +275,7 @@ export const contactStepOneSchema = contactCreateSchema.pick([
   'first_name', 'last_name', 'organization_id', 'position', 'email', 'phone'
 ])
 
-// Step 2: Authority & Influence (Required: purchase_influence, decision_authority)
-export const contactStepTwoSchema = contactCreateSchema.pick([
-  'purchase_influence', 'decision_authority', 'preferred_principals'
-])
-
-// Step 3: Contact Details (All optional)
+// Step 2: Contact Details (All optional) - formerly Step 3
 export const contactStepThreeSchema = contactCreateSchema.pick([
   'address', 'city', 'state', 'zip_code', 'website', 'account_manager', 'notes', 'is_primary'
 ])
@@ -338,7 +289,6 @@ export type ContactSearchForm = yup.InferType<typeof contactSearchSchema>
 
 // Step-specific form types
 export type ContactStepOneForm = yup.InferType<typeof contactStepOneSchema>
-export type ContactStepTwoForm = yup.InferType<typeof contactStepTwoSchema>
 export type ContactStepThreeForm = yup.InferType<typeof contactStepThreeSchema>
 
 /**
@@ -497,34 +447,6 @@ export class ContactValidator {
     }
   }
 
-  /**
-   * Validate contact step two form
-   */
-  static async validateStepTwo(data: unknown): Promise<FormValidationResult<ContactStepTwoForm>> {
-    try {
-      const validData = await contactStepTwoSchema.validate(data, { abortEarly: false })
-      return {
-        isValid: true,
-        data: validData,
-        errors: []
-      }
-    } catch (error) {
-      if (error instanceof yup.ValidationError) {
-        return {
-          isValid: false,
-          errors: error.inner.map(err => ({
-            field: err.path || 'unknown',
-            message: err.message
-          }))
-        }
-      }
-      
-      return {
-        isValid: false,
-        errors: [{ field: 'general', message: 'Step 2 validation failed' }]
-      }
-    }
-  }
 
   /**
    * Validate contact step three form
@@ -582,8 +504,6 @@ export class ContactValidator {
       last_name: form.last_name,
       organization_id: form.organization_id,
       position: form.position,
-      purchase_influence: form.purchase_influence,
-      decision_authority: form.decision_authority,
       phone: form.phone,
       email: form.email,
       address: form.address,
@@ -607,8 +527,6 @@ export class ContactValidator {
     if (form.last_name !== undefined) update.last_name = form.last_name
     if (form.organization_id !== undefined) update.organization_id = form.organization_id
     if (form.position !== undefined) update.position = form.position
-    if (form.purchase_influence !== undefined) update.purchase_influence = form.purchase_influence
-    if (form.decision_authority !== undefined) update.decision_authority = form.decision_authority
     if (form.phone !== undefined) update.phone = form.phone
     if (form.email !== undefined) update.email = form.email
     if (form.address !== undefined) update.address = form.address
@@ -632,9 +550,6 @@ export class ContactValidator {
       last_name: contact.last_name,
       organization_id: contact.organization_id,
       position: contact.position,
-      purchase_influence: contact.purchase_influence,
-      decision_authority: contact.decision_authority,
-      preferred_principals: [], // Will be loaded from junction table
       phone: contact.phone,
       email: contact.email,
       address: contact.address,
@@ -733,31 +648,6 @@ export const contactUtils = {
     return position || 'No position specified'
   },
 
-  /**
-   * Get purchase influence badge class
-   */
-  getPurchaseInfluenceClass: (influence: string): string => {
-    switch (influence) {
-      case 'High': return 'bg-red-100 text-red-800'
-      case 'Medium': return 'bg-yellow-100 text-yellow-800'
-      case 'Low': return 'bg-blue-100 text-blue-800'
-      case 'Unknown': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  },
-
-  /**
-   * Get decision authority badge class
-   */
-  getDecisionAuthorityClass: (authority: string): string => {
-    switch (authority) {
-      case 'Decision Maker': return 'bg-green-100 text-green-800'
-      case 'Influencer': return 'bg-purple-100 text-purple-800'
-      case 'End User': return 'bg-blue-100 text-blue-800'
-      case 'Gatekeeper': return 'bg-orange-100 text-orange-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  },
 
   /**
    * Format phone number for display
@@ -816,34 +706,33 @@ export interface ContactPrincipalAdvocacy {
  */
 export const contactListUtils = {
   /**
-   * Sort contacts by influence priority
+   * Sort contacts by name
    */
-  sortByInfluence: (contacts: Contact[]): Contact[] => {
-    const influenceOrder = { 'High': 4, 'Medium': 3, 'Low': 2, 'Unknown': 1 }
+  sortByName: (contacts: Contact[]): Contact[] => {
     return [...contacts].sort((a, b) => {
-      const aScore = influenceOrder[a.purchase_influence as keyof typeof influenceOrder] || 0
-      const bScore = influenceOrder[b.purchase_influence as keyof typeof influenceOrder] || 0
-      return bScore - aScore
+      const nameA = `${a.first_name} ${a.last_name}`.toLowerCase()
+      const nameB = `${b.first_name} ${b.last_name}`.toLowerCase()
+      return nameA.localeCompare(nameB)
     })
   },
 
   /**
-   * Filter contacts by purchase influence
+   * Filter contacts by position
    */
-  filterByInfluence: (contacts: Contact[], influences: string[]): Contact[] => {
-    return contacts.filter(contact => influences.includes(contact.purchase_influence))
+  filterByPosition: (contacts: Contact[], positions: string[]): Contact[] => {
+    return contacts.filter(contact => positions.includes(contact.position))
   },
 
   /**
-   * Group contacts by decision authority
+   * Group contacts by organization
    */
-  groupByAuthority: (contacts: Contact[]): Record<string, Contact[]> => {
+  groupByOrganization: (contacts: Contact[]): Record<string, Contact[]> => {
     return contacts.reduce((groups, contact) => {
-      const authority = contact.decision_authority || 'Unknown'
-      if (!groups[authority]) {
-        groups[authority] = []
+      const orgId = contact.organization_id || 'Unknown'
+      if (!groups[orgId]) {
+        groups[orgId] = []
       }
-      groups[authority].push(contact)
+      groups[orgId].push(contact)
       return groups
     }, {} as Record<string, Contact[]>)
   }
@@ -851,5 +740,3 @@ export const contactListUtils = {
 
 // Type exports for external use
 export type PositionOption = typeof POSITION_OPTIONS[number]
-export type PurchaseInfluence = typeof PURCHASE_INFLUENCE_OPTIONS[number]
-export type DecisionAuthority = typeof DECISION_AUTHORITY_OPTIONS[number]

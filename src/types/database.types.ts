@@ -21,8 +21,6 @@ export type Database = {
           last_name: string
           organization_id: string
           position: string
-          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
-          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone: string | null
           email: string | null
           address: string | null
@@ -43,8 +41,6 @@ export type Database = {
           last_name: string
           organization_id: string
           position: string
-          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
-          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone?: string | null
           email?: string | null
           address?: string | null
@@ -65,8 +61,6 @@ export type Database = {
           last_name?: string
           organization_id?: string
           position?: string
-          purchase_influence?: "High" | "Medium" | "Low" | "Unknown"
-          decision_authority?: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone?: string | null
           email?: string | null
           address?: string | null
@@ -626,8 +620,6 @@ export type Database = {
           organization_name: string
           organization_industry: string | null
           position: string
-          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
-          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone: string | null
           email: string | null
           is_primary: boolean | null
@@ -646,8 +638,6 @@ export type Database = {
           full_name: string
           organization_id: string
           position: string
-          purchase_influence: "High" | "Medium" | "Low" | "Unknown"
-          decision_authority: "Decision Maker" | "Influencer" | "End User" | "Gatekeeper"
           phone: string | null
           email: string | null
           address: string | null
@@ -849,9 +839,7 @@ export type ContactPrincipalUpdate = Database['public']['Tables']['contact_princ
 export type ContactListView = Database['public']['Views']['contact_list_view']['Row']
 export type ContactDetailView = Database['public']['Views']['contact_detail_view']['Row']
 
-// Contact enum types
-export type PurchaseInfluence = 'High' | 'Medium' | 'Low' | 'Unknown'
-export type DecisionAuthority = 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper'
+// Contact enum types  
 export type AdvocacyLevel = 'High' | 'Medium' | 'Low'
 
 // Organization enum types

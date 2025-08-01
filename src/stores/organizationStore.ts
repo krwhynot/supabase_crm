@@ -665,10 +665,7 @@ export const useOrganizationStore = defineStore('organization', () => {
           last_name: contact.last_name,
           email: contact.email,
           phone: contact.phone || null,
-          position: contact.title || 'Unknown', // Map title to position
-          purchase_influence: 'Unknown' as 'High' | 'Medium' | 'Low' | 'Unknown',
-          decision_authority: 'End User' as 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper',
-          department: contact.department || null
+          position: contact.title || 'Unknown' // Map title to position
         }))
 
         const { error: contactError } = await supabase
@@ -916,10 +913,7 @@ export const useOrganizationStore = defineStore('organization', () => {
           last_name: contact.last_name,
           email: contact.email,
           phone: contact.phone || null,
-          position: contact.title || 'Unknown', // Map title to position
-          purchase_influence: 'Unknown' as 'High' | 'Medium' | 'Low' | 'Unknown',
-          decision_authority: 'End User' as 'Decision Maker' | 'Influencer' | 'End User' | 'Gatekeeper',
-          department: contact.department || null
+          position: contact.title || 'Unknown' // Map title to position
         }))
 
         const { error: contactError } = await supabase

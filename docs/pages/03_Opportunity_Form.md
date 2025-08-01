@@ -43,7 +43,7 @@ Initiate formal sales relationship and track pipeline progression.
 - **Opportunity Context** - Type of opportunity (dropdown): Site Visit, Food Show, New Product Interest, Follow-up, Demo Request, Sampling, Custom
 - Probability % (0-100)
 - Expected Close Date
-- Deal Owner (sales rep)
+- Deal Owner (Account Manager)
 - Notes
 
 ## Auto-Generated Opportunity Naming

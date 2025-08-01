@@ -3,10 +3,9 @@ import { test, expect } from '@playwright/test';
 /**
  * Contact Multi-Step Form Test Suite
  * 
- * Comprehensive testing for the 3-step contact creation form:
+ * Comprehensive testing for the 2-step contact creation form:
  * - Step 1: Basic Info (first_name, last_name, organization_id, position, email, phone)
- * - Step 2: Authority & Influence (purchase_influence, decision_authority, preferred_principals)  
- * - Step 3: Contact Details (address, city, state, zip_code, website, account_manager, notes, is_primary)
+ * - Step 2: Contact Details (address, city, state, zip_code, website, account_manager, notes, is_primary)
  */
 
 // Test data fixtures
@@ -19,11 +18,7 @@ const validContactData = {
   email: 'john.doe@restaurant.com',
   phone: '(555) 123-4567',
   
-  // Step 2 - Required fields
-  purchase_influence: 'High',
-  decision_authority: 'Decision Maker',
-  
-  // Step 3 - Optional fields
+  // Step 2 - Optional fields
   address: '123 Main Street',
   city: 'San Francisco',
   state: 'CA',
@@ -66,10 +61,8 @@ class ContactFormHelpers {
     }
     
     // Fallback: check which step header is visible
-    if (await this.page.locator('h2:has-text("Authority"), h2:has-text("Influence")').isVisible()) {
+    if (await this.page.locator('h2:has-text("Contact Details")').isVisible()) {
       return 2;
-    } else if (await this.page.locator('h2:has-text("Contact Details")').isVisible()) {
-      return 3;
     }
     
     return 1;
@@ -169,24 +162,6 @@ class ContactFormHelpers {
   }
 
   async fillStep2(data: typeof validContactData) {
-    // Purchase Influence (required)
-    const purchaseInfluenceField = this.page.locator('select[name="purchase_influence"]');
-    const purchaseOptions = await purchaseInfluenceField.locator('option').count();
-    if (purchaseOptions > 1) {
-      await purchaseInfluenceField.selectOption({ index: 1 });
-    }
-    
-    // Decision Authority (required)
-    const decisionAuthorityField = this.page.locator('select[name="decision_authority"]');
-    const authorityOptions = await decisionAuthorityField.locator('option').count();
-    if (authorityOptions > 1) {
-      await decisionAuthorityField.selectOption({ index: 1 });
-    }
-    
-    // Preferred Principals (optional) - skip for basic test
-  }
-
-  async fillStep3(data: typeof validContactData) {
     // Address fields (all optional)
     if (data.address) {
       await this.page.fill('input[name="address"]', data.address);
@@ -236,7 +211,7 @@ class ContactFormHelpers {
 }
 
 test.describe('Contact Multi-Step Form - Navigation Tests', () => {
-  test('should navigate through all 3 steps successfully', async ({ page }) => {
+  test('should navigate through all 2 steps successfully', async ({ page }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -251,14 +226,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     // Verify we moved to step 2
     expect(await helpers.getCurrentStep()).toBe(2);
     
-    // Fill and complete Step 2
-    await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
-    
-    // Verify we moved to step 3
-    expect(await helpers.getCurrentStep()).toBe(3);
-    
-    // Verify step 3 is the final step
+    // Verify step 2 is the final step
     const submitButton = page.locator('button:has-text("Create Contact")');
     await expect(submitButton).toBeVisible();
   });
@@ -286,14 +254,8 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     await helpers.clickNext();
     expect(await helpers.getCurrentStep()).toBe(2);
     
-    // Step 2: Without required authority fields, should be disabled
-    expect(await helpers.isNextButtonDisabled()).toBe(true);
-    
-    // Fill required fields
-    await helpers.fillStep2(validContactData);
-    
-    // Should now be enabled
-    expect(await helpers.isNextButtonDisabled()).toBe(false);
+    // Step 2: All fields are optional, so submit should be enabled
+    expect(await helpers.isSubmitButtonDisabled()).toBe(false);
   });
 
   test('should maintain form data when navigating back and forward', async ({ page }) => {
@@ -307,15 +269,6 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     
     // Fill step 2  
     await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
-    
-    // Go back to step 2
-    await helpers.clickBack();
-    expect(await helpers.getCurrentStep()).toBe(2);
-    
-    // Verify data is maintained (check purchase influence selection)
-    const purchaseInfluenceValue = await page.inputValue('select[name="purchase_influence"]');
-    expect(purchaseInfluenceValue).toBe(validContactData.purchase_influence);
     
     // Go back to step 1
     await helpers.clickBack();
@@ -333,8 +286,10 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     // Go forward again
     await helpers.clickNext();
     expect(await helpers.getCurrentStep()).toBe(2);
-    await helpers.clickNext();
-    expect(await helpers.getCurrentStep()).toBe(3);
+    
+    // Verify step 2 data is maintained (check address field)
+    const addressValue = await page.inputValue('input[name="address"]');
+    expect(addressValue).toBe(validContactData.address);
   });
 
   test('should update step progress indicator correctly', async ({ page }) => {
@@ -348,17 +303,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     await helpers.fillStep1(validContactData);
     await helpers.clickNext();
     
-    // Step 2: First two indicators should be active
-    expect(await helpers.getActiveStepCount()).toBe(2);
-    
-    await helpers.fillStep2(validContactData);  
-    await helpers.clickNext();
-    
-    // Step 3: All three indicators should be active
-    expect(await helpers.getActiveStepCount()).toBe(3);
-    
-    // Go back to step 2
-    await helpers.clickBack();
+    // Step 2: Both indicators should be active
     expect(await helpers.getActiveStepCount()).toBe(2);
     
     // Go back to step 1
@@ -401,13 +346,6 @@ test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
     await helpers.clickNext();
     
     // Step 2 should also fit without scrolling
-    await expect(page.locator('select[name="purchase_influence"]')).toBeVisible();
-    await expect(page.locator('select[name="decision_authority"]')).toBeVisible();
-    
-    await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
-    
-    // Step 3 should fit without scrolling
     await expect(page.locator('input[name="address"]')).toBeVisible();
     await expect(page.locator('textarea[name="notes"]')).toBeVisible();
   });
@@ -465,8 +403,9 @@ test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     
     await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
-    expect(await helpers.getCurrentStep()).toBe(3);
+    
+    // Should still be on step 2 (final step)
+    expect(await helpers.getCurrentStep()).toBe(2);
   });
 });
 
@@ -496,7 +435,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     // For now, we'll assume the form handles missing org gracefully
   });
 
-  test('should validate Step 2 required fields', async ({ page }) => {
+  test('should validate Step 2 - all fields optional', async ({ page }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -505,16 +444,14 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     await helpers.fillStep1(validContactData);
     await helpers.clickNext();
     
-    // Step 2: Next button should be disabled without required fields
-    expect(await helpers.isNextButtonDisabled()).toBe(true);
+    // Step 2: All fields are optional, so submit should be enabled immediately
+    expect(await helpers.isSubmitButtonDisabled()).toBe(false);
     
-    // Add purchase influence
-    await page.selectOption('select[name="purchase_influence"]', { label: 'High' });
-    expect(await helpers.isNextButtonDisabled()).toBe(true);
+    // Fill optional fields
+    await helpers.fillStep2(validContactData);
     
-    // Add decision authority - should enable progression
-    await page.selectOption('select[name="decision_authority"]', { label: 'Decision Maker' });
-    expect(await helpers.isNextButtonDisabled()).toBe(false);
+    // Should still be able to submit
+    expect(await helpers.isSubmitButtonDisabled()).toBe(false);
   });
 
   test('should validate field formats', async ({ page }) => {
@@ -545,15 +482,13 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     )).toBe(false);
   });
 
-  test('should validate Step 3 optional field formats', async ({ page }) => {
+  test('should validate Step 2 optional field formats', async ({ page }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
     
-    // Navigate to step 3
+    // Navigate to step 2
     await helpers.fillStep1(validContactData);
-    await helpers.clickNext();
-    await helpers.fillStep2(validContactData);
     await helpers.clickNext();
     
     // Test invalid website format
@@ -701,11 +636,8 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     await helpers.clickNext();
     
     await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
     
-    await helpers.fillStep3(validContactData);
-    
-    // Submit form
+    // Submit form (no step 3)
     await helpers.clickSubmit();
     
     // Should redirect to contact detail page or show success
@@ -726,14 +658,12 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     
     await helpers.navigateToCreatePage();
     
-    // Fill only required fields
+    // Fill only required fields from Step 1
     const requiredData = {
       first_name: validContactData.first_name,
       last_name: validContactData.last_name,
       organization_id: validContactData.organization_id,
-      position: validContactData.position,
-      purchase_influence: validContactData.purchase_influence,
-      decision_authority: validContactData.decision_authority
+      position: validContactData.position
     };
     
     // Step 1: Required fields only
@@ -744,13 +674,7 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     
     await helpers.clickNext();
     
-    // Step 2: Required fields
-    await page.selectOption('select[name="purchase_influence"]', { label: requiredData.purchase_influence });
-    await page.selectOption('select[name="decision_authority"]', { label: requiredData.decision_authority });
-    
-    await helpers.clickNext();
-    
-    // Step 3: Skip optional fields
+    // Step 2: Skip all optional fields and submit directly
     await helpers.clickSubmit();
     
     // Should still succeed with minimal data
@@ -780,8 +704,6 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     await helpers.fillStep1(validContactData);
     await helpers.clickNext();
     await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
-    await helpers.fillStep3(validContactData);
     await helpers.clickSubmit();
     
     // Should show error message
@@ -922,13 +844,12 @@ test.describe('Contact Multi-Step Form - Visual Tests', () => {
       fullPage: true 
     });
     
-    // Fill step 2 and move to step 3
+    // Fill step 2 (final step)
     await helpers.fillStep2(validContactData);
-    await helpers.clickNext();
     
-    // Step 3 screenshot
+    // Step 2 complete screenshot
     await page.screenshot({ 
-      path: `screenshots/contact-form-step-3-ipad-${testInfo.project.name}.png`,
+      path: `screenshots/contact-form-step-2-complete-ipad-${testInfo.project.name}.png`,
       fullPage: true 
     });
   });

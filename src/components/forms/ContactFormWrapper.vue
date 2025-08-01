@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <!-- Compact Progress Indicator -->
-    <div class="mb-3">
+    <div class="mb-3" role="progressbar" :aria-valuenow="currentStep" :aria-valuemax="totalSteps" aria-label="Form progress">
       <div class="flex items-center justify-center space-x-2 mb-2">
         <div
           v-for="(step, index) in steps"
@@ -10,16 +10,17 @@
             'h-1.5 w-6 rounded-full transition-colors duration-200',
             index + 1 <= currentStep ? 'bg-primary-600' : 'bg-gray-200'
           ]"
-          :aria-label="`Step ${index + 1}: ${step.title}`"
+          :aria-label="`Step ${index + 1}: ${step.title} ${index + 1 <= currentStep ? 'completed' : 'not completed'}`"
+          role="presentation"
         />
       </div>
       
       <!-- Compact Step Header -->
       <div class="text-center">
-        <h2 class="text-base font-medium text-gray-900">
+        <h2 class="text-lg font-semibold text-gray-900" :id="`step-${currentStep}-title`">
           {{ currentStepData.title }}
         </h2>
-        <p class="text-xs text-gray-600 mt-0.5">
+        <p class="text-sm font-medium text-gray-700 mt-0.5" :id="`step-${currentStep}-description`">
           {{ currentStepData.description }}
         </p>
       </div>
@@ -123,30 +124,33 @@
           />
         </svg>
         <div>
-          <h3 class="text-sm font-medium text-red-800">Error</h3>
-          <p class="mt-1 text-sm text-red-700">{{ globalError }}</p>
+          <h3 class="text-base font-semibold text-red-800">Error</h3>
+          <p class="mt-1 text-sm font-medium text-red-700">{{ globalError }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Form Content with Reduced Padding -->
-    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
-      <div class="p-3 md:p-4">
+    <!-- Form Content with Enhanced Visual Hierarchy -->
+    <div class="bg-white shadow-lg rounded-lg border-2 border-gray-300 ring-1 ring-gray-100">
+      <div class="p-4 md:p-6">
         <!-- Step Components -->
         <component
           :is="currentStepComponent"
           :model-value="formData"
           :errors="stepErrors"
           :loading="isValidating"
+          :aria-labelledby="`step-${currentStep}-title`"
+          :aria-describedby="`step-${currentStep}-description`"
+          role="group"
           @validate="handleStepValidation"
           @update:modelValue="handleFormDataUpdate"
         />
       </div>
     </div>
 
-    <!-- Floating Action Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:relative md:bg-gray-50 md:border-0 md:shadow-none md:mt-3 md:rounded-lg">
-      <div class="max-w-4xl mx-auto px-3 py-2 md:px-4 md:py-3">
+    <!-- Enhanced Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-xl md:relative md:bg-gray-50 md:border-2 md:border-gray-300 md:shadow-lg md:mt-4 md:rounded-lg">
+      <div class="max-w-4xl mx-auto px-4 py-3 md:px-6 md:py-4">
         <div class="flex items-center justify-between">
           <!-- Back Button -->
           <Button
@@ -154,13 +158,16 @@
             variant="secondary"
             size="sm"
             :disabled="isSubmitting"
+            :aria-label="`Go back to step ${currentStep - 1}`"
             @click="goToPreviousStep"
+            @keydown.enter="goToPreviousStep"
           >
             <svg
               class="h-4 w-4 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 stroke-linecap="round"
@@ -175,7 +182,7 @@
 
           <div class="flex items-center space-x-3">
             <!-- Step Indicator -->
-            <div class="text-xs text-gray-500">
+            <div class="text-sm font-medium text-gray-600">
               Step {{ currentStep }} of {{ totalSteps }}
             </div>
             
@@ -185,7 +192,9 @@
               size="sm"
               :loading="isSubmitting || isValidating"
               :disabled="!isCurrentStepValid || isSubmitting"
+              :aria-label="isLastStep ? 'Create contact and submit form' : `Continue to step ${currentStep + 1}`"
               @click="handleNextOrSubmit"
+              @keydown.enter="handleNextOrSubmit"
             >
               {{ isLastStep ? 'Create Contact' : 'Next' }}
               <svg
@@ -194,6 +203,7 @@
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   stroke-linecap="round"
@@ -219,7 +229,6 @@ import { ContactValidator } from '@/types/contacts'
 import type { ContactCreateForm, ContactFormData } from '@/types/contacts'
 import Button from '@/components/atomic/Button.vue'
 import ContactStepOne from './ContactStepOne.vue'
-import ContactStepTwo from './ContactStepTwo.vue'
 import ContactStepThree from './ContactStepThree.vue'
 
 /**
@@ -255,7 +264,7 @@ const contactStore = useContactStore()
 
 // Form state
 const currentStep = ref(1)
-const totalSteps = 3
+const totalSteps = 2
 const isSubmitting = ref(false)
 const isValidating = ref(false)
 const globalError = ref('')
@@ -264,8 +273,7 @@ const autoSaveStatus = ref<'saving' | 'saved' | 'error' | null>(null)
 // Step validation state
 const stepValidation = reactive({
   1: false, // Step 1 has required fields
-  2: false, // Step 2 has required fields
-  3: true   // Step 3 has no required fields
+  2: true   // Step 2 has no required fields (formerly step 3)
 })
 
 // Form data with default values
@@ -274,9 +282,6 @@ const formData = reactive<Partial<ContactFormData>>({
   last_name: '', 
   organization_id: '',
   position: '',
-  purchase_influence: 'Unknown',
-  decision_authority: 'End User',
-  preferred_principals: [],
   email: null,
   phone: null,
   address: null,
@@ -293,8 +298,7 @@ const formData = reactive<Partial<ContactFormData>>({
 // Form errors
 const formErrors = reactive<Record<string, Record<string, string>>>({
   1: {},
-  2: {},
-  3: {}
+  2: {}
 })
 
 /**
@@ -311,14 +315,6 @@ const steps = [
   },
   {
     id: 2,
-    title: 'Authority & Influence',
-    description: 'Define purchase influence and decision authority',
-    component: 'ContactStepTwo',
-    requiredFields: ['purchase_influence', 'decision_authority'],
-    optionalFields: ['preferred_principals']
-  },
-  {
-    id: 3,
     title: 'Contact Details',
     description: 'Add address, website, and additional information',
     component: 'ContactStepThree',
@@ -335,7 +331,6 @@ const currentStepData = computed(() => steps[currentStep.value - 1])
 const currentStepComponent = computed(() => {
   const componentMap = {
     ContactStepOne,
-    ContactStepTwo,
     ContactStepThree
   }
   return componentMap[currentStepData.value.component as keyof typeof componentMap]
@@ -389,9 +384,6 @@ const validateCurrentStep = async (): Promise<boolean> => {
         validationResult = await ContactValidator.validateStepOne(stepData)
         break
       case 2:
-        validationResult = await ContactValidator.validateStepTwo(stepData)
-        break
-      case 3:
         validationResult = await ContactValidator.validateStepThree(stepData)
         break
       default:
