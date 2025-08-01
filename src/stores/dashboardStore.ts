@@ -118,6 +118,16 @@ export interface DashboardFilters {
 }
 
 /**
+ * User interface preferences
+ */
+export interface DashboardPreferences {
+  sidebarCollapsed: boolean
+  weekFilterEnabled: boolean
+  autoRefresh: boolean
+  theme: 'light' | 'dark' | 'system'
+}
+
+/**
  * Store state interface for type safety
  */
 interface DashboardStoreState {
@@ -137,6 +147,7 @@ interface DashboardStoreState {
   
   // User preferences
   filters: DashboardFilters
+  preferences: DashboardPreferences
   autoRefresh: boolean
   
   // Cache management
@@ -183,6 +194,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
       productCategories: [],
       showInactiveItems: false,
       refreshInterval: 5 // 5 minutes default
+    },
+    preferences: {
+      sidebarCollapsed: false,
+      weekFilterEnabled: false,
+      autoRefresh: true,
+      theme: 'light'
     },
     autoRefresh: true,
     
@@ -511,6 +528,19 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const updateTimeFilter = (timeFilter: DashboardTimeFilter): void => {
     updateFilters({ timeFilter })
   }
+
+  /**
+   * Update user interface preferences
+   */
+  const updatePreferences = (newPreferences: Partial<DashboardPreferences>): void => {
+    state.preferences = { ...state.preferences, ...newPreferences }
+    
+    // Sync autoRefresh state with preferences
+    if (newPreferences.autoRefresh !== undefined) {
+      state.autoRefresh = newPreferences.autoRefresh
+      toggleAutoRefresh(newPreferences.autoRefresh)
+    }
+  }
   
   /**
    * Toggle auto-refresh
@@ -601,6 +631,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
       refreshInterval: 5
     }
     
+    // Reset preferences to defaults
+    state.preferences = {
+      sidebarCollapsed: false,
+      weekFilterEnabled: false,
+      autoRefresh: true,
+      theme: 'light'
+    }
+    
     stopAutoRefresh()
   }
   
@@ -656,6 +694,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     lastUpdated: computed(() => state.lastUpdated),
     lastRefresh: computed(() => state.lastRefresh),
     filters: computed(() => state.filters),
+    preferences: computed(() => state.preferences),
     autoRefresh: computed(() => state.autoRefresh),
     isDataStale: computed(() => state.isDataStale),
     isDataFresh,
@@ -671,6 +710,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     refreshDashboard,
     updateFilters,
     updateTimeFilter,
+    updatePreferences,
     toggleAutoRefresh,
     exportDashboard,
     resetDashboard,
@@ -690,5 +730,6 @@ export type {
   DashboardActivity,
   DashboardPerformance,
   DashboardFilters,
+  DashboardPreferences,
   DashboardTimeFilter
 }

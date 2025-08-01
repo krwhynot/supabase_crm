@@ -90,6 +90,44 @@ const routes: RouteRecordRaw[] = [
           title: 'Edit Organization',
           description: 'Modify organization information'
         }
+      },
+      {
+        path: 'opportunities',
+        name: 'OpportunitiesList',
+        component: () => import('@/views/opportunities/OpportunitiesListView.vue'),
+        meta: {
+          title: 'Opportunities',
+          description: 'Manage your business opportunities'
+        }
+      },
+      {
+        path: 'opportunities/new',
+        name: 'OpportunityCreate',
+        component: () => import('@/views/opportunities/OpportunityCreateView.vue'),
+        meta: {
+          title: 'New Opportunity',
+          description: 'Add a new opportunity to your CRM'
+        }
+      },
+      {
+        path: 'opportunities/:id',
+        name: 'OpportunityDetail',
+        component: () => import('@/views/opportunities/OpportunityDetailView.vue'),
+        props: true,
+        meta: {
+          title: 'Opportunity Details',
+          description: 'View opportunity information'
+        }
+      },
+      {
+        path: 'opportunities/:id/edit',
+        name: 'OpportunityEdit',
+        component: () => import('@/views/opportunities/OpportunityEditView.vue'),
+        props: true,
+        meta: {
+          title: 'Edit Opportunity',
+          description: 'Modify opportunity information'
+        }
       }
     ]
   }

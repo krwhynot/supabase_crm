@@ -92,6 +92,21 @@
             <span v-if="!sidebarCollapsed" class="ml-3">Contacts</span>
           </router-link>
 
+          <router-link
+            to="/opportunities"
+            :class="[
+              'nav-item',
+              $route.path.startsWith('/opportunities')
+                ? 'nav-item-active'
+                : 'nav-item-inactive'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <span v-if="!sidebarCollapsed" class="ml-3">Opportunities</span>
+          </router-link>
+
         </div>
 
 
