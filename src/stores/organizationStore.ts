@@ -224,6 +224,28 @@ export const useOrganizationStore = defineStore('organization', () => {
         orgWithFields.custom_fields.is_principal === true
     })
   )
+
+  // Organizations associated with specific principals (for opportunity integration)
+  const getOrganizationsForPrincipals = computed(() => {
+    return (principalIds: string[]) => {
+      return organizations.value.filter(org => {
+        // Check if organization has relationships with specified principals
+        // This could be expanded to check contact_principals junction table
+        return principalIds.includes(org.id) || // Organization is itself a principal
+          (org as any).assigned_principals?.some((pid: string) => principalIds.includes(pid))
+      })
+    }
+  })
+
+  // Organizations that have principal relationships (for analytics)
+  const principalRelatedOrganizations = computed(() => 
+    organizations.value.filter(org => {
+      const orgWithFields = org as any
+      return (orgWithFields.custom_fields?.is_principal === true) ||
+        (orgWithFields.custom_fields?.is_distributor === true) ||
+        (orgWithFields.assigned_principals && orgWithFields.assigned_principals.length > 0)
+    })
+  )
   
   // ===============================
   // ERROR MANAGEMENT
@@ -302,6 +324,93 @@ export const useOrganizationStore = defineStore('organization', () => {
   // CORE CRUD OPERATIONS
   // ===============================
   
+  /**
+   * Fetch organizations associated with specific principals
+   */
+  const fetchOrganizationsByPrincipal = async (
+    principalId: string,
+    options: {
+      includeDirectRelationships?: boolean
+      includeContactRelationships?: boolean
+      useCache?: boolean
+    } = {}
+  ): Promise<OrganizationListItem[] | null> => {
+    try {
+      loading.organizations = true
+      clearError('organizations')
+      
+      const cacheKey = `organizations_by_principal_${principalId}_${JSON.stringify(options)}`
+      
+      if (options.useCache !== false) {
+        const cached = getCachedData<OrganizationListItem[]>(cacheKey)
+        if (cached) return cached
+      }
+      
+      // Build query to find organizations related to principal
+      let query = supabase
+        .from('organizations')
+        .select('*')
+      
+      // Direct relationship: organization is the principal
+      if (options.includeDirectRelationships !== false) {
+        query = query.or(`id.eq.${principalId}`)
+      }
+      
+      // TODO: Add contact_principals junction table query when available
+      // This would find organizations through contact relationships with principals
+      if (options.includeContactRelationships) {
+        // Future implementation for contact-principal relationships
+      }
+      
+      const { data, error } = await query
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+      
+      // Transform to OrganizationListItem format
+      const transformedData: OrganizationListItem[] = (data || []).map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        legal_name: item.legal_name,
+        industry: item.industry,
+        type: item.type,
+        size: item.size,
+        status: item.status,
+        website: item.website,
+        email: item.email,
+        primary_phone: item.primary_phone,
+        city: item.city,
+        country: item.country,
+        employees_count: item.employees_count,
+        annual_revenue: item.annual_revenue,
+        lead_score: item.lead_score,
+        contact_count: undefined,
+        last_interaction_date: item.last_contact_date,
+        next_follow_up_date: item.next_follow_up_date,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }))
+      
+      setCacheData(cacheKey, transformedData)
+      return transformedData
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch organizations by principal'
+      setError('organizations', message)
+      
+      console.error(`Failed to fetch organizations by principal: ${message}`, {
+        operation: 'fetch_organizations_by_principal',
+        principalId,
+        options
+      })
+      
+      return null
+    } finally {
+      loading.organizations = false
+    }
+  }
+
   /**
    * Fetch organizations with advanced filtering, sorting, and pagination
    */
@@ -1091,7 +1200,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   // ===============================
   
   /**
-   * Fetch dashboard metrics
+   * Fetch dashboard metrics with principal-specific analytics
    */
   const fetchDashboardMetrics = async (): Promise<OrganizationMetrics | null> => {
     try {
@@ -1106,14 +1215,26 @@ export const useOrganizationStore = defineStore('organization', () => {
         return cached
       }
       
-      // Fetch metrics in parallel
-      const [totalResult, activeResult, prospectResult, customerResult, partnerResult, revenueResult] = await Promise.all([
+      // Fetch metrics in parallel, including principal-specific queries
+      const [
+        totalResult, 
+        activeResult, 
+        prospectResult, 
+        customerResult, 
+        partnerResult, 
+        revenueResult,
+        principalResult,
+        distributorResult
+      ] = await Promise.all([
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'Active'),
         supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'Prospect'),
         supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'Customer'),
         supabase.from('organizations').select('id', { count: 'exact', head: true }).eq('status', 'Partner'),
-        supabase.from('organizations').select('annual_revenue, lead_score', { count: 'exact' }).not('annual_revenue', 'is', null)
+        supabase.from('organizations').select('annual_revenue, lead_score', { count: 'exact' }).not('annual_revenue', 'is', null),
+        // Principal-specific metrics
+        supabase.from('organizations').select('id', { count: 'exact', head: true }).contains('custom_fields', { is_principal: true }),
+        supabase.from('organizations').select('id', { count: 'exact', head: true }).contains('custom_fields', { is_distributor: true })
       ])
       
       // Calculate date ranges
@@ -1139,8 +1260,11 @@ export const useOrganizationStore = defineStore('organization', () => {
         monthlyGrowth: monthResult.count || 0,
         industryDistribution: [], // Will be populated by industry analytics
         statusDistribution: [], // Will be populated by status analytics
-        recentActivity: [] // Will be populated by activity analytics
-      }
+        recentActivity: [], // Will be populated by activity analytics
+        // Principal-specific metrics
+        principalCount: principalResult.count || 0,
+        distributorCount: distributorResult.count || 0
+      } as OrganizationMetrics & { principalCount: number; distributorCount: number }
       
       dashboardMetrics.value = metrics
       
@@ -1155,6 +1279,59 @@ export const useOrganizationStore = defineStore('organization', () => {
       return null
     } finally {
       loading.metrics = false
+    }
+  }
+
+  /**
+   * Fetch principal-organization relationship analytics
+   */
+  const fetchPrincipalAnalytics = async (): Promise<any | null> => {
+    try {
+      loading.analytics = true
+      clearError('analytics')
+      
+      const cacheKey = 'principal_analytics'
+      const cached = getCachedData<any>(cacheKey)
+      if (cached) return cached
+      
+      // Fetch organizations with principal relationships
+      const { data: principalOrgs, error } = await supabase
+        .from('organizations')
+        .select('id, name, type, custom_fields, annual_revenue, lead_score')
+        .or('custom_fields->>is_principal.eq.true,custom_fields->>is_distributor.eq.true')
+      
+      if (error) throw new Error(error.message)
+      
+      // Analyze principal-distributor relationships
+      const analytics = {
+        principalDistribution: principalOrgs?.filter(org => 
+          (org.custom_fields as any)?.is_principal === true
+        ).length || 0,
+        distributorDistribution: principalOrgs?.filter(org => 
+          (org.custom_fields as any)?.is_distributor === true
+        ).length || 0,
+        totalPrincipalRevenue: principalOrgs?.filter(org => 
+          (org.custom_fields as any)?.is_principal === true
+        ).reduce((sum, org) => sum + (org.annual_revenue || 0), 0) || 0,
+        averagePrincipalLeadScore: (() => {
+          const principals = principalOrgs?.filter(org => 
+            (org.custom_fields as any)?.is_principal === true && org.lead_score
+          ) || []
+          return principals.length > 0 
+            ? principals.reduce((sum, org) => sum + (org.lead_score || 0), 0) / principals.length
+            : 0
+        })()
+      }
+      
+      setCacheData(cacheKey, analytics, 300000) // 5 minutes cache
+      return analytics
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch principal analytics'
+      setError('analytics', message)
+      return null
+    } finally {
+      loading.analytics = false
     }
   }
   
@@ -1570,10 +1747,13 @@ export const useOrganizationStore = defineStore('organization', () => {
     foodBeverageSegments,
     distributorOrganizations,
     principalOrganizations,
+    getOrganizationsForPrincipals,
+    principalRelatedOrganizations,
     
     // Core CRUD operations
     fetchOrganizations,
     fetchOrganization,
+    fetchOrganizationsByPrincipal,
     createOrganization,
     createOrganizationWithContacts,
     createOrganizationWithEnhancedForm,
@@ -1598,6 +1778,7 @@ export const useOrganizationStore = defineStore('organization', () => {
     fetchAnalytics,
     fetchPerformanceData,
     fetchLeadScoringData,
+    fetchPrincipalAnalytics,
     
     // Interaction management
     fetchInteractions,
