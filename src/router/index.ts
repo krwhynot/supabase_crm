@@ -128,14 +128,136 @@ const routes: RouteRecordRaw[] = [
           title: 'Edit Opportunity',
           description: 'Modify opportunity information'
         }
+      },
+      {
+        path: 'interactions',
+        name: 'InteractionsList',
+        component: () => import('@/views/interactions/InteractionsListView.vue'),
+        meta: {
+          title: 'Interactions',
+          description: 'Manage your customer interactions'
+        }
+      },
+      {
+        path: 'interactions/new',
+        name: 'InteractionCreate',
+        component: () => import('@/views/interactions/InteractionCreateView.vue'),
+        meta: {
+          title: 'New Interaction',
+          description: 'Add a new interaction to your CRM'
+        }
+      },
+      {
+        path: 'interactions/:id',
+        name: 'InteractionDetail',
+        component: () => import('@/views/interactions/InteractionDetailView.vue'),
+        props: true,
+        meta: {
+          title: 'Interaction Details',
+          description: 'View interaction information'
+        }
+      },
+      {
+        path: 'interactions/:id/edit',
+        name: 'InteractionEdit',
+        component: () => import('@/views/interactions/InteractionEditView.vue'),
+        props: true,
+        meta: {
+          title: 'Edit Interaction',
+          description: 'Modify interaction information'
+        }
+      },
+      // Contextual interaction creation routes
+      {
+        path: 'opportunities/:opportunityId/interactions/new',
+        name: 'InteractionCreateFromOpportunity',
+        component: () => import('@/views/interactions/InteractionCreateView.vue'),
+        props: route => ({ 
+          opportunityId: route.params.opportunityId,
+          fromContext: 'opportunity'
+        }),
+        meta: {
+          title: 'New Interaction',
+          description: 'Add interaction for this opportunity'
+        }
+      },
+      {
+        path: 'contacts/:contactId/interactions/new',
+        name: 'InteractionCreateFromContact',
+        component: () => import('@/views/interactions/InteractionCreateView.vue'),
+        props: route => ({ 
+          contactId: route.params.contactId,
+          fromContext: 'contact'
+        }),
+        meta: {
+          title: 'New Interaction',
+          description: 'Add interaction for this contact'
+        }
       }
     ]
+  },
+  {
+    // Mobile-optimized routes (full-screen, no sidebar)
+    path: '/interactions/quick',
+    name: 'QuickInteraction',
+    component: () => import('@/views/interactions/QuickInteractionView.vue'),
+    meta: {
+      title: 'Quick Interaction',
+      description: 'Mobile-optimized interaction creation',
+      fullscreen: true,
+      mobile: true,
+      requiresPWA: true
+    }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+// Navigation guards for page titles and authentication
+router.beforeEach((to, from, next) => {
+  // Set page title from route meta
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - CRM`
+  } else {
+    document.title = 'CRM Dashboard'
+  }
+
+  // Handle mobile PWA routes
+  if (to.meta.mobile && to.meta.requiresPWA) {
+    // Check if running as PWA or mobile device
+    const isMobile = window.innerWidth <= 768
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches
+    
+    if (!isMobile && !isPWA) {
+      // Redirect mobile-only routes to desktop equivalent
+      next('/interactions/new')
+      return
+    }
+  }
+
+  // Future: Add authentication checks here
+  // if (to.meta.requiresAuth && !isAuthenticated()) {
+  //   next('/login')
+  //   return
+  // }
+
+  next()
+})
+
+// After navigation guards for route tracking
+router.afterEach((to, from) => {
+  // Future: Add analytics tracking here
+  // analytics.trackPageView(to.path)
+  
+  // Handle PWA navigation state
+  if (to.meta.fullscreen) {
+    document.body.classList.add('fullscreen-mode')
+  } else {
+    document.body.classList.remove('fullscreen-mode')
+  }
 })
 
 export default router

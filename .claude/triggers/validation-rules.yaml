@@ -1,0 +1,450 @@
+# Trigger Validation Rules and Tests
+# Comprehensive testing framework for auto-invocation system
+
+metadata:
+  version: "1.0.0"
+  project: "vue3-supabase-crm"
+  created: "2025-01-02"
+  description: "Validation rules and test cases for trigger pattern matching"
+
+# Pattern matching validation tests
+pattern_validation_tests:
+  vue_component_triggers:
+    test_cases:
+      - input: "src/components/ContactCard.vue"
+        expected:
+          agent: "vue-component-architect"
+          priority: "high"
+          workflow_chain: "frontend-quality"
+          additional_agents: ["quality-compliance-auditor"]
+        
+      - input: "src/views/contacts/ContactDetailView.vue"
+        expected:
+          agent: "vue-component-architect"
+          priority: "high"
+          workflow_chain: "frontend-quality"
+          
+      - input: "src/components/forms/ContactForm.vue"
+        expected:
+          agent: "form-design-architect"
+          priority: "high"
+          workflow_chain: "form-design-mobile-delight"
+          chain: ["mobile-pwa-specialist", "delight-experience-enhancer"]
+          
+      - input: "src/layouts/DashboardLayout.vue"
+        expected:
+          agent: "vue-component-architect"
+          priority: "high"
+          additional_validation: ["responsive_design", "accessibility"]
+
+  backend_api_triggers:
+    test_cases:
+      - input: "src/services/contactsApi.ts"
+        expected:
+          agent: "backend-architect"
+          priority: "high"
+          workflow_chain: "backend-security-performance"
+          chain: ["security-specialist", "comprehensive-performance-tester"]
+          
+      - input: "src/services/opportunitiesApi.ts"
+        expected:
+          agent: "backend-architect"
+          priority: "high"
+          
+      - input: "supabase/functions/contact-export/index.ts"
+        expected:
+          agent: "backend-architect"
+          priority: "high"
+          additional_security_review: true
+          
+      - input: "src/api/webhooks/stripe.ts"
+        expected:
+          agent: "backend-architect"
+          priority: "high"
+          keyword_boost: "external_integration"
+          required_agents: ["security-specialist"]
+
+  database_migration_triggers:
+    test_cases:
+      - input: "sql/01_initial_schema.sql"
+        expected:
+          agent: "migration-workflow-orchestrator"
+          priority: "critical"
+          chain: ["comprehensive-performance-tester", "security-specialist"]
+          
+      - input: "supabase/migrations/20231201_add_contacts.sql"
+        expected:
+          agent: "migration-workflow-orchestrator"
+          priority: "critical"
+          additional_validation: ["backup_verification", "rollback_plan"]
+          
+      - input: "sql/indexes/performance_optimization.sql"
+        expected:
+          agent: "migration-workflow-orchestrator"
+          priority: "critical"
+          focus: "performance_impact_analysis"
+
+  test_file_triggers:
+    test_cases:
+      - input: "tests/contact-form.spec.ts"
+        expected:
+          agent: "test-writer-fixer"
+          priority: "medium"
+          auto_handoff: false
+          
+      - input: "src/services/contactsApi.test.ts"
+        expected:
+          agent: "test-writer-fixer"
+          priority: "medium"
+          
+      - input: "tests/e2e/user-journey.playwright.ts"
+        expected:
+          agent: "test-writer-fixer"
+          priority: "medium"
+          test_type: "end_to_end"
+
+  store_file_triggers:
+    test_cases:
+      - input: "src/stores/contactStore.ts"
+        expected:
+          agent: "pinia-store-generator"
+          priority: "high"
+          secondary_agent: "backend-architect"
+          focus: ["state_management", "type_safety"]
+          
+      - input: "src/stores/opportunityStore.ts"
+        expected:
+          agent: "pinia-store-generator"
+          priority: "high"
+
+# Keyword detection validation
+keyword_detection_tests:
+  security_keywords:
+    test_cases:
+      - input: "Add authentication middleware for API endpoints"
+        expected:
+          keyword_boost: +2.0
+          force_agents: ["security-specialist"]
+          priority_override: "critical"
+          
+      - input: "Fix login vulnerability in user authentication"
+        expected:
+          keyword_boost: +2.0
+          priority_override: "critical"
+          interrupt_lower_priority: true
+          
+      - input: "Update password validation rules"
+        expected:
+          keyword_boost: +2.0
+          force_agents: ["security-specialist"]
+
+  performance_keywords:
+    test_cases:
+      - input: "Optimize database query performance"
+        expected:
+          keyword_boost: +1.5
+          force_agents: ["comprehensive-performance-tester"]
+          
+      - input: "Fix memory leak in component rendering"
+        expected:
+          keyword_boost: +1.5
+          priority_boost: "performance_critical"
+          
+      - input: "Add caching layer for API responses"
+        expected:
+          keyword_boost: +1.5
+          force_agents: ["comprehensive-performance-tester"]
+
+  breaking_change_keywords:
+    test_cases:
+      - input: "Breaking change: Remove deprecated API endpoint"
+        expected:
+          keyword_boost: +1.8
+          force_agents: ["senior-code-reviewer", "technical-documentation-agent"]
+          
+      - input: "API migration: Update contact schema"
+        expected:
+          keyword_boost: +1.8
+          additional_validation: true
+
+# Scope detection validation
+scope_detection_tests:
+  single_file_changes:
+    test_cases:
+      - input: 
+          files: ["src/components/ContactCard.vue"]
+        expected:
+          scope: "single_file"
+          modifier: 0.0
+          complexity: "low"
+          
+  multiple_file_changes:
+    test_cases:
+      - input:
+          files: 
+            - "src/components/ContactCard.vue"
+            - "src/services/contactsApi.ts"
+            - "src/stores/contactStore.ts"
+        expected:
+          scope: "multiple_related_files"
+          modifier: +0.3
+          additional_validation: true
+          complexity: "medium"
+          
+  architectural_changes:
+    test_cases:
+      - input:
+          files: 
+            - "src/components/forms/ContactForm.vue"
+            - "src/services/contactsApi.ts"
+            - "src/stores/contactStore.ts"
+            - "sql/contacts_table.sql"
+            - "src/types/contact.ts"
+            - "tests/contact-integration.spec.ts"
+            - "docs/contact-management.md"
+        expected:
+          scope: "cross_module_changes"
+          modifier: +0.6
+          required_agents: ["quality-compliance-auditor"]
+          complexity: "high"
+
+# Priority calculation validation
+priority_calculation_tests:
+  database_migration_priority:
+    test_cases:
+      - input:
+          file: "sql/add_user_preferences.sql"
+          keywords: []
+          scope: "single_file"
+        expected:
+          base_priority: "critical"
+          multiplier: 1.5
+          final_priority: "critical"
+          
+  security_api_change:
+    test_cases:
+      - input:
+          file: "src/services/authApi.ts"
+          keywords: ["authentication", "security"]
+          scope: "single_file"
+        expected:
+          base_priority: "high"
+          keyword_boost: +2.0
+          final_priority: "critical"
+          interrupt_lower_priority: true
+          
+  form_component_with_accessibility:
+    test_cases:
+      - input:
+          file: "src/components/forms/LoginForm.vue"
+          keywords: ["accessibility", "aria"]
+          scope: "single_file"
+        expected:
+          base_priority: "high"
+          keyword_boost: +1.3
+          final_priority: "high"
+          force_agents: ["quality-compliance-auditor"]
+
+# Workflow chain validation
+workflow_chain_tests:
+  frontend_quality_chain:
+    test_cases:
+      - input: "vue_component_change"
+        expected:
+          chain: ["vue-component-architect", "quality-compliance-auditor", "test-writer-fixer"]
+          handoff_automatic: true
+          quality_gates: ["accessibility", "vue3_standards", "design_system"]
+          
+  backend_security_performance_chain:
+    test_cases:
+      - input: "api_modification"
+        expected:
+          chain: ["backend-architect", "security-specialist", "comprehensive-performance-tester"]
+          handoff_automatic: true
+          quality_gates: ["security", "performance", "architecture"]
+          
+  form_design_chain:
+    test_cases:
+      - input: "form_component_creation"
+        expected:
+          chain: ["form-design-architect", "mobile-pwa-specialist", "delight-experience-enhancer"]
+          special_focus: ["accessibility", "mobile_optimization", "user_experience"]
+
+# Deployment trigger validation
+deployment_trigger_tests:
+  pull_request_validation:
+    test_cases:
+      - input:
+          event: "pull_request_opened"
+          target_branch: "main"
+          files: ["src/services/contactsApi.ts", "src/components/ContactForm.vue"]
+        expected:
+          agents: ["quality-compliance-auditor", "security-specialist", "comprehensive-performance-tester"]
+          priority: "critical"
+          blocking_validations: ["code_quality_gate", "security_scan"]
+          
+  production_deployment:
+    test_cases:
+      - input:
+          event: "deployment_started"
+          environment: "production"
+        expected:
+          agents: ["comprehensive-performance-tester", "security-specialist", "senior-code-reviewer"]
+          priority: "critical"
+          real_time_monitoring: true
+          
+  hotfix_deployment:
+    test_cases:
+      - input:
+          event: "hotfix_deployment_initiated"
+          severity: "critical"
+        expected:
+          agents: ["senior-code-reviewer", "security-specialist", "test-writer-fixer"]
+          expedited_process: true
+          timeout_minutes: 5
+
+# Conditional rule validation
+conditional_rule_tests:
+  business_hours_modifier:
+    test_cases:
+      - input:
+          time: "14:00 UTC"
+          day: "Tuesday"
+        expected:
+          modifier: +0.2
+          reasoning: "business_hours_priority_boost"
+          
+  end_of_sprint_urgency:
+    test_cases:
+      - input:
+          days_to_sprint_end: 1
+        expected:
+          modifier: +0.5
+          reasoning: "sprint_completion_urgency"
+          
+  holiday_period_adjustment:
+    test_cases:
+      - input:
+          holiday_period: true
+          reduced_team: true
+        expected:
+          modifier: -0.3
+          escalation_threshold_lower: true
+
+# Agent capacity validation
+agent_capacity_tests:
+  workload_balancing:
+    test_cases:
+      - input:
+          agent: "security-specialist"
+          current_tasks: 1
+          new_task_priority: "critical"
+        expected:
+          assignment: "accept"
+          reasoning: "critical_priority_override"
+          
+      - input:
+          agent: "vue-component-architect"
+          current_tasks: 3
+          new_task_priority: "medium"
+        expected:
+          assignment: "queue"
+          estimated_wait_minutes: 15
+          
+      - input:
+          agent: "security-specialist"
+          current_tasks: 1
+          new_task_priority: "medium"
+          alternative_agents_available: true
+        expected:
+          assignment: "delegate"
+          delegate_to: "senior-code-reviewer"
+
+# Error handling validation
+error_handling_tests:
+  pattern_matching_failures:
+    test_cases:
+      - input: "unknown_file_type.xyz"
+        expected:
+          action: "log_and_escalate"
+          escalation_agent: "senior-code-reviewer"
+          
+  agent_unavailable:
+    test_cases:
+      - input:
+          required_agent: "security-specialist"
+          agent_status: "unavailable"
+        expected:
+          action: "queue_and_retry"
+          max_queue_time_minutes: 30
+          fallback_agent: "quality-compliance-auditor"
+          
+  system_overload:
+    test_cases:
+      - input:
+          current_load: "high"
+          new_task_priority: "medium"
+        expected:
+          action: "priority_filtering"
+          minimum_priority: "high"
+          notification: "workflow-studio-orchestrator"
+
+# Performance benchmarks
+performance_tests:
+  pattern_matching_speed:
+    target_response_time_ms: 100
+    test_cases:
+      - input: "large_file_list_100_files"
+        max_processing_time_ms: 500
+        
+  priority_calculation_speed:
+    target_response_time_ms: 50
+    test_cases:
+      - input: "complex_priority_calculation"
+        max_processing_time_ms: 200
+        
+  workflow_initiation_speed:
+    target_response_time_ms: 200
+    test_cases:
+      - input: "full_workflow_chain_setup"
+        max_processing_time_ms: 1000
+
+# Integration tests
+integration_tests:
+  end_to_end_workflow:
+    test_cases:
+      - scenario: "vue_component_modification"
+        steps:
+          1: "detect_file_change: src/components/ContactCard.vue"
+          2: "calculate_priority: high"
+          3: "select_agent: vue-component-architect"
+          4: "initiate_workflow: frontend-quality"
+          5: "automatic_handoff: quality-compliance-auditor"
+          6: "final_handoff: test-writer-fixer"
+        expected_duration_minutes: 15
+        
+      - scenario: "critical_security_fix"
+        steps:
+          1: "detect_file_change: src/services/authApi.ts"
+          2: "detect_keywords: security, vulnerability"
+          3: "priority_override: critical"
+          4: "interrupt_current_work: true"
+          5: "assign_agent: security-specialist"
+        expected_duration_minutes: 5
+
+# Validation test runner configuration
+test_execution:
+  automated_testing:
+    schedule: "on_config_change"
+    test_environment: "isolated"
+    cleanup_after_tests: true
+    
+  continuous_validation:
+    monitor_pattern_accuracy: true
+    track_false_positives: true
+    measure_agent_satisfaction: true
+    
+  performance_monitoring:
+    track_response_times: true
+    monitor_system_resource_usage: true
+    alert_on_degradation: true

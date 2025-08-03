@@ -1,6 +1,5 @@
 <template>
-  <DashboardLayout>
-    <div class="opportunity-detail-view">
+  <div class="opportunity-detail-view">
       <!-- Loading State -->
       <div v-if="loading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <div class="flex justify-center">
@@ -280,14 +279,13 @@
         </div>
       </div>
     </div>
-  </DashboardLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOpportunityStore } from '@/stores/opportunityStore'
-import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import StageTag from '@/components/opportunities/StageTag.vue'
 import ProbabilityBar from '@/components/opportunities/ProbabilityBar.vue'
 import type { OpportunityDetailView } from '@/types/opportunities'

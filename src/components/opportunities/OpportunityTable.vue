@@ -77,7 +77,7 @@
         <button
           type="button"
           class="empty-action-btn"
-          @click="$emit('createNew')"
+          @click="emit('createNew')"
         >
           Create Opportunity
         </button>
@@ -204,7 +204,7 @@
                 <button
                   type="button"
                   class="name-button"
-                  @click="$emit('rowClick', opportunity)"
+                  @click="emit('rowClick', opportunity)"
                 >
                   <span class="name-text">{{ opportunity.name }}</span>
                   <span v-if="opportunity.is_won" class="won-indicator">
@@ -399,7 +399,7 @@ const props = withDefaults(defineProps<Props>(), {
 /**
  * Component emits
  */
-defineEmits<{
+const emit = defineEmits<{
   /** Emitted when a row is clicked */
   rowClick: [opportunity: OpportunityListView]
   /** Emitted when edit action is triggered */
@@ -564,25 +564,22 @@ const refresh = async (): Promise<void> => {
  */
 const handleEdit = (opportunity: OpportunityListView): void => {
   activeActionsMenu.value = null
-  // TODO: Emit edit event - implementation pending
-  console.log('Edit opportunity:', opportunity.id)
+  emit('edit', opportunity)
 }
 
 const handleDelete = (opportunity: OpportunityListView): void => {
   activeActionsMenu.value = null
-  // TODO: Emit delete event - implementation pending
-  console.log('Delete opportunity:', opportunity.id)
+  emit('delete', opportunity)
 }
 
 const handleDuplicate = (opportunity: OpportunityListView): void => {
   activeActionsMenu.value = null
-  // TODO: Emit duplicate event - implementation pending
-  console.log('Duplicate opportunity:', opportunity.id)
+  emit('duplicate', opportunity)
 }
 
 const handleBulkDelete = (): void => {
   if (selectedItems.value.length > 0) {
-    // Emit bulk delete event
+    emit('bulkDelete', selectedItems.value)
     selectedItems.value = []
   }
 }

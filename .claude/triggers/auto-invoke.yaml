@@ -1,0 +1,406 @@
+# Auto-Invocation Trigger System
+# Event-driven subagent coordination for Vue 3 + Supabase CRM
+
+metadata:
+  version: "1.0.0"
+  project: "vue3-supabase-crm"
+  created: "2025-01-02"
+  description: "Automatic workflow triggers for proactive subagent invocation"
+  type: "event-driven-coordination"
+
+# Global trigger configuration
+trigger_config:
+  enable_auto_invocation: true
+  max_concurrent_workflows: 3
+  debounce_interval_ms: 2000  # Wait 2s for multiple file changes
+  retry_failed_invocations: true
+  max_retry_attempts: 2
+  escalation_timeout_minutes: 15
+
+# Priority levels for trigger execution
+priority_levels:
+  critical:
+    value: 1
+    max_concurrent: 1
+    interrupt_lower: true
+    timeout_minutes: 5
+    escalation: "immediate"
+    examples: ["security_vulnerability", "production_failure", "data_corruption"]
+    
+  high:
+    value: 2
+    max_concurrent: 2
+    interrupt_lower: false
+    timeout_minutes: 10
+    escalation: "senior-code-reviewer"
+    examples: ["api_breaking_change", "component_architecture", "performance_degradation"]
+    
+  medium:
+    value: 3
+    max_concurrent: 3
+    interrupt_lower: false
+    timeout_minutes: 20
+    escalation: "workflow-studio-orchestrator"
+    examples: ["test_updates", "documentation_changes", "minor_enhancements"]
+    
+  low:
+    value: 4
+    max_concurrent: 5
+    interrupt_lower: false
+    timeout_minutes: 60
+    escalation: "quality-compliance-auditor"
+    examples: ["style_updates", "comments", "non_functional_changes"]
+
+# File pattern-based automatic triggers
+file_triggers:
+  vue_components:
+    patterns:
+      - "src/components/**/*.vue"
+      - "src/views/**/*.vue"
+      - "src/layouts/**/*.vue"
+    exclude_patterns:
+      - "**/*.backup.vue"
+      - "**/node_modules/**"
+    agents:
+      primary: "vue-component-architect"
+      secondary: ["quality-compliance-auditor"]
+    priority: "high"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+      - type: "file_size"
+        min_lines: 5  # Ignore trivial changes
+    context:
+      workflow_chain: "frontend-quality"
+      auto_handoff: true
+      quality_gates: ["accessibility", "vue3_standards", "design_system"]
+    
+  vue_form_components:
+    patterns:
+      - "src/components/forms/**/*.vue"
+      - "src/components/**/Form*.vue"
+      - "src/components/**/*Form.vue"
+    agents:
+      primary: "form-design-architect"
+      chain: ["mobile-pwa-specialist", "delight-experience-enhancer"]
+    priority: "high"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+    context:
+      workflow_chain: "form-design-mobile-delight"
+      auto_handoff: true
+      special_focus: ["accessibility", "mobile_optimization", "user_experience"]
+
+  backend_api_services:
+    patterns:
+      - "src/services/**/*.ts"
+      - "src/api/**/*.ts"
+      - "supabase/functions/**/*.ts"
+    exclude_patterns:
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
+    agents:
+      primary: "backend-architect"
+      chain: ["security-specialist", "comprehensive-performance-tester"]
+    priority: "high"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+      - type: "keyword_detection"
+        keywords: ["api", "endpoint", "database", "query", "mutation"]
+    context:
+      workflow_chain: "backend-security-performance"
+      auto_handoff: true
+      quality_gates: ["security", "performance", "architecture"]
+
+  database_migrations:
+    patterns:
+      - "sql/**/*.sql"
+      - "supabase/migrations/**/*.sql"
+      - "migrations/**/*.sql"
+    agents:
+      primary: "migration-workflow-orchestrator"
+      chain: ["comprehensive-performance-tester", "security-specialist"]
+    priority: "critical"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+    context:
+      workflow_chain: "backend-security-performance"
+      auto_handoff: true
+      special_requirements: ["backup_verification", "rollback_plan", "performance_impact"]
+      quality_gates: ["schema_validation", "rls_policies", "index_optimization"]
+
+  pinia_stores:
+    patterns:
+      - "src/stores/**/*.ts"
+      - "src/stores/**/*Store.ts"
+    exclude_patterns:
+      - "**/*.test.ts"
+    agents:
+      primary: "pinia-store-generator"
+      secondary: ["backend-architect"]
+    priority: "high"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+      - type: "keyword_detection"
+        keywords: ["store", "state", "action", "getter"]
+    context:
+      workflow_chain: "backend-security-performance"
+      auto_handoff: true
+      focus_areas: ["state_management", "type_safety", "performance"]
+
+  test_files:
+    patterns:
+      - "tests/**/*.spec.ts"
+      - "tests/**/*.test.ts"
+      - "src/**/*.test.ts"
+      - "**/*.playwright.ts"
+    agents:
+      primary: "test-writer-fixer"
+      secondary: ["comprehensive-performance-tester"]
+    priority: "medium"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+    context:
+      auto_handoff: false  # Tests usually don't need automatic chaining
+      focus_areas: ["test_coverage", "test_reliability", "performance_testing"]
+
+  type_definitions:
+    patterns:
+      - "src/types/**/*.ts"
+      - "**/*.d.ts"
+      - "src/**/*types.ts"
+    agents:
+      primary: "backend-architect"
+      secondary: ["vue-component-architect"]
+    priority: "medium"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+    context:
+      workflow_chain: "type_safety_validation"
+      auto_handoff: true
+      quality_gates: ["typescript_compilation", "type_coverage"]
+
+  documentation_files:
+    patterns:
+      - "docs/**/*.md"
+      - "README.md"
+      - "CHANGELOG.md"
+    agents:
+      primary: "technical-documentation-agent"
+    priority: "low"
+    conditions:
+      - type: "file_change"
+        action: ["create", "modify"]
+    context:
+      auto_handoff: false
+      focus_areas: ["documentation_quality", "completeness", "accuracy"]
+
+# Code change pattern detection
+change_detection:
+  component_creation:
+    triggers:
+      - pattern: "CREATE: src/components/**/*.vue"
+        agent: "vue-component-architect"
+        priority: "high"
+        context: "new_component_development"
+    
+  api_endpoint_modification:
+    triggers:
+      - pattern: "MODIFY: src/services/**/*.ts"
+        keywords: ["export function", "export const", "api", "endpoint"]
+        agent: "backend-architect"
+        priority: "high"
+        context: "api_change_impact_analysis"
+    
+  security_related_changes:
+    triggers:
+      - pattern: "MODIFY: **/*.ts"
+        keywords: ["auth", "login", "password", "token", "security", "permission"]
+        agent: "security-specialist"
+        priority: "critical"
+        context: "security_impact_assessment"
+    
+  performance_critical_changes:
+    triggers:
+      - pattern: "MODIFY: src/stores/**/*.ts"
+        keywords: ["query", "fetch", "load", "cache", "optimize"]
+        agent: "comprehensive-performance-tester"
+        priority: "high"
+        context: "performance_impact_analysis"
+
+# Branch and deployment-based triggers
+deployment_triggers:
+  pre_deployment:
+    triggers:
+      - event: "pull_request_opened"
+        target_branch: ["main", "production"]
+        agents: ["security-specialist", "comprehensive-performance-tester"]
+        priority: "critical"
+        
+      - event: "commit_to_main"
+        agents: ["quality-compliance-auditor"]
+        priority: "high"
+        
+  post_deployment:
+    triggers:
+      - event: "deployment_successful"
+        environment: "production"
+        agents: ["comprehensive-performance-tester"]
+        priority: "medium"
+        context: "post_deployment_validation"
+        
+      - event: "deployment_failed"
+        environment: ["staging", "production"]
+        agents: ["senior-code-reviewer", "technical-documentation-agent"]
+        priority: "critical"
+        context: "deployment_failure_analysis"
+
+  hotfix_deployment:
+    triggers:
+      - event: "hotfix_branch_created"
+        agents: ["security-specialist", "senior-code-reviewer"]
+        priority: "critical"
+        context: "expedited_review_required"
+
+# Conditional invocation rules
+conditional_rules:
+  file_scope_detection:
+    single_file:
+      max_files: 1
+      priority_modifier: 0  # No change
+      
+    multiple_files:
+      max_files: 5
+      priority_modifier: +1  # Increase priority
+      additional_agents: ["quality-compliance-auditor"]
+      
+    architectural_change:
+      min_files: 6
+      priority_modifier: +2  # Significantly increase priority
+      required_agents: ["senior-code-reviewer", "workflow-studio-orchestrator"]
+      escalation: "immediate"
+
+  change_type_detection:
+    feature_development:
+      keywords: ["feature", "new", "implement", "add"]
+      workflow: "full_feature_development"
+      priority_modifier: +1
+      
+    bug_fix:
+      keywords: ["fix", "bug", "issue", "error", "problem"]
+      agents: ["test-writer-fixer", "senior-code-reviewer"]
+      priority_modifier: +1
+      
+    security_patch:
+      keywords: ["security", "vulnerability", "exploit", "patch"]
+      agents: ["security-specialist"]
+      priority: "critical"
+      interrupt_all: true
+
+  team_coordination:
+    multiple_developers:
+      detection: "concurrent_modifications"
+      agents: ["workflow-studio-orchestrator"]
+      priority: "high"
+      context: "merge_conflict_prevention"
+      
+    cross_team_changes:
+      detection: "multiple_area_modifications"
+      agents: ["senior-code-reviewer", "quality-compliance-auditor"]
+      priority: "high"
+
+# Agent workload management
+workload_management:
+  max_concurrent_per_agent: 2
+  queue_management: "priority_based"
+  load_balancing: true
+  
+  agent_availability:
+    high_load_threshold: 3
+    escalation_agent: "workflow-studio-orchestrator"
+    overflow_handling: "queue_and_notify"
+  
+  resource_allocation:
+    critical_priority: "dedicated_resources"
+    normal_operations: "shared_resources"
+
+# Monitoring and metrics
+monitoring:
+  trigger_effectiveness:
+    track_metrics:
+      - "trigger_accuracy"
+      - "false_positive_rate"
+      - "agent_selection_accuracy"
+      - "workflow_completion_rate"
+    
+  performance_metrics:
+    response_time_target_ms: 500
+    max_processing_delay_ms: 2000
+    success_rate_target: 95
+    
+  escalation_tracking:
+    timeout_escalations: "senior-code-reviewer"
+    failed_invocations: "workflow-studio-orchestrator"
+    system_overload: "technical-documentation-agent"
+
+# Integration with existing manual system
+manual_override:
+  enable_manual_triggers: true
+  manual_priority_boost: true
+  override_auto_decisions: true
+  
+  preserve_existing:
+    mention_patterns: true
+    workflow_chains: true
+    handoff_protocols: true
+
+# Error handling and recovery
+error_handling:
+  failed_pattern_matching:
+    action: "log_and_escalate"
+    escalation_agent: "senior-code-reviewer"
+    
+  agent_unavailable:
+    action: "queue_and_retry"
+    max_queue_time_minutes: 30
+    fallback_agent: "quality-compliance-auditor"
+    
+  system_overload:
+    action: "priority_filtering"
+    minimum_priority: "high"
+    notification: "workflow-studio-orchestrator"
+
+# Validation rules for trigger testing
+validation:
+  pattern_tests:
+    - pattern: "src/components/ContactCard.vue"
+      expected_agent: "vue-component-architect"
+      expected_priority: "high"
+      
+    - pattern: "src/services/contactsApi.ts"
+      expected_agent: "backend-architect"
+      expected_priority: "high"
+      
+    - pattern: "sql/add_contacts_table.sql"
+      expected_agent: "migration-workflow-orchestrator"
+      expected_priority: "critical"
+      
+    - pattern: "tests/contact-form.spec.ts"
+      expected_agent: "test-writer-fixer"
+      expected_priority: "medium"
+
+  workflow_tests:
+    - trigger: "vue_component_change"
+      expected_chain: ["vue-component-architect", "quality-compliance-auditor"]
+      
+    - trigger: "api_modification"
+      expected_chain: ["backend-architect", "security-specialist", "comprehensive-performance-tester"]
+      
+    - trigger: "database_migration"
+      expected_chain: ["migration-workflow-orchestrator", "comprehensive-performance-tester"]

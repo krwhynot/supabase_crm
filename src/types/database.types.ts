@@ -467,6 +467,69 @@ export type Database = {
           }
         ]
       }
+      interactions: {
+        Row: {
+          id: string
+          interaction_type: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
+          date: string
+          subject: string
+          notes: string | null
+          opportunity_id: string | null
+          contact_id: string | null
+          created_by: string | null
+          follow_up_needed: boolean
+          follow_up_date: string | null
+          created_at: string | null
+          updated_at: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          interaction_type: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
+          date: string
+          subject: string
+          notes?: string | null
+          opportunity_id?: string | null
+          contact_id?: string | null
+          created_by?: string | null
+          follow_up_needed?: boolean
+          follow_up_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          interaction_type?: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
+          date?: string
+          subject?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          contact_id?: string | null
+          created_by?: string | null
+          follow_up_needed?: boolean
+          follow_up_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interactions_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       user_submissions: {
         Row: {
           age: number
@@ -1399,3 +1462,11 @@ export type OpportunityContext = 'Site Visit' | 'Food Show' | 'New Product Inter
 
 // Product enum types
 export type ProductCategory = 'Protein' | 'Sauce' | 'Seasoning' | 'Beverage' | 'Snack' | 'Frozen' | 'Dairy' | 'Bakery' | 'Other'
+
+// Interaction entity types
+export type Interaction = Database['public']['Tables']['interactions']['Row']
+export type InteractionInsert = Database['public']['Tables']['interactions']['Insert']
+export type InteractionUpdate = Database['public']['Tables']['interactions']['Update']
+
+// Interaction enum types
+export type InteractionTypeDB = 'EMAIL' | 'CALL' | 'IN_PERSON' | 'DEMO' | 'FOLLOW_UP'

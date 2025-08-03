@@ -1,0 +1,389 @@
+# Backend-Security-Performance Chain Workflow
+# Vue 3 + Supabase CRM Project
+
+workflow:
+  name: "backend-security-performance"
+  description: "Complete backend development workflow with security audit and performance validation"
+  version: "1.0.0"
+  
+  # Agent sequence definition
+  sequence:
+    - stage: 1
+      agent: "backend-architect"
+      role: "implementation"
+      timeout: "30 minutes"
+      
+    - stage: 2
+      agent: "security-specialist"
+      role: "validation"
+      timeout: "20 minutes"
+      
+    - stage: 3
+      agent: "comprehensive-performance-tester"
+      role: "optimization"
+      timeout: "25 minutes"
+
+# Detailed stage configurations
+stages:
+  backend_implementation:
+    agent: "backend-architect"
+    description: "Design and implement backend architecture with Supabase"
+    
+    inputs:
+      required:
+        - user_requirements: "Business requirements and functional specifications"
+        - existing_schema: "Current database schema context"
+      optional:
+        - related_apis: "Existing API endpoints that may be affected"
+        - performance_requirements: "Specific performance targets"
+    
+    deliverables:
+      primary:
+        - database_schema: 
+            files: ["sql/**/*.sql"]
+            validation: "Valid PostgreSQL syntax with proper constraints"
+        - api_implementation:
+            files: ["src/services/**/*.ts", "src/stores/**/*.ts"]
+            validation: "TypeScript compilation without errors"
+        - type_definitions:
+            files: ["src/types/**/*.ts"]
+            validation: "Generated types match schema exactly"
+      
+      secondary:
+        - rls_policies: "Row Level Security implementations"
+        - migration_scripts: "Database migration files"
+        - api_documentation: "OpenAPI specifications for endpoints"
+    
+    success_criteria:
+      mandatory:
+        - "Database schema created with proper relationships and constraints"
+        - "RLS policies implemented for all tables"
+        - "API endpoints functional with proper error handling"
+        - "TypeScript types generated and imported successfully"
+        - "All database operations use proper transaction handling"
+      
+      quality_indicators:
+        - "Foreign key relationships properly defined"
+        - "Indexes created for performance-critical queries"
+        - "Enum types used for constrained values"
+        - "Proper naming conventions followed"
+        - "Documentation includes usage examples"
+    
+    handoff_data:
+      validation_criteria:
+        schema_validation:
+          - "All tables have primary keys"
+          - "Foreign key constraints properly defined"
+          - "Check constraints validate business rules"
+          - "Indexes exist for frequently queried columns"
+        
+        api_validation:
+          - "All endpoints handle authentication"
+          - "Error responses follow consistent format"
+          - "Input validation prevents SQL injection"
+          - "Response types match TypeScript definitions"
+        
+        security_readiness:
+          - "RLS policies deny access by default"
+          - "Service role access properly scoped"
+          - "No hardcoded secrets in code"
+          - "Environment variables properly configured"
+
+  security_audit:
+    agent: "security-specialist"
+    description: "Comprehensive security review of backend implementation"
+    
+    inputs:
+      required:
+        - database_schema: "From backend-architect"
+        - api_implementation: "From backend-architect"
+        - rls_policies: "From backend-architect"
+      context:
+        - compliance_requirements: "GDPR, SOC2, or other applicable standards"
+        - threat_model: "Specific security concerns for CRM data"
+    
+    audit_checklist:
+      authentication:
+        - "JWT token validation implemented"
+        - "Session management secure"
+        - "Multi-factor authentication supported"
+        - "Password policies enforced"
+      
+      authorization:
+        - "RLS policies properly restrict data access"
+        - "API endpoints verify user permissions"
+        - "Admin functions properly protected"
+        - "Cross-tenant data isolation verified"
+      
+      data_protection:
+        - "Sensitive data encrypted at rest"
+        - "PII handling complies with regulations"
+        - "Data retention policies implemented"
+        - "Backup security measures in place"
+      
+      input_validation:
+        - "SQL injection prevention verified"
+        - "XSS protection implemented"
+        - "CSRF tokens used where applicable"
+        - "File upload restrictions enforced"
+      
+      infrastructure:
+        - "HTTPS enforced for all connections"
+        - "Security headers properly configured"
+        - "Rate limiting implemented"
+        - "Logging captures security events"
+    
+    deliverables:
+      primary:
+        - security_audit_report:
+            format: "Structured markdown with severity levels"
+            sections: ["Executive Summary", "Findings", "Recommendations", "Compliance Status"]
+        - compliance_certification:
+            format: "YAML compliance matrix"
+            coverage: ["OWASP Top 10", "GDPR requirements", "Industry standards"]
+      
+      conditional:
+        - remediation_plan: "Required if critical or high-severity issues found"
+        - penetration_test_results: "If external testing was performed"
+    
+    success_criteria:
+      mandatory:
+        - "No critical security vulnerabilities identified"
+        - "All RLS policies validated and tested"
+        - "Authentication and authorization working correctly"
+        - "Compliance requirements met"
+      
+      quality_indicators:
+        - "Security best practices followed"
+        - "Threat modeling completed"
+        - "Security testing performed"
+        - "Documentation includes security considerations"
+    
+    escalation_triggers:
+      critical_findings:
+        - "SQL injection vulnerabilities"
+        - "Authentication bypass possible"
+        - "Data exposure risks"
+        - "Privilege escalation vulnerabilities"
+      
+      compliance_failures:
+        - "GDPR violation risks"
+        - "Industry regulation non-compliance"
+        - "Audit trail inadequacies"
+
+  performance_testing:
+    agent: "comprehensive-performance-tester"
+    description: "Performance validation and optimization of backend systems"
+    
+    inputs:
+      required:
+        - database_schema: "From backend-architect"
+        - api_implementation: "From backend-architect"  
+        - security_audit_report: "From security-specialist"
+      optional:
+        - load_requirements: "Expected user concurrency and data volumes"
+        - performance_targets: "Specific SLA requirements"
+    
+    testing_suite:
+      api_testing:
+        endpoints: "All CRUD operations for each entity"
+        scenarios:
+          - "Single user operations"
+          - "Concurrent user operations"
+          - "High-volume data operations"
+          - "Error condition handling"
+        
+        metrics:
+          - response_time: "P95 < 200ms for simple queries, < 500ms for complex"
+          - throughput: "Requests per second under normal load"
+          - error_rate: "< 0.1% under normal conditions"
+          - availability: "> 99.9% uptime"
+      
+      database_testing:
+        query_performance:
+          - "Individual query execution times"
+          - "Query plan analysis and optimization"
+          - "Index utilization verification"
+          - "Connection pool efficiency"
+        
+        load_testing:
+          - "Concurrent connection limits"
+          - "Transaction throughput"
+          - "Deadlock detection and resolution"
+          - "Memory usage under load"
+      
+      integration_testing:
+        supabase_integration:
+          - "Real-time subscription performance"
+          - "File upload/download speeds"
+          - "Authentication flow latency"
+          - "Edge function execution times"
+    
+    deliverables:
+      primary:
+        - performance_report:
+            format: "Detailed analysis with graphs and metrics"
+            sections: ["Executive Summary", "Test Results", "Bottlenecks", "Recommendations"]
+        - optimization_recommendations:
+            format: "Prioritized action items with implementation guidance"
+            categories: ["Database", "API", "Infrastructure", "Caching"]
+      
+      supporting:
+        - benchmark_results: "Baseline performance metrics for future comparison"
+        - monitoring_setup: "Performance monitoring configuration"
+        - scaling_guidelines: "Recommendations for horizontal/vertical scaling"
+    
+    success_criteria:
+      mandatory:
+        - "All API endpoints meet response time targets"
+        - "Database queries perform within acceptable limits"
+        - "System handles expected concurrent load"
+        - "No performance regressions introduced"
+      
+      optimization_targets:
+        - "Database query optimization opportunities identified"
+        - "Caching strategy recommendations provided"
+        - "Scaling bottlenecks documented"
+        - "Performance monitoring established"
+
+# Trigger conditions for workflow initiation
+triggers:
+  file_changes:
+    database_schema:
+      patterns: ["sql/**/*.sql", "supabase/migrations/**/*.sql"]
+      priority: "critical"
+      auto_start: true
+    
+    api_services:
+      patterns: ["src/services/**/*.ts", "src/api/**/*.ts"]
+      priority: "high"
+      auto_start: true
+    
+    store_modifications:
+      patterns: ["src/stores/**/*Store.ts", "src/stores/**/api.ts"]
+      priority: "high"
+      auto_start: false  # Requires manual confirmation
+    
+    supabase_config:
+      patterns: ["supabase/config.toml", ".env*", "src/lib/supabase.ts"]
+      priority: "critical"
+      auto_start: true
+
+  explicit_triggers:
+    new_feature_development:
+      description: "Starting development of new backend feature"
+      required_context: ["feature_requirements", "acceptance_criteria"]
+    
+    security_review_request:
+      description: "Requested security audit of existing backend code"
+      required_context: ["scope_definition", "compliance_requirements"]
+    
+    performance_issue_reported:
+      description: "Performance problems reported by users or monitoring"
+      required_context: ["issue_description", "affected_components"]
+
+# Handoff protocols between agents
+handoffs:
+  backend_to_security:
+    timing: "Upon successful completion of backend implementation"
+    data_transfer:
+      required_files:
+        - "All SQL migration files"
+        - "API service implementations"
+        - "RLS policy definitions"
+        - "TypeScript type definitions"
+      
+      context_information:
+        - "Architecture decisions and rationale"
+        - "Security considerations already addressed"
+        - "Known limitations or constraints"
+        - "Compliance requirements to validate"
+    
+    validation_checkpoints:
+      pre_handoff:
+        - "All code compiles without errors"
+        - "Basic functionality testing passed"
+        - "Database migrations run successfully"
+        - "API endpoints respond correctly"
+      
+      post_handoff:
+        - "Security specialist confirms deliverable completeness"
+        - "Audit scope and timeline agreed upon"
+        - "Access to testing environments confirmed"
+
+  security_to_performance:
+    timing: "Upon completion of security audit with no critical issues"
+    data_transfer:
+      required_files:
+        - "Security audit report"
+        - "Updated implementation files (if remediation performed)"
+        - "Compliance certification"
+      
+      context_information:
+        - "Security constraints affecting performance testing"
+        - "Authentication requirements for testing"
+        - "Data sensitivity considerations"
+        - "Approved testing scenarios"
+    
+    validation_checkpoints:
+      pre_handoff:
+        - "Security audit completed successfully"
+        - "Critical and high-severity issues resolved"
+        - "Compliance requirements met"
+        - "Testing environment security approved"
+      
+      post_handoff:
+        - "Performance tester confirms security constraints understood"
+        - "Testing plan approved by security specialist"
+        - "Monitoring access configured securely"
+
+# Error handling and escalation procedures
+error_handling:
+  handoff_failures:
+    timeout_exceeded:
+      action: "Escalate to workflow-studio-orchestrator"
+      notification: "All stakeholders notified of delay"
+      investigation: "Agent performance and resource availability reviewed"
+    
+    deliverable_quality_issues:
+      action: "Return to previous agent with specific feedback"
+      retry_limit: 2
+      escalation: "senior-code-reviewer for architectural guidance"
+    
+    agent_unavailable:
+      action: "Queue workflow for retry"
+      fallback: "Route to alternative qualified agent if available"
+      timeout: "4 hours maximum queue time"
+
+  critical_issues:
+    security_vulnerabilities:
+      immediate_action: "Halt deployment pipeline"
+      notification: "Security team and project leads"
+      resolution: "Must be resolved before workflow continuation"
+    
+    performance_failures:
+      immediate_action: "Flag for urgent optimization"
+      notification: "Backend team and DevOps"
+      fallback: "Consider scaling resources temporarily"
+    
+    compliance_violations:
+      immediate_action: "Legal and compliance team notification"
+      resolution: "Mandatory before production deployment"
+      documentation: "Incident report required"
+
+# Success metrics and monitoring
+monitoring:
+  workflow_health:
+    completion_rate: "Target: 95% successful completion"
+    average_duration: "Target: 75 minutes total workflow time"
+    handoff_efficiency: "Target: < 5 minutes between agents"
+    
+  quality_metrics:
+    security_pass_rate: "Target: 100% (no critical vulnerabilities)"
+    performance_compliance: "Target: 95% of APIs meet SLA requirements"
+    defect_escape_rate: "Target: < 2% of issues found post-deployment"
+    
+  stakeholder_satisfaction:
+    developer_experience: "Workflow clarity and ease of use"
+    business_value: "Time to market and feature quality"
+    operational_efficiency: "Reduced manual intervention required"

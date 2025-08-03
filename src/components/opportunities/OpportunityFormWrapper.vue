@@ -394,6 +394,31 @@
   </div>
 </template>
 
+<!--
+  OpportunityFormWrapper - Comprehensive opportunity creation and editing form
+  
+  Features:
+  - Multi-step wizard for new opportunity creation (3 steps)
+  - Single-page editing mode for existing opportunities
+  - Auto-naming with manual override capability
+  - Batch creation for multiple principals
+  - Real-time validation with accessible error handling
+  - Auto-save functionality with draft recovery
+  - Contextual creation from contacts/organizations
+  - Responsive design optimized for iPad
+  - WCAG 2.1 AA accessibility compliance
+  
+  Form Steps:
+  1. Organization & Context - Select organization and opportunity context
+  2. Principals & Naming - Choose principals and configure naming
+  3. Product & Details - Select product, stage, probability, and notes
+  
+  Batch Creation:
+  - Supports creating multiple opportunities for different principals
+  - Shows name previews for each principal
+  - Handles batch submission with progress feedback
+-->
+
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'

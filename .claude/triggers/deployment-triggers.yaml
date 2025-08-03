@@ -1,0 +1,403 @@
+# Deployment Stage Triggers
+# Event-driven agent invocation for deployment lifecycle
+
+metadata:
+  version: "1.0.0"
+  project: "vue3-supabase-crm"
+  created: "2025-01-02"
+  description: "Deployment stage triggers for automated quality assurance and monitoring"
+
+# Deployment environment configuration
+environments:
+  development:
+    auto_triggers: true
+    required_validations: ["basic_testing", "type_checking"]
+    priority_level: "medium"
+    
+  staging:
+    auto_triggers: true
+    required_validations: ["security_scan", "performance_testing", "integration_testing"]
+    priority_level: "high"
+    
+  production:
+    auto_triggers: true
+    required_validations: ["security_audit", "performance_validation", "rollback_plan"]
+    priority_level: "critical"
+
+# Pre-deployment triggers
+pre_deployment:
+  pull_request_validation:
+    triggers:
+      - event: "pull_request_opened"
+        target_branches: ["main", "master", "production"]
+        agents:
+          primary: "quality-compliance-auditor"
+          required: ["security-specialist", "comprehensive-performance-tester"]
+        priority: "critical"
+        timeout_minutes: 15
+        
+        validations:
+          - name: "code_quality_gate"
+            agent: "quality-compliance-auditor"
+            criteria:
+              - "typescript_compilation"
+              - "eslint_compliance"
+              - "test_coverage_threshold"
+            blocking: true
+            
+          - name: "security_scan"
+            agent: "security-specialist"
+            criteria:
+              - "no_exposed_secrets"
+              - "rls_policy_validation"
+              - "input_sanitization"
+            blocking: true
+            
+          - name: "performance_impact"
+            agent: "comprehensive-performance-tester"
+            criteria:
+              - "bundle_size_check"
+              - "api_response_benchmarks"
+              - "memory_usage_analysis"
+            blocking: false  # Warning only for PR stage
+        
+        conditions:
+          file_changes:
+            critical_paths:
+              - "sql/**/*.sql"
+              - "src/services/**/*.ts"
+              - "supabase/functions/**/*"
+            non_critical_paths:
+              - "docs/**/*"
+              - "**/*.md"
+              - "**/*.test.ts"
+        
+        escalation:
+          failed_validation: "senior-code-reviewer"
+          timeout_exceeded: "workflow-studio-orchestrator"
+
+  pre_merge_validation:
+    triggers:
+      - event: "pull_request_approved"
+        target_branches: ["main", "master"]
+        agents:
+          primary: "senior-code-reviewer"
+          supporting: ["test-writer-fixer"]
+        priority: "high"
+        
+        final_checks:
+          - name: "integration_testing"
+            agent: "test-writer-fixer"
+            timeout_minutes: 10
+            
+          - name: "deployment_readiness"
+            agent: "senior-code-reviewer"
+            criteria:
+              - "all_tests_passing"
+              - "no_merge_conflicts"
+              - "documentation_updated"
+
+  branch_protection:
+    triggers:
+      - event: "direct_push_to_main"
+        agents: ["senior-code-reviewer", "workflow-studio-orchestrator"]
+        priority: "critical"
+        action: "immediate_review_required"
+        
+      - event: "hotfix_branch_created"
+        pattern: "hotfix/**"
+        agents: ["security-specialist", "senior-code-reviewer"]
+        priority: "critical"
+        expedited_review: true
+
+# Deployment execution triggers
+deployment_execution:
+  staging_deployment:
+    triggers:
+      - event: "deployment_started"
+        environment: "staging"
+        agents:
+          monitoring: ["comprehensive-performance-tester"]
+          validation: ["quality-compliance-auditor"]
+        priority: "high"
+        
+        during_deployment:
+          - name: "real_time_monitoring"
+            agent: "comprehensive-performance-tester"
+            metrics: ["response_times", "error_rates", "resource_usage"]
+            alert_thresholds:
+              response_time_ms: 500
+              error_rate_percent: 1
+              memory_usage_percent: 80
+              
+        post_deployment_immediate:
+          - name: "smoke_testing"
+            agent: "test-writer-fixer"
+            timeout_minutes: 5
+            critical_paths: ["login", "dashboard", "core_features"]
+
+  production_deployment:
+    triggers:
+      - event: "deployment_started"
+        environment: "production"
+        agents:
+          primary: "comprehensive-performance-tester"
+          security: "security-specialist"
+          oversight: "senior-code-reviewer"
+        priority: "critical"
+        
+        pre_deployment_final:
+          - name: "security_final_scan"
+            agent: "security-specialist"
+            timeout_minutes: 3
+            blocking: true
+            
+          - name: "rollback_plan_verification"
+            agent: "senior-code-reviewer"
+            timeout_minutes: 2
+            blocking: true
+            
+        during_deployment:
+          - name: "production_monitoring"
+            agent: "comprehensive-performance-tester"
+            real_time_alerts: true
+            metrics: ["response_times", "error_rates", "user_impact", "database_performance"]
+            
+        immediate_post_deployment:
+          - name: "production_smoke_tests"
+            agent: "test-writer-fixer"
+            timeout_minutes: 3
+            critical_only: true
+            
+          - name: "performance_baseline"
+            agent: "comprehensive-performance-tester"
+            timeout_minutes: 5
+            establish_baseline: true
+
+# Post-deployment triggers
+post_deployment:
+  deployment_success:
+    triggers:
+      - event: "deployment_completed"
+        status: "success"
+        environment: ["staging", "production"]
+        agents:
+          validation: "comprehensive-performance-tester"
+          documentation: "technical-documentation-agent"
+        priority: "medium"
+        
+        validations:
+          - name: "post_deployment_testing"
+            agent: "test-writer-fixer"
+            test_suite: "post_deployment"
+            timeout_minutes: 10
+            
+          - name: "performance_validation"
+            agent: "comprehensive-performance-tester"
+            benchmarks: ["api_response_times", "page_load_speeds", "database_queries"]
+            timeout_minutes: 15
+            
+          - name: "security_verification"
+            agent: "security-specialist"
+            checks: ["endpoint_security", "data_access_validation", "authentication_flows"]
+            timeout_minutes: 10
+            
+        documentation_updates:
+          - name: "deployment_log"
+            agent: "technical-documentation-agent"
+            update_files: ["CHANGELOG.md", "deployment_history.md"]
+            
+        monitoring_setup:
+          - name: "performance_monitoring"
+            agent: "comprehensive-performance-tester"
+            duration_hours: 24
+            alert_on_degradation: true
+
+  deployment_failure:
+    triggers:
+      - event: "deployment_failed"
+        environment: ["staging", "production"]
+        agents:
+          primary: "senior-code-reviewer"
+          investigation: ["workflow-studio-orchestrator", "technical-documentation-agent"]
+        priority: "critical"
+        
+        immediate_actions:
+          - name: "failure_analysis"
+            agent: "senior-code-reviewer"
+            timeout_minutes: 5
+            generate_report: true
+            
+          - name: "rollback_assessment"
+            agent: "workflow-studio-orchestrator"
+            timeout_minutes: 3
+            determine_rollback_necessity: true
+            
+          - name: "impact_assessment"
+            agent: "comprehensive-performance-tester"
+            timeout_minutes: 5
+            check_service_availability: true
+            
+        escalation:
+          critical_production_failure:
+            agents: ["senior-code-reviewer", "security-specialist"]
+            notification: "immediate"
+            contact_method: "emergency_protocol"
+
+# Database migration deployment
+database_deployment:
+  migration_execution:
+    triggers:
+      - event: "migration_started"
+        environment: ["staging", "production"]
+        agents:
+          primary: "migration-workflow-orchestrator"
+          monitoring: "comprehensive-performance-tester"
+          validation: "security-specialist"
+        priority: "critical"
+        
+        pre_migration:
+          - name: "backup_verification"
+            agent: "migration-workflow-orchestrator"
+            timeout_minutes: 5
+            verify_backup_integrity: true
+            blocking: true
+            
+          - name: "rollback_script_validation"
+            agent: "migration-workflow-orchestrator"
+            timeout_minutes: 3
+            test_rollback_script: true
+            blocking: true
+            
+        during_migration:
+          - name: "migration_monitoring"
+            agent: "comprehensive-performance-tester"
+            real_time_monitoring: true
+            metrics: ["migration_progress", "database_performance", "lock_duration"]
+            
+        post_migration:
+          - name: "data_integrity_validation"
+            agent: "migration-workflow-orchestrator"
+            timeout_minutes: 10
+            verify_data_consistency: true
+            
+          - name: "performance_impact_assessment"
+            agent: "comprehensive-performance-tester"
+            timeout_minutes: 15
+            compare_pre_post_performance: true
+            
+          - name: "security_policy_validation"
+            agent: "security-specialist"
+            timeout_minutes: 10
+            validate_rls_policies: true
+
+# Hotfix deployment
+hotfix_deployment:
+  expedited_process:
+    triggers:
+      - event: "hotfix_deployment_initiated"
+        severity: ["critical", "security"]
+        agents:
+          primary: "senior-code-reviewer"
+          security: "security-specialist"
+          testing: "test-writer-fixer"
+        priority: "critical"
+        
+        expedited_validations:
+          - name: "security_focused_review"
+            agent: "security-specialist"
+            timeout_minutes: 5
+            focus: "security_impact_only"
+            
+          - name: "critical_path_testing"
+            agent: "test-writer-fixer"
+            timeout_minutes: 5
+            test_scope: "affected_functionality_only"
+            
+          - name: "minimal_viable_validation"
+            agent: "senior-code-reviewer"
+            timeout_minutes: 3
+            validation_scope: "fix_effectiveness_only"
+            
+        monitoring:
+          - name: "hotfix_impact_monitoring"
+            agent: "comprehensive-performance-tester"
+            duration_hours: 4
+            intensive_monitoring: true
+            immediate_rollback_on_issues: true
+
+# Rollback triggers
+rollback_scenarios:
+  automatic_rollback:
+    triggers:
+      - event: "critical_error_detected"
+        post_deployment_minutes: 30
+        agents: ["senior-code-reviewer", "workflow-studio-orchestrator"]
+        priority: "critical"
+        automatic_action: true
+        
+      - event: "performance_degradation_severe"
+        threshold: "50_percent_increase_response_time"
+        agents: ["comprehensive-performance-tester", "senior-code-reviewer"]
+        priority: "critical"
+        
+  manual_rollback_assistance:
+    triggers:
+      - event: "rollback_initiated"
+        agents:
+          orchestration: "workflow-studio-orchestrator"
+          validation: "comprehensive-performance-tester"
+          documentation: "technical-documentation-agent"
+        priority: "critical"
+        
+        rollback_process:
+          - name: "rollback_execution_monitoring"
+            agent: "workflow-studio-orchestrator"
+            track_rollback_progress: true
+            
+          - name: "post_rollback_validation"
+            agent: "comprehensive-performance-tester"
+            verify_service_restoration: true
+            
+          - name: "incident_documentation"
+            agent: "technical-documentation-agent"
+            create_incident_report: true
+
+# Integration with CI/CD pipelines
+cicd_integration:
+  github_actions:
+    webhook_endpoints:
+      - "workflow_run_completed"
+      - "pull_request_opened"
+      - "push_to_main"
+      - "deployment_status_changed"
+      
+  vercel_deployment:
+    events:
+      - "deployment_created"
+      - "deployment_ready"
+      - "deployment_error"
+      - "deployment_canceled"
+      
+  monitoring_integration:
+    external_services:
+      - "sentry_error_tracking"
+      - "datadog_performance_monitoring"
+      - "uptime_robot_availability"
+
+# Notification and escalation
+notification_channels:
+  slack_integration:
+    channels:
+      - "#deployment-alerts" 
+      - "#security-alerts"
+      - "#performance-alerts"
+      
+  email_notifications:
+    critical_only: true
+    recipients: ["team_lead", "senior_developer"]
+    
+  dashboard_updates:
+    real_time_status: true
+    deployment_timeline: true
+    agent_activity_log: true

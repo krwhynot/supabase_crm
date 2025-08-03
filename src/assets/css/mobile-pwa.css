@@ -1,0 +1,233 @@
+/* Mobile PWA Optimization Styles */
+/* These styles are applied when the app is in fullscreen mode */
+
+/* Fullscreen mode removes dashboard sidebar for PWA */
+body.fullscreen-mode .dashboard-layout {
+  @apply w-full;
+}
+
+body.fullscreen-mode .dashboard-sidebar {
+  @apply hidden;
+}
+
+body.fullscreen-mode .dashboard-content {
+  @apply w-full ml-0;
+}
+
+/* Mobile quick interaction optimizations */
+.quick-interaction-view {
+  @apply min-h-screen bg-gray-50;
+}
+
+.quick-interaction-view .container {
+  @apply max-w-full px-4 py-6;
+}
+
+/* Touch-friendly controls for mobile interactions */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  @apply touch-manipulation;
+}
+
+/* Voice input button styling */
+.voice-input-button {
+  @apply bg-red-500 hover:bg-red-600 active:bg-red-700;
+  @apply rounded-full p-4 shadow-lg;
+  @apply transition-all duration-200;
+}
+
+.voice-input-button.recording {
+  @apply animate-pulse bg-red-600;
+}
+
+/* Quick template buttons for mobile */
+.quick-template-grid {
+  @apply grid grid-cols-2 gap-3 mb-6;
+}
+
+.quick-template-button {
+  @apply p-4 text-sm bg-white border border-gray-200 rounded-lg;
+  @apply hover:bg-gray-50 active:bg-gray-100;
+  @apply flex flex-col items-center justify-center;
+  @apply min-h-20 min-w-16;
+  @apply touch-manipulation;
+}
+
+/* Mobile navigation optimizations */
+.mobile-nav-back {
+  @apply sticky top-0 z-10 bg-white border-b border-gray-200;
+  @apply px-4 py-3 flex items-center;
+}
+
+/* Responsive breakpoints for interactions */
+@media (max-width: 768px) {
+  .interaction-form-mobile {
+    @apply px-2 py-4;
+  }
+  
+  .interaction-table-mobile {
+    @apply hidden;
+  }
+  
+  .interaction-cards-mobile {
+    @apply block space-y-4;
+  }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    /* Prevent bounce scrolling on iOS */
+    overscroll-behavior: none;
+  }
+  
+  .app-header {
+    /* Account for status bar in PWA mode */
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .app-content {
+    /* Account for home indicator on iOS */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .quick-template-button {
+    @apply border-2 border-gray-900;
+  }
+  
+  .mobile-touch-target {
+    @apply ring-2 ring-blue-600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .voice-input-button,
+  .quick-template-button {
+    @apply transition-none;
+  }
+  
+  .voice-input-button.recording {
+    @apply animate-none;
+  }
+}
+
+/* Dark mode support for mobile PWA */
+@media (prefers-color-scheme: dark) {
+  .quick-interaction-view {
+    @apply bg-gray-900;
+  }
+  
+  .quick-template-button {
+    @apply bg-gray-800 border-gray-700 text-white;
+    @apply hover:bg-gray-700 active:bg-gray-600;
+  }
+  
+  .mobile-nav-back {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
+
+/* Accessibility enhancements for mobile */
+.sr-only-mobile {
+  @apply sr-only;
+}
+
+@media (max-width: 768px) {
+  .sr-only-mobile {
+    @apply not-sr-only text-xs text-gray-500 mt-1;
+  }
+}
+
+/* Offline indicator */
+.offline-indicator {
+  @apply fixed bottom-4 left-4 right-4 z-50;
+  @apply bg-yellow-500 text-yellow-900 px-4 py-2 rounded-md;
+  @apply flex items-center justify-center;
+  @apply text-sm font-medium;
+  @apply transform translate-y-full transition-transform duration-300;
+}
+
+.offline-indicator.show {
+  @apply translate-y-0;
+}
+
+/* Loading states for mobile */
+.mobile-loading-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+  @apply flex items-center justify-center;
+}
+
+.mobile-loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-white;
+}
+
+/* Touch feedback */
+.touch-feedback {
+  @apply active:scale-95 transition-transform duration-100;
+}
+
+/* Mobile form optimizations */
+.mobile-form-group {
+  @apply mb-6;
+}
+
+.mobile-input {
+  @apply text-16 leading-normal; /* Prevents zoom on iOS */
+}
+
+/* Voice input visualization */
+.voice-visualizer {
+  @apply flex items-end justify-center h-16 space-x-1;
+}
+
+.voice-bar {
+  @apply w-2 bg-primary-500 rounded-full transition-all duration-100;
+}
+
+.voice-bar.active {
+  @apply bg-red-500;
+}
+
+/* Swipe gesture indicators */
+.swipe-indicator {
+  @apply flex items-center text-xs text-gray-400 mb-2;
+}
+
+.swipe-indicator::before {
+  @apply content-[''] w-4 h-0.5 bg-gray-300 mr-2;
+}
+
+/* Quick action floating button */
+.fab-button {
+  @apply fixed bottom-6 right-6 z-40;
+  @apply w-14 h-14 bg-primary-600 text-white rounded-full;
+  @apply flex items-center justify-center shadow-lg;
+  @apply hover:bg-primary-700 active:bg-primary-800;
+  @apply touch-manipulation;
+}
+
+/* Status indicators for mobile */
+.mobile-status-dot {
+  @apply w-2 h-2 rounded-full flex-shrink-0;
+}
+
+.mobile-status-dot.success {
+  @apply bg-green-500;
+}
+
+.mobile-status-dot.warning {
+  @apply bg-yellow-500;
+}
+
+.mobile-status-dot.error {
+  @apply bg-red-500;
+}
+
+.mobile-status-dot.info {
+  @apply bg-blue-500;
+}

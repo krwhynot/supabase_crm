@@ -1,0 +1,339 @@
+# Priority Matrix and Execution Order
+# Intelligent priority calculation and agent coordination
+
+metadata:
+  version: "1.0.0"
+  project: "vue3-supabase-crm"
+  created: "2025-01-02"
+  description: "Priority calculation rules and execution order matrix for auto-invocation"
+
+# Base priority calculation matrix
+priority_matrix:
+  file_type_priorities:
+    database_migrations:
+      base_priority: "critical"
+      multiplier: 1.5
+      reasoning: "Schema changes affect entire application"
+      
+    security_files:
+      patterns: ["**/auth/**", "**/security/**", "**/*auth*", "**/*security*"]
+      base_priority: "critical"
+      multiplier: 1.4
+      reasoning: "Security impacts user data and system integrity"
+      
+    api_endpoints:
+      patterns: ["src/services/**/*.ts", "supabase/functions/**/*.ts"]
+      base_priority: "high"
+      multiplier: 1.3
+      reasoning: "API changes affect multiple frontend components"
+      
+    vue_components:
+      patterns: ["src/components/**/*.vue", "src/views/**/*.vue"]
+      base_priority: "high"
+      multiplier: 1.2
+      reasoning: "UI changes directly impact user experience"
+      
+    form_components:
+      patterns: ["**/forms/**/*.vue", "**/*Form*.vue"]
+      base_priority: "high"
+      multiplier: 1.25
+      reasoning: "Forms are critical for user interaction and data entry"
+      
+    store_files:
+      patterns: ["src/stores/**/*.ts"]
+      base_priority: "medium"
+      multiplier: 1.1
+      reasoning: "State management affects component behavior"
+      
+    test_files:
+      patterns: ["**/*.test.ts", "**/*.spec.ts", "tests/**/*"]
+      base_priority: "medium"
+      multiplier: 1.0
+      reasoning: "Tests improve quality but don't directly affect users"
+      
+    documentation:
+      patterns: ["docs/**/*.md", "README.md", "**/*.md"]
+      base_priority: "low"
+      multiplier: 0.8
+      reasoning: "Documentation is important but not user-facing"
+      
+    configuration:
+      patterns: ["*.config.*", ".*rc", "package.json", "tsconfig.json"]
+      base_priority: "medium"
+      multiplier: 1.2
+      reasoning: "Config changes can affect entire build process"
+
+# Change scope impact modifiers
+scope_modifiers:
+  single_file:
+    threshold: 1
+    modifier: 0.0
+    description: "Isolated change with limited impact"
+    
+  multiple_related_files:
+    threshold: 2-5
+    modifier: +0.3
+    description: "Related files suggest feature work"
+    additional_validation: true
+    
+  cross_module_changes:
+    threshold: 6-10
+    modifier: +0.6
+    description: "Changes span multiple modules"
+    required_agents: ["quality-compliance-auditor"]
+    
+  architectural_changes:
+    threshold: 11+
+    modifier: +1.0
+    description: "Large-scale architectural modifications"
+    required_agents: ["senior-code-reviewer", "workflow-studio-orchestrator"]
+    escalation: "immediate"
+
+# Keyword-based priority boosters
+keyword_boosters:
+  security_keywords:
+    keywords: ["security", "auth", "login", "password", "token", "vulnerability", "exploit"]
+    priority_boost: +2.0
+    force_agents: ["security-specialist"]
+    interrupt_lower_priority: true
+    
+  performance_keywords:
+    keywords: ["performance", "optimize", "slow", "cache", "memory", "cpu", "bottleneck"]
+    priority_boost: +1.5
+    force_agents: ["comprehensive-performance-tester"]
+    
+  breaking_change_keywords:
+    keywords: ["breaking", "breaking change", "api change", "migration", "deprecated"]
+    priority_boost: +1.8
+    force_agents: ["senior-code-reviewer", "technical-documentation-agent"]
+    
+  bug_fix_keywords:
+    keywords: ["fix", "bug", "issue", "error", "problem", "crash", "failure"]
+    priority_boost: +1.2
+    force_agents: ["test-writer-fixer"]
+    
+  accessibility_keywords:
+    keywords: ["accessibility", "a11y", "wcag", "aria", "screen reader", "keyboard"]
+    priority_boost: +1.3
+    force_agents: ["quality-compliance-auditor"]
+
+# Temporal priority adjustments
+temporal_factors:
+  business_hours:
+    timezone: "UTC"
+    business_hours: "09:00-17:00"
+    weekdays_only: true
+    modifier: +0.2
+    reasoning: "Higher priority during business hours for immediate review"
+    
+  end_of_sprint:
+    days_before_sprint_end: 2
+    modifier: +0.5
+    reasoning: "Increased urgency near sprint completion"
+    
+  release_proximity:
+    days_before_release: 3
+    modifier: +0.8
+    additional_validation: true
+    reasoning: "Higher scrutiny before releases"
+    
+  holiday_periods:
+    reduced_team_availability: true
+    modifier: -0.3
+    escalation_threshold_lower: true
+    reasoning: "Adjusted expectations during holidays"
+
+# Agent availability and workload balancing
+workload_balancing:
+  agent_capacity:
+    max_concurrent_tasks:
+      security-specialist: 1  # Security requires focused attention
+      senior-code-reviewer: 2  # Senior review is limited resource
+      vue-component-architect: 3  # Can handle multiple components
+      backend-architect: 2  # Database/API work needs focus
+      comprehensive-performance-tester: 2  # Performance testing is resource intensive
+      test-writer-fixer: 4  # Testing can be more parallelized
+      quality-compliance-auditor: 3  # Quality checks can be batched
+      
+  queue_management:
+    queue_strategy: "priority_with_aging"
+    aging_factor: 0.1  # Priority increases by 0.1 every 15 minutes
+    max_queue_time_minutes: 60
+    
+  load_balancing_rules:
+    overloaded_agent:
+      threshold: "max_concurrent_reached"
+      action: "delegate_to_similar"
+      similar_agents:
+        vue-component-architect: ["frontend-developer", "ui-ux-improvement-specialist"]
+        backend-architect: ["supabase-integration-specialist", "api-architect"]
+        security-specialist: ["senior-code-reviewer"]  # Limited fallback
+        
+  emergency_override:
+    critical_priority_bypass: true
+    interrupt_current_work: true
+    notification_required: true
+
+# Execution order matrix
+execution_order:
+  sequential_dependencies:
+    backend_to_frontend:
+      trigger: "api_changes"
+      sequence:
+        1: "backend-architect"
+        2: "security-specialist"  
+        3: "vue-component-architect"  # After API is stable
+        4: "comprehensive-performance-tester"
+        
+    database_to_application:
+      trigger: "schema_changes"
+      sequence:
+        1: "migration-workflow-orchestrator"
+        2: "backend-architect"  # Update types and services
+        3: "security-specialist"  # Validate RLS policies
+        4: "vue-component-architect"  # Update UI for schema changes
+        5: "comprehensive-performance-tester"
+        
+    form_development:
+      trigger: "form_creation"
+      sequence:
+        1: "form-design-architect"
+        2: "mobile-pwa-specialist"  # Mobile optimization
+        3: "quality-compliance-auditor"  # Accessibility validation
+        4: "test-writer-fixer"
+        5: "delight-experience-enhancer"  # UX improvements
+        
+  parallel_execution_groups:
+    independent_reviews:
+      agents: ["quality-compliance-auditor", "security-specialist"]
+      can_run_parallel: true
+      merge_results: true
+      
+    testing_suite:
+      agents: ["test-writer-fixer", "comprehensive-performance-tester"]
+      can_run_parallel: true
+      coordinate_results: true
+      
+    documentation_and_monitoring:
+      agents: ["technical-documentation-agent", "comprehensive-performance-tester"]
+      can_run_parallel: true
+      independent_outputs: true
+
+# Priority escalation rules
+escalation_rules:
+  time_based_escalation:
+    stuck_in_queue:
+      threshold_minutes: 30
+      action: "priority_boost"
+      boost_amount: +0.5
+      
+    long_running_task:
+      threshold_minutes: 60
+      action: "escalate_to_senior"
+      escalation_agent: "senior-code-reviewer"
+      
+    critical_timeout:
+      threshold_minutes: 15
+      priority_threshold: "critical"
+      action: "immediate_intervention"
+      notification: "emergency"
+      
+  failure_based_escalation:
+    repeated_failures:
+      failure_count: 3
+      time_window_hours: 24
+      action: "escalate_and_review_process"
+      escalation_agent: "workflow-studio-orchestrator"
+      
+    agent_unavailable:
+      timeout_minutes: 10
+      action: "reassign_to_fallback"
+      fallback_selection: "capability_based"
+      
+    quality_gate_failures:
+      consecutive_failures: 2
+      action: "escalate_to_senior_review"
+      escalation_agent: "senior-code-reviewer"
+
+# Context-aware priority adjustments
+context_awareness:
+  user_impact_assessment:
+    user_facing_changes:
+      patterns: ["src/components/**", "src/views/**", "public/**"]
+      priority_boost: +0.4
+      reasoning: "Direct user impact requires careful review"
+      
+    internal_tooling:
+      patterns: ["scripts/**", "tools/**", "dev/**"]
+      priority_reduction: -0.2
+      reasoning: "Internal tools have lower user impact"
+      
+  business_logic_sensitivity:
+    core_business_logic:
+      patterns: ["src/stores/**", "src/services/**"]
+      priority_boost: +0.6
+      additional_agents: ["senior-code-reviewer"]
+      reasoning: "Business logic changes need senior oversight"
+      
+    experimental_features:
+      branch_patterns: ["feature/**", "experiment/**"]
+      priority_reduction: -0.1
+      relaxed_validation: true
+      reasoning: "Experimental work can be less strict"
+      
+  integration_complexity:
+    external_api_integration:
+      keywords: ["api", "webhook", "external", "integration", "third-party"]
+      priority_boost: +0.5
+      additional_agents: ["security-specialist"]
+      reasoning: "External integrations need security review"
+      
+    database_integration:
+      patterns: ["**/*Store.ts", "src/services/**", "sql/**"]
+      priority_boost: +0.4
+      required_validation: ["data_integrity", "performance_impact"]
+
+# Real-time priority calculation
+dynamic_priority_calculation:
+  base_calculation:
+    formula: "base_priority + scope_modifier + keyword_boost + temporal_factor + context_adjustment"
+    
+  normalization:
+    min_priority: 0.1
+    max_priority: 5.0
+    critical_threshold: 4.0
+    high_threshold: 3.0
+    medium_threshold: 2.0
+    low_threshold: 1.0
+    
+  real_time_adjustments:
+    system_load_factor: true
+    team_availability_factor: true
+    current_incident_factor: true
+    
+  priority_caching:
+    cache_duration_minutes: 5
+    invalidate_on_new_changes: true
+    recalculate_on_context_change: true
+
+# Monitoring and optimization
+priority_analytics:
+  track_metrics:
+    - "priority_accuracy"
+    - "escalation_frequency"
+    - "queue_wait_times"
+    - "agent_utilization"
+    - "priority_distribution"
+    
+  optimization_triggers:
+    high_escalation_rate:
+      threshold: 20  # 20% of tasks escalate
+      action: "review_priority_matrix"
+      
+    uneven_load_distribution:
+      threshold: 50  # 50% difference in agent utilization
+      action: "rebalance_agent_assignments"
+      
+    frequent_priority_adjustments:
+      threshold: 30  # 30% of tasks get priority adjusted
+      action: "tune_priority_calculation"

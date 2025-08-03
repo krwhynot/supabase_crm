@@ -1,0 +1,493 @@
+# Frontend-Quality Chain Workflow
+# Vue 3 + Supabase CRM Project
+
+workflow:
+  name: "frontend-quality"
+  description: "Complete frontend development workflow with quality assurance and comprehensive testing"
+  version: "1.0.0"
+  
+  # Agent sequence definition
+  sequence:
+    - stage: 1
+      agent: "vue-component-architect"
+      role: "implementation"
+      timeout: "45 minutes"
+      
+    - stage: 2
+      agent: "quality-compliance-auditor"
+      role: "validation"
+      timeout: "20 minutes"
+      
+    - stage: 3
+      agent: "test-writer-fixer"
+      role: "testing"
+      timeout: "30 minutes"
+
+# Detailed stage configurations
+stages:
+  component_implementation:
+    agent: "vue-component-architect"
+    description: "Create production-ready Vue 3 components with TypeScript and accessibility"
+    
+    inputs:
+      required:
+        - component_requirements: "Functional and design specifications"
+        - design_mockups: "UI/UX designs or wireframes"
+      optional:
+        - existing_components: "Related components for consistency"
+        - api_contracts: "Backend API specifications for integration"
+        - accessibility_requirements: "Specific WCAG compliance needs"
+    
+    implementation_standards:
+      vue3_patterns:
+        - "Use Composition API with <script setup> syntax"
+        - "Implement proper TypeScript interfaces for props and events"
+        - "Follow reactive patterns with ref() and reactive()"
+        - "Use computed() for derived state"
+        - "Implement proper lifecycle management"
+      
+      accessibility_requirements:
+        - "WCAG 2.1 AA compliance mandatory"
+        - "Proper ARIA attributes for all interactive elements"
+        - "Keyboard navigation support"
+        - "Screen reader compatibility"
+        - "Color contrast ratios meet standards"
+        - "Focus management implemented"
+      
+      responsive_design:
+        - "Mobile-first approach using Tailwind breakpoints"
+        - "Touch-friendly interactions for mobile devices"
+        - "Flexible layouts that adapt to screen sizes"
+        - "Performance optimized for mobile networks"
+      
+      code_quality:
+        - "TypeScript strict mode compliance"
+        - "ESLint and Prettier formatting applied"
+        - "Component composition over inheritance"
+        - "Single responsibility principle followed"
+        - "Clear prop and event interfaces"
+    
+    deliverables:
+      primary:
+        - vue_component:
+            files: ["src/components/**/*.vue", "src/views/**/*.vue"]
+            validation: "Vue 3 SFC with proper TypeScript integration"
+        - component_interfaces:
+            files: ["src/types/**/*.ts"]
+            validation: "TypeScript interfaces for props, events, and state"
+        - style_implementation:
+            validation: "Tailwind CSS classes with responsive design"
+      
+      secondary:
+        - usage_documentation: "Component usage examples and props documentation"
+        - storybook_stories: "Component stories for design system integration"
+        - accessibility_audit: "WCAG compliance verification"
+    
+    success_criteria:
+      mandatory:
+        - "Vue 3 component created with Composition API and TypeScript"
+        - "All accessibility requirements met (WCAG 2.1 AA)"
+        - "Responsive design implemented for mobile, tablet, desktop"
+        - "Props and events properly typed with TypeScript interfaces"
+        - "Component integrates properly with existing design system"
+        - "Error states and loading states properly handled"
+      
+      quality_indicators:
+        - "Component follows single responsibility principle"
+        - "Reusable and composable design patterns"
+        - "Performance optimized with proper reactivity"
+        - "Clear and comprehensive documentation"
+        - "Consistent with project architectural patterns"
+    
+    handoff_data:
+      validation_criteria:
+        component_structure:
+          - "SFC follows project conventions"
+          - "TypeScript compilation without errors"
+          - "Props interface properly defined"
+          - "Events properly typed and documented"
+        
+        accessibility_readiness:
+          - "ARIA attributes present where needed"
+          - "Keyboard navigation functional"
+          - "Focus management implemented"
+          - "Screen reader compatibility verified"
+        
+        design_system_compliance:
+          - "Tailwind CSS utilities used appropriately"
+          - "Design tokens followed consistently"
+          - "Component variants properly implemented"
+          - "Responsive breakpoints correctly applied"
+
+  quality_compliance_audit:
+    agent: "quality-compliance-auditor"
+    description: "Comprehensive compliance review against architectural and design standards"
+    
+    inputs:
+      required:
+        - vue_component: "From vue-component-architect"
+        - component_interfaces: "From vue-component-architect"
+        - usage_documentation: "From vue-component-architect"
+      context:
+        - project_standards: "CLAUDE.md architectural patterns"
+        - design_system_rules: "Established design system guidelines"
+        - accessibility_standards: "WCAG 2.1 AA requirements"
+    
+    audit_checklist:
+      architectural_compliance:
+        vue3_standards:
+          - "Composition API usage verified"
+          - "<script setup> syntax implemented correctly"
+          - "TypeScript interfaces properly defined"
+          - "Reactivity patterns followed"
+          - "Component lifecycle properly managed"
+        
+        project_patterns:
+          - "Follows established component patterns from CLAUDE.md"
+          - "Consistent with existing form component architecture"
+          - "Proper state management integration (Pinia)"
+          - "Router integration if applicable"
+          - "Error handling patterns consistent"
+      
+      design_system_compliance:
+        tailwind_usage:
+          - "Utility-first approach followed"
+          - "Custom CSS minimal and justified"
+          - "Responsive design utilities used correctly"
+          - "Color scheme and spacing consistent"
+        
+        component_standards:
+          - "Props interface follows project conventions"
+          - "Event naming consistent with Vue standards"
+          - "Slot usage appropriate and documented"
+          - "CSS class composition computed correctly"
+      
+      accessibility_compliance:
+        wcag_requirements:
+          - "All interactive elements accessible via keyboard"
+          - "ARIA attributes correctly implemented"
+          - "Color contrast ratios meet AA standards"
+          - "Focus indicators visible and appropriate"
+          - "Screen reader announcements proper"
+        
+        semantic_html:
+          - "Proper HTML semantic elements used"
+          - "Form elements properly labeled"
+          - "Heading hierarchy maintained"
+          - "Landmark regions defined"
+      
+      code_quality:
+        typescript_compliance:
+          - "Strict TypeScript mode compliance"
+          - "No 'any' types without justification"
+          - "Generic types used appropriately"
+          - "Type inference optimized"
+        
+        maintainability:
+          - "Component complexity reasonable"
+          - "Logic properly separated into composables"
+          - "Documentation complete and accurate"
+          - "Error boundaries implemented where needed"
+    
+    audit_decision_matrix:
+      APPROVED:
+        criteria:
+          - "All mandatory compliance checks pass"
+          - "No critical architectural violations"
+          - "Accessibility standards fully met"
+          - "Code quality meets project standards"
+      
+      NEEDS_REVISION:
+        criteria:
+          - "Minor compliance issues identified"
+          - "Accessibility improvements needed"
+          - "Code quality concerns present"
+          - "Documentation gaps identified"
+        
+        required_actions:
+          - "Specific issues documented with remediation steps"
+          - "Reference to violated standards provided"
+          - "Timeline for revision specified"
+      
+      REJECTED:
+        criteria:
+          - "Critical architectural violations present"
+          - "Major accessibility failures"
+          - "Security concerns identified"
+          - "Fundamental design problems"
+        
+        escalation:
+          - "Route to senior-code-reviewer for architectural guidance"
+          - "Stakeholder notification of significant issues"
+          - "Project timeline impact assessment"
+    
+    deliverables:
+      primary:
+        - compliance_report:
+            format: "Structured markdown with clear APPROVED/NEEDS_REVISION/REJECTED decision"
+            sections: ["Executive Summary", "Compliance Matrix", "Findings", "Recommendations"]
+        - quality_score:
+            format: "Numerical score based on weighted criteria"
+            components: ["Architecture: 30%", "Accessibility: 25%", "Design System: 25%", "Code Quality: 20%"]
+      
+      conditional:
+        - remediation_checklist: "Required if NEEDS_REVISION or REJECTED"
+        - architectural_guidance: "If significant pattern violations found"
+
+  comprehensive_testing:
+    agent: "test-writer-fixer"
+    description: "Complete test coverage including unit, integration, and E2E testing"
+    
+    inputs:
+      required:
+        - vue_component: "From vue-component-architect"
+        - compliance_report: "From quality-compliance-auditor"
+        - component_interfaces: "From vue-component-architect"
+      optional:
+        - integration_requirements: "API integration testing needs"
+        - user_scenarios: "E2E testing scenarios"
+    
+    testing_strategy:
+      unit_testing:
+        framework: "Vitest with Vue Testing Library"
+        coverage_targets:
+          - "Component logic: 95%"
+          - "Props validation: 100%"
+          - "Event emission: 100%"
+          - "Computed properties: 90%"
+        
+        test_scenarios:
+          - "Component mounting and rendering"
+          - "Props validation and type checking"
+          - "Event emission and handling"
+          - "Reactive state management"
+          - "Computed property calculations"
+          - "Error state handling"
+          - "Loading state management"
+      
+      integration_testing:
+        scope: "Component interaction with stores, router, and external APIs"
+        scenarios:
+          - "Pinia store integration testing"
+          - "Vue Router navigation testing"
+          - "API service integration"
+          - "Form submission workflows"
+          - "Real-time data updates"
+        
+        mock_strategy:
+          - "API calls mocked with realistic responses"
+          - "Store state properly isolated"
+          - "External dependencies stubbed"
+      
+      accessibility_testing:
+        tools: ["@testing-library/jest-dom", "axe-core"]
+        scenarios:
+          - "Keyboard navigation testing"
+          - "Screen reader compatibility"
+          - "ARIA attribute validation"
+          - "Focus management verification"
+          - "Color contrast automated testing"
+      
+      e2e_testing:
+        framework: "Playwright"
+        scenarios:
+          - "Complete user workflows"
+          - "Cross-browser compatibility"
+          - "Mobile viewport testing"
+          - "Performance impact assessment"
+          - "Visual regression testing"
+    
+    deliverables:
+      primary:
+        - test_suite:
+            files: ["tests/unit/**/*.spec.ts", "tests/integration/**/*.spec.ts", "tests/e2e/**/*.spec.ts"]
+            validation: "All tests pass and coverage targets met"
+        - coverage_report:
+            format: "Detailed coverage analysis with line-by-line breakdown"
+            targets: "Unit: 95%, Integration: 80%, E2E: Critical paths"
+      
+      secondary:
+        - accessibility_test_report: "Automated accessibility testing results"
+        - performance_impact: "Component performance metrics and optimization recommendations"
+        - visual_regression_baseline: "Screenshot baselines for future regression testing"
+    
+    success_criteria:
+      mandatory:
+        - "All unit tests pass with 95%+ coverage"
+        - "Integration tests verify component behavior in context"
+        - "E2E tests cover critical user paths"
+        - "Accessibility tests validate WCAG compliance"
+        - "Performance impact within acceptable limits"
+      
+      quality_indicators:
+        - "Test scenarios comprehensive and realistic"
+        - "Mock strategy appropriate and maintainable"
+        - "Test documentation clear and complete"
+        - "Continuous integration integration verified"
+
+# Trigger conditions for workflow initiation
+triggers:
+  file_changes:
+    vue_components:
+      patterns: ["src/components/**/*.vue", "src/views/**/*.vue"]
+      priority: "high"
+      auto_start: true
+    
+    form_components:
+      patterns: ["src/components/forms/**/*.vue"]
+      priority: "high"
+      auto_start: true
+      special_handling: "May route to form-design-mobile-delight chain instead"
+    
+    component_types:
+      patterns: ["src/types/**/*Component*.ts", "src/types/**/*Props*.ts"]
+      priority: "medium"
+      auto_start: false  # Manual confirmation for type-only changes
+    
+    style_updates:
+      patterns: ["src/assets/**/*.css", "tailwind.config.js"]
+      priority: "medium"
+      auto_start: false  # May affect multiple components
+
+  explicit_triggers:
+    component_development:
+      description: "Starting development of new UI component"
+      required_context: ["component_specification", "design_mockups"]
+    
+    component_refactor:
+      description: "Major refactoring of existing component"
+      required_context: ["refactor_scope", "backward_compatibility_requirements"]
+    
+    accessibility_improvement:
+      description: "Improving accessibility of existing components"
+      required_context: ["accessibility_audit_results", "compliance_gaps"]
+
+# Handoff protocols between agents
+handoffs:
+  component_to_quality:
+    timing: "Upon successful completion of component implementation"
+    data_transfer:
+      required_files:
+        - "Vue component SFC files"
+        - "TypeScript interface definitions"
+        - "Component documentation"
+        - "Usage examples"
+      
+      context_information:
+        - "Design decisions and architectural rationale"
+        - "Accessibility considerations implemented"
+        - "Performance optimizations applied"
+        - "Known limitations or edge cases"
+    
+    validation_checkpoints:
+      pre_handoff:
+        - "Component compiles without TypeScript errors"
+        - "Basic component rendering verified"
+        - "Props and events functional"
+        - "Documentation complete"
+      
+      post_handoff:
+        - "Quality auditor confirms component scope understood"
+        - "Compliance criteria agreed upon"
+        - "Audit timeline established"
+
+  quality_to_testing:
+    timing: "Upon APPROVED decision from quality compliance audit"
+    data_transfer:
+      required_files:
+        - "Compliance audit report"
+        - "Component implementation (potentially updated after revision)"
+        - "Quality score and detailed findings"
+      
+      context_information:
+        - "Quality assurance findings and recommendations"
+        - "Specific testing focus areas identified"
+        - "Compliance requirements for test validation"
+        - "Integration testing scope defined"
+    
+    validation_checkpoints:
+      pre_handoff:
+        - "Compliance audit completed with APPROVED status"
+        - "Any required revisions completed"
+        - "Component ready for comprehensive testing"
+      
+      post_handoff:
+        - "Test writer confirms testing scope understood"
+        - "Test strategy aligned with compliance findings"
+        - "Testing environment properly configured"
+
+# Error handling and escalation procedures
+error_handling:
+  quality_audit_failures:
+    needs_revision:
+      action: "Return to vue-component-architect with specific remediation checklist"
+      retry_limit: 3
+      escalation: "senior-code-reviewer if patterns consistently violated"
+    
+    rejected_component:
+      action: "Escalate to senior-code-reviewer for architectural guidance"
+      notification: "Project stakeholders informed of significant issues"
+      investigation: "Root cause analysis of design or requirement issues"
+  
+  testing_failures:
+    coverage_insufficient:
+      action: "Work with vue-component-architect to improve testability"
+      minimum_threshold: "85% coverage before escalation"
+      escalation: "technical-documentation-agent for architectural review"
+    
+    accessibility_test_failures:
+      action: "Return to vue-component-architect for accessibility improvements"
+      priority: "High - accessibility is mandatory requirement"
+      escalation: "user-behavior-analyst for UX accessibility guidance"
+    
+    integration_test_failures:
+      action: "Coordinate with backend team if API-related issues"
+      investigation: "Determine if component or integration contract issue"
+      escalation: "workflow-studio-orchestrator for cross-team coordination"
+
+  workflow_bottlenecks:
+    agent_unavailable:
+      action: "Queue workflow with notification to stakeholders"
+      timeout: "2 hours maximum wait time"
+      fallback: "Cross-train secondary agents for coverage"
+    
+    approval_delays:
+      action: "Escalate to project management after 24 hours"
+      notification: "Stakeholders updated on timeline impact"
+      mitigation: "Parallel work streams where possible"
+
+# Success metrics and monitoring
+monitoring:
+  workflow_health:
+    completion_rate: "Target: 98% successful completion"
+    average_duration: "Target: 95 minutes total workflow time"
+    handoff_efficiency: "Target: < 3 minutes between agents"
+    
+  quality_metrics:
+    compliance_pass_rate: "Target: 90% APPROVED on first audit"
+    test_coverage: "Target: 95% unit test coverage maintained"
+    accessibility_compliance: "Target: 100% WCAG 2.1 AA compliance"
+    defect_escape_rate: "Target: < 1% of issues found post-deployment"
+    
+  developer_experience:
+    workflow_clarity: "Clear handoff criteria and expectations"
+    feedback_quality: "Actionable and specific remediation guidance"
+    documentation_completeness: "Comprehensive component documentation"
+    reusability_score: "Components successfully reused across features"
+
+# Integration with project ecosystem
+project_integration:
+  design_system_updates:
+    trigger: "New component may become part of design system"
+    action: "Coordinate with brand-identity-guardian for design system inclusion"
+    documentation: "Update design system documentation and Storybook"
+  
+  mobile_optimization:
+    trigger: "Component used in mobile-critical features"
+    additional_agent: "mobile-pwa-specialist for mobile-specific optimization"
+    validation: "Additional mobile viewport and touch interaction testing"
+  
+  delight_enhancement:
+    trigger: "Component part of user-facing feature"
+    additional_agent: "delight-experience-enhancer for micro-interactions"
+    timing: "After successful completion of primary workflow"

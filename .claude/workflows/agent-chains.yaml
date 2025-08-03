@@ -1,0 +1,344 @@
+# Agent Coordination Workflows - Master Configuration
+# Vue 3 + Supabase CRM Project
+
+metadata:
+  version: "1.0.0"
+  project: "vue3-supabase-crm"
+  created: "2025-01-02"
+  description: "Master configuration for subagent coordination workflows"
+
+# Global handoff data schema
+handoff_schema:
+  source_agent: 
+    type: string
+    required: true
+    description: "Agent initiating the handoff"
+  target_agent:
+    type: string
+    required: true
+    description: "Agent receiving the handoff"
+  deliverable_type:
+    type: string
+    enum: ["component", "schema", "api", "feature", "security_audit", "performance_report", "test_suite"]
+    required: true
+  file_paths:
+    type: array
+    items: string
+    description: "Files created, modified, or affected"
+  validation_criteria:
+    type: object
+    description: "Success criteria for the next agent"
+  context:
+    type: object
+    description: "Additional context and requirements"
+  priority:
+    type: string
+    enum: ["low", "medium", "high", "critical"]
+    default: "medium"
+  timestamp:
+    type: string
+    format: "iso8601"
+    description: "Handoff initiation timestamp"
+
+# Agent registry with capabilities and specializations
+agents:
+  backend-architect:
+    specializations: ["database", "api", "supabase", "schema", "rls", "postgresql"]
+    outputs: ["schema", "api", "migration"]
+    handoff_targets: ["security-specialist", "comprehensive-performance-tester"]
+    file_patterns: ["sql/**/*.sql", "src/services/**/*.ts", "src/stores/**/*.ts"]
+    
+  security-specialist:
+    specializations: ["security_audit", "vulnerability_assessment", "compliance", "rls_review"]
+    outputs: ["security_audit", "compliance_report"]
+    handoff_targets: ["comprehensive-performance-tester", "senior-code-reviewer"]
+    required_inputs: ["schema", "api"]
+    
+  comprehensive-performance-tester:
+    specializations: ["performance_testing", "load_testing", "optimization", "benchmarking"]
+    outputs: ["performance_report", "optimization_recommendations"]
+    handoff_targets: ["technical-documentation-agent"]
+    required_inputs: ["schema", "api", "security_audit"]
+    
+  vue-component-architect:
+    specializations: ["vue3", "typescript", "components", "accessibility", "responsive_design"]
+    outputs: ["component", "ui_implementation"]
+    handoff_targets: ["quality-compliance-auditor", "delight-experience-enhancer"]
+    file_patterns: ["src/components/**/*.vue", "src/views/**/*.vue"]
+    
+  quality-compliance-auditor:
+    specializations: ["compliance_audit", "design_system", "standards_validation", "quality_gates"]
+    outputs: ["compliance_report", "approval_decision"]
+    handoff_targets: ["test-writer-fixer", "senior-code-reviewer"]
+    required_inputs: ["component", "ui_implementation"]
+    
+  test-writer-fixer:
+    specializations: ["testing", "test_automation", "playwright", "vitest", "coverage"]
+    outputs: ["test_suite", "coverage_report"]
+    handoff_targets: ["technical-documentation-agent"]
+    required_inputs: ["component", "compliance_report"]
+
+# Primary workflow chains
+chains:
+  backend-security-performance:
+    description: "Backend development with security and performance validation"
+    sequence:
+      - agent: "backend-architect"
+        role: "implementation"
+        success_criteria:
+          - "Database schema created with proper relationships"
+          - "RLS policies implemented"
+          - "API endpoints functional"
+          - "TypeScript types generated"
+        
+      - agent: "security-specialist"
+        role: "validation"
+        success_criteria:
+          - "Security audit completed"
+          - "No critical vulnerabilities found"
+          - "RLS policies validated"
+          - "Compliance requirements met"
+        
+      - agent: "comprehensive-performance-tester"
+        role: "optimization"
+        success_criteria:
+          - "Performance benchmarks met"
+          - "Load testing passed"
+          - "Query optimization completed"
+          - "API response times acceptable"
+    
+    triggers:
+      file_patterns:
+        - "sql/**/*.sql"
+        - "src/services/**/*.ts"
+        - "src/stores/**/*Store.ts"
+      code_changes:
+        - "database_schema"
+        - "api_endpoints"
+        - "supabase_config"
+    
+    escalation:
+      failed_handoff: "workflow-studio-orchestrator"
+      critical_issues: "senior-code-reviewer"
+      performance_issues: "backend-architect"
+
+  frontend-quality:
+    description: "Frontend development with quality assurance and testing"
+    sequence:
+      - agent: "vue-component-architect"
+        role: "implementation"
+        success_criteria:
+          - "Vue 3 component created with TypeScript"
+          - "Accessibility requirements met"
+          - "Responsive design implemented"
+          - "Props and events properly typed"
+        
+      - agent: "quality-compliance-auditor"
+        role: "validation"
+        success_criteria:
+          - "Design system compliance verified"
+          - "Architectural standards met"
+          - "Accessibility audit passed"
+          - "Code quality standards met"
+        
+      - agent: "test-writer-fixer"
+        role: "testing"
+        success_criteria:
+          - "Unit tests written and passing"
+          - "Integration tests implemented"
+          - "E2E tests for critical paths"
+          - "Test coverage targets met"
+    
+    triggers:
+      file_patterns:
+        - "src/components/**/*.vue"
+        - "src/views/**/*.vue"
+        - "src/components/forms/**/*.vue"
+      code_changes:
+        - "component_creation"
+        - "ui_modification"
+        - "form_implementation"
+    
+    escalation:
+      failed_handoff: "senior-code-reviewer"
+      design_issues: "brand-identity-guardian"
+      accessibility_issues: "vue-component-architect"
+
+  form-design-mobile-delight:
+    description: "Form creation with mobile optimization and user experience enhancement"
+    sequence:
+      - agent: "form-design-architect"
+        role: "implementation"
+        success_criteria:
+          - "Form validation schema implemented"
+          - "Accessibility features included"
+          - "Error handling comprehensive"
+          - "User experience optimized"
+        
+      - agent: "mobile-pwa-specialist"
+        role: "optimization"
+        success_criteria:
+          - "Mobile viewport optimized"
+          - "Touch interactions functional"
+          - "Progressive enhancement applied"
+          - "Performance on mobile devices"
+        
+      - agent: "delight-experience-enhancer"
+        role: "enhancement"
+        success_criteria:
+          - "Micro-interactions added"
+          - "User feedback mechanisms"
+          - "Error states made friendly"
+          - "Loading states engaging"
+    
+    triggers:
+      file_patterns:
+        - "src/components/forms/**/*.vue"
+        - "src/validation/**/*.ts"
+      code_changes:
+        - "form_creation"
+        - "validation_schema"
+        - "user_input_handling"
+
+# Cross-cutting workflows for complex features
+integration_workflows:
+  full_feature_development:
+    description: "Complete feature development with both frontend and backend"
+    orchestrator: "workflow-studio-orchestrator"
+    parallel_chains:
+      - "backend-security-performance"
+      - "frontend-quality"
+    coordination_points:
+      - name: "api_contract_validation"
+        agents: ["backend-architect", "vue-component-architect"]
+        deliverable: "api_contract"
+      - name: "integration_testing"
+        agents: ["comprehensive-performance-tester", "test-writer-fixer"]
+        deliverable: "integration_test_suite"
+    
+    final_validation:
+      agent: "quality-compliance-auditor"
+      criteria:
+        - "End-to-end functionality verified"
+        - "Performance requirements met"
+        - "Security standards maintained"
+        - "User experience validated"
+
+  security_focused_development:
+    description: "Security-first development workflow"
+    orchestrator: "security-specialist"
+    sequence:
+      - "security-specialist"     # Initial security assessment
+      - "backend-architect"       # Secure implementation
+      - "security-specialist"     # Security validation
+      - "comprehensive-performance-tester"  # Performance impact assessment
+
+# Trigger patterns for automatic workflow initiation
+triggers:
+  file_patterns:
+    vue_components:
+      pattern: "src/components/**/*.vue"
+      workflow: "frontend-quality"
+      priority: "high"
+    
+    database_schema:
+      pattern: "sql/**/*.sql"
+      workflow: "backend-security-performance"
+      priority: "critical"
+    
+    api_services:
+      pattern: "src/services/**/*.ts"
+      workflow: "backend-security-performance"
+      priority: "high"
+    
+    form_components:
+      pattern: "src/components/forms/**/*.vue"
+      workflow: "form-design-mobile-delight"
+      priority: "high"
+    
+    store_files:
+      pattern: "src/stores/**/*.ts"
+      workflow: "backend-security-performance"
+      priority: "medium"
+    
+    test_files:
+      pattern: "tests/**/*.spec.ts"
+      agent: "test-writer-fixer"
+      priority: "medium"
+
+# Validation criteria for quality gates
+quality_gates:
+  component_compliance:
+    accessibility:
+      - "ARIA attributes present"
+      - "Keyboard navigation functional"
+      - "Color contrast ratios met"
+      - "Screen reader compatibility"
+    
+    vue3_standards:
+      - "Composition API usage"
+      - "TypeScript interfaces defined"
+      - "Props validation implemented"
+      - "Emission types declared"
+    
+    design_system:
+      - "Tailwind CSS utilities used"
+      - "Design tokens followed"
+      - "Responsive breakpoints implemented"
+      - "Brand guidelines adhered"
+
+  backend_compliance:
+    security:
+      - "RLS policies implemented"
+      - "Input validation present"
+      - "SQL injection prevention"
+      - "Authentication required"
+    
+    performance:
+      - "Query response time < 200ms"
+      - "Proper indexing implemented"
+      - "Connection pooling optimized"
+      - "Caching strategy defined"
+    
+    architecture:
+      - "TypeScript types generated"
+      - "Error handling comprehensive"
+      - "Logging implemented"
+      - "API documentation complete"
+
+# Escalation procedures
+escalation:
+  workflow_failure:
+    primary: "workflow-studio-orchestrator"
+    secondary: "senior-code-reviewer"
+    critical: "technical-documentation-agent"
+  
+  security_issues:
+    primary: "security-specialist"
+    secondary: "senior-code-reviewer"
+  
+  performance_issues:
+    primary: "comprehensive-performance-tester"
+    secondary: "backend-architect"
+  
+  design_compliance:
+    primary: "quality-compliance-auditor"
+    secondary: "brand-identity-guardian"
+
+# Monitoring and metrics
+metrics:
+  handoff_efficiency:
+    target_time: "5 minutes"
+    escalation_threshold: "15 minutes"
+  
+  success_rate:
+    target: "95%"
+    minimum_acceptable: "90%"
+  
+  quality_score:
+    components:
+      - "compliance_check: 40%"
+      - "test_coverage: 30%"
+      - "performance: 20%"
+      - "security: 10%"
+    target: "85/100"

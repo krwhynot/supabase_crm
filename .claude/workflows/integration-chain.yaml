@@ -1,0 +1,413 @@
+# Cross-Feature Integration Chain Workflow
+# Vue 3 + Supabase CRM Project
+
+workflow:
+  name: "integration-chain"
+  description: "Orchestrates complex multi-agent workflows for full-stack feature development"
+  version: "1.0.0"
+  orchestrator: "workflow-studio-orchestrator"
+  
+  # Supported integration patterns
+  patterns:
+    - "full-stack-feature"      # Complete feature with frontend + backend
+    - "api-contract-first"      # Backend-first with frontend integration
+    - "component-system"        # UI component with supporting systems
+    - "security-focused"        # Security-first development approach
+    - "performance-critical"    # Performance-optimized feature development
+
+# Full-Stack Feature Development Pattern
+full_stack_feature:
+  description: "Complete feature development with coordinated frontend and backend work"
+  complexity: "high"
+  estimated_duration: "3-5 hours"
+  
+  phases:
+    phase_1_planning:
+      duration: "30 minutes"
+      orchestrator_role: "requirements_analysis"
+      
+      activities:
+        - "Analyze feature requirements and acceptance criteria"
+        - "Decompose into frontend and backend work streams"
+        - "Define API contracts and data models"
+        - "Identify integration points and dependencies"
+        - "Plan parallel vs sequential work assignments"
+      
+      deliverables:
+        - api_contract: "OpenAPI specification with request/response schemas"
+        - data_model: "Database schema and TypeScript type definitions"
+        - work_breakdown: "Parallel frontend and backend task definitions"
+        - integration_plan: "Coordination points and validation checkpoints"
+      
+      success_criteria:
+        - "Clear API contract agreed upon by frontend and backend teams"
+        - "Data model supports all feature requirements"
+        - "Work streams properly parallelized for efficiency"
+        - "Integration points and dependencies identified"
+
+    phase_2_parallel_development:
+      duration: "120-180 minutes"
+      coordination_model: "parallel_with_checkpoints"
+      
+      backend_stream:
+        workflow: "backend-security-performance"
+        agents: ["backend-architect", "security-specialist", "comprehensive-performance-tester"]
+        inputs:
+          - api_contract: "From phase 1"
+          - data_model: "From phase 1"
+          - feature_requirements: "Original requirements"
+        
+        checkpoints:
+          - name: "api_implementation_complete"
+            timing: "60 minutes"
+            validation: "API endpoints functional and documented"
+          - name: "security_approved"
+            timing: "90 minutes"
+            validation: "Security audit passed"
+          - name: "performance_validated"
+            timing: "120 minutes"
+            validation: "Performance benchmarks met"
+      
+      frontend_stream:
+        workflow: "frontend-quality"
+        agents: ["vue-component-architect", "quality-compliance-auditor", "test-writer-fixer"]
+        inputs:
+          - api_contract: "From phase 1"
+          - ui_requirements: "Design specifications"
+          - accessibility_requirements: "WCAG compliance needs"
+        
+        checkpoints:
+          - name: "component_implementation_complete"
+            timing: "75 minutes"
+            validation: "UI components functional with mock data"
+          - name: "quality_approved"
+            timing: "105 minutes"
+            validation: "Compliance audit passed"
+          - name: "tests_complete"
+            timing: "135 minutes"
+            validation: "Test suite comprehensive and passing"
+      
+      coordination_points:
+        api_contract_validation:
+          timing: "60 minutes"
+          participants: ["backend-architect", "vue-component-architect"]
+          validation: "API contract implementation matches specification"
+          escalation: "Return to phase 1 if significant contract changes needed"
+        
+        integration_readiness:
+          timing: "120 minutes"
+          participants: ["comprehensive-performance-tester", "test-writer-fixer"]
+          validation: "Both streams ready for integration testing"
+          deliverable: "Integration test plan"
+
+    phase_3_integration_testing:
+      duration: "45 minutes"
+      orchestrator_role: "integration_coordination"
+      
+      activities:
+        - "Execute end-to-end integration testing"
+        - "Validate API contract implementation"
+        - "Performance testing of complete feature"
+        - "Security testing of integrated system"
+        - "User acceptance testing scenarios"
+      
+      testing_scenarios:
+        api_integration:
+          - "Frontend successfully consumes backend APIs"
+          - "Error handling works correctly across stack"
+          - "Authentication/authorization flow complete"
+          - "Data validation consistent frontend/backend"
+        
+        performance_integration:
+          - "End-to-end response times meet requirements"
+          - "Frontend performance not degraded by backend calls"
+          - "Caching strategies working effectively"
+          - "Concurrent user scenarios function properly"
+        
+        security_integration:
+          - "Complete security flow validated"
+          - "RLS policies enforce frontend restrictions"
+          - "Authentication state properly managed"
+          - "No security vulnerabilities in integration"
+      
+      success_criteria:
+        - "All integration tests pass successfully"
+        - "Performance requirements met end-to-end"
+        - "Security requirements validated in integration"
+        - "User acceptance criteria fulfilled"
+
+    phase_4_deployment_readiness:
+      duration: "30 minutes"
+      orchestrator_role: "deployment_coordination"
+      
+      activities:
+        - "Final validation of deployment artifacts"
+        - "Documentation completeness verification"
+        - "Monitoring and observability setup"
+        - "Rollback procedures defined"
+        - "Stakeholder sign-off obtained"
+      
+      deliverables:
+        - deployment_package: "Complete feature ready for production"
+        - documentation: "Technical and user documentation"
+        - monitoring_setup: "Performance and error monitoring configured"
+        - rollback_plan: "Procedures for reverting if issues arise"
+
+# API-Contract-First Development Pattern
+api_contract_first:
+  description: "Backend-first development with subsequent frontend integration"
+  complexity: "medium"
+  estimated_duration: "2-3 hours"
+  
+  sequence:
+    backend_development:
+      workflow: "backend-security-performance"
+      duration: "90 minutes"
+      focus: "Complete and validated API implementation"
+    
+    contract_publication:
+      orchestrator_role: "api_documentation"
+      duration: "15 minutes"
+      deliverable: "Published API specification and examples"
+    
+    frontend_integration:
+      workflow: "frontend-quality"
+      duration: "75 minutes"
+      inputs: ["published_api_contract", "api_examples"]
+      focus: "Frontend implementation against stable API"
+
+# Component System Development Pattern
+component_system:
+  description: "UI component development with supporting design and mobile systems"
+  complexity: "medium"
+  estimated_duration: "2.5 hours"
+  
+  sequence:
+    core_component:
+      workflow: "frontend-quality"
+      duration: "90 minutes"
+      focus: "Production-ready Vue component with tests"
+    
+    design_system_integration:
+      agent: "brand-identity-guardian"
+      duration: "20 minutes"
+      activities: ["Design system compliance", "Style guide updates"]
+    
+    mobile_optimization:
+      agent: "mobile-pwa-specialist"
+      duration: "30 minutes"
+      activities: ["Mobile viewport optimization", "Touch interaction testing"]
+    
+    delight_enhancement:
+      agent: "delight-experience-enhancer"
+      duration: "20 minutes"
+      activities: ["Micro-interactions", "User feedback mechanisms"]
+
+# Security-Focused Development Pattern
+security_focused:
+  description: "Security-first development with comprehensive security validation"
+  complexity: "high"
+  estimated_duration: "3-4 hours"
+  
+  sequence:
+    security_assessment:
+      agent: "security-specialist"
+      duration: "45 minutes"
+      activities: ["Threat modeling", "Security requirements definition"]
+    
+    secure_backend:
+      workflow: "backend-security-performance"
+      duration: "120 minutes"
+      focus: "Security-hardened implementation"
+      additional_validation: "Extended security testing"
+    
+    secure_frontend:
+      workflow: "frontend-quality"
+      duration: "90 minutes"
+      focus: "Security-aware UI with proper data handling"
+      additional_validation: "Client-side security audit"
+    
+    penetration_testing:
+      agent: "security-specialist"
+      duration: "30 minutes"
+      activities: ["Security penetration testing", "Vulnerability assessment"]
+
+# Workflow orchestration mechanics
+orchestration:
+  coordination_strategies:
+    parallel_execution:
+      description: "Multiple agents work simultaneously on independent tasks"
+      use_cases: ["Frontend and backend development", "Testing different aspects"]
+      coordination: "Regular checkpoints and shared deliverable validation"
+      
+    sequential_handoffs:
+      description: "Traditional chain execution with quality gates"
+      use_cases: ["Security-dependent workflows", "API-contract-first development"]
+      coordination: "Formal handoff protocols between agents"
+      
+    checkpoint_synchronization:
+      description: "Parallel work with mandatory synchronization points"
+      use_cases: ["Full-stack feature development", "Complex integration scenarios"]
+      coordination: "Orchestrator manages checkpoint validation and conflict resolution"
+  
+  conflict_resolution:
+    api_contract_conflicts:
+      detection: "Backend implementation differs from agreed contract"
+      resolution: "Return to planning phase for contract renegotiation"
+      escalation: "senior-code-reviewer for architectural guidance"
+    
+    timeline_conflicts:
+      detection: "Agent workflows taking longer than allocated time"
+      resolution: "Dynamic reallocation of work or parallel stream adjustment"
+      escalation: "Project stakeholder notification if critical path affected"
+    
+    quality_conflicts:
+      detection: "Quality standards not met in one or more streams"
+      resolution: "Pause integration until quality issues resolved"
+      escalation: "quality-compliance-auditor for standards clarification"
+  
+  resource_management:
+    agent_availability:
+      monitoring: "Track agent workload and availability"
+      allocation: "Optimal assignment based on expertise and capacity"
+      fallback: "Secondary agent assignment for critical path continuity"
+    
+    dependency_tracking:
+      deliverable_dependencies: "Track cross-stream deliverable dependencies"
+      blocking_issues: "Identify and resolve blocking dependencies"
+      critical_path: "Maintain awareness of critical path constraints"
+
+# Quality assurance across integration workflows
+quality_assurance:
+  integration_testing:
+    comprehensive_scenarios:
+      - "End-to-end user workflows"
+      - "Error handling across system boundaries"
+      - "Performance under realistic load"
+      - "Security validation of complete flows"
+      - "Data consistency across frontend/backend"
+    
+    automated_validation:
+      - "API contract compliance testing"
+      - "Cross-browser compatibility validation"
+      - "Mobile viewport functionality testing"
+      - "Accessibility compliance across workflows"
+    
+    manual_validation:
+      - "User experience flow validation"
+      - "Visual design consistency checking"
+      - "Business logic correctness verification"
+      - "Edge case handling validation"
+  
+  documentation_requirements:
+    technical_documentation:
+      - "API documentation with examples"
+      - "Component usage documentation"
+      - "Integration setup instructions"
+      - "Troubleshooting guides"
+    
+    user_documentation:
+      - "Feature functionality descriptions"
+      - "User workflow instructions"
+      - "Configuration and setup guides"
+      - "FAQ and common issues"
+
+# Monitoring and metrics for integration workflows
+monitoring:
+  workflow_efficiency:
+    parallel_execution_effectiveness:
+      metric: "Time savings from parallel vs sequential execution"
+      target: "30% time reduction for full-stack features"
+    
+    coordination_overhead:
+      metric: "Time spent on coordination vs development"
+      target: "< 10% of total workflow time"
+    
+    checkpoint_success_rate:
+      metric: "Percentage of checkpoints passed without issues"
+      target: "> 90% checkpoint success rate"
+  
+  quality_metrics:
+    integration_defect_rate:
+      metric: "Issues found during integration vs development phases"
+      target: "< 5% of total defects found in integration"
+    
+    rework_percentage:
+      metric: "Amount of rework required due to integration issues"
+      target: "< 10% rework rate"
+    
+    stakeholder_satisfaction:
+      metric: "Feature delivery quality and timeline adherence"
+      target: "> 90% stakeholder satisfaction score"
+  
+  resource_utilization:
+    agent_utilization:
+      metric: "Percentage of time agents actively working vs waiting"
+      target: "> 85% active utilization during workflows"
+    
+    bottleneck_identification:
+      metric: "Frequency and duration of workflow bottlenecks"
+      target: "< 5% of workflows experience significant bottlenecks"
+
+# Error handling and escalation procedures
+error_handling:
+  integration_failures:
+    api_contract_violations:
+      detection: "Automated testing reveals contract non-compliance"
+      immediate_action: "Halt integration testing and return to development"
+      resolution: "Backend and frontend teams coordinate fix"
+      prevention: "Enhanced contract validation in development phase"
+    
+    performance_degradation:
+      detection: "Integration testing reveals performance below targets"
+      immediate_action: "Performance profiling and bottleneck identification"
+      resolution: "Targeted optimization in identified areas"
+      escalation: "Architecture review if fundamental design changes needed"
+    
+    security_vulnerabilities:
+      detection: "Security testing reveals vulnerabilities in integration"
+      immediate_action: "Halt deployment pipeline and security review"
+      resolution: "Security specialist guidance and remediation"
+      escalation: "Executive notification if critical vulnerabilities found"
+  
+  coordination_failures:
+    missed_checkpoints:
+      detection: "Agents fail to meet checkpoint timing or deliverables"
+      immediate_action: "Orchestrator intervenes to assess situation"
+      resolution: "Resource reallocation or timeline adjustment"
+      escalation: "Project management if critical path impact"
+    
+    conflicting_implementations:
+      detection: "Frontend and backend implementations incompatible"
+      immediate_action: "Development pause and conflict analysis"
+      resolution: "Coordination meeting and implementation alignment"
+      escalation: "Architectural review if design problems identified"
+    
+    quality_gate_failures:
+      detection: "Quality standards not met in one or more streams"
+      immediate_action: "Quality improvement activities initiated"
+      resolution: "Re-execution of quality validation after fixes"
+      escalation: "Standards review if consistent quality issues"
+
+# Success criteria and completion validation
+completion_criteria:
+  functional_requirements:
+    - "All feature requirements implemented and validated"
+    - "API contracts fully implemented and tested"
+    - "Frontend components functional and accessible"
+    - "Integration testing passed successfully"
+    - "Performance requirements met end-to-end"
+  
+  quality_requirements:
+    - "Security standards met across all components"
+    - "Code quality standards maintained"
+    - "Design system compliance verified"
+    - "Accessibility requirements fulfilled"
+    - "Test coverage targets achieved"
+  
+  operational_requirements:
+    - "Documentation complete and accurate"
+    - "Monitoring and alerting configured"
+    - "Deployment procedures validated"
+    - "Rollback procedures defined and tested"
+    - "Stakeholder acceptance obtained"

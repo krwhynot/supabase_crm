@@ -237,6 +237,120 @@ To connect to a real Supabase database:
 - Technical Docs: `docs/technical/Dashboard_Technical_Documentation.md`
 - Implementation Checklist: `docs/checklists/Dashboard_Migration_Plan_Checklist.md`
 
+## Opportunity Management System
+
+**Comprehensive Sales Pipeline Management:** Full-featured opportunity tracking with 7-stage pipeline, auto-naming, and batch creation capabilities.
+
+**Core Features:**
+- **7-Stage Pipeline**: NEW_LEAD → INITIAL_OUTREACH → SAMPLE_VISIT_OFFERED → AWAITING_RESPONSE → FEEDBACK_LOGGED → DEMO_SCHEDULED → CLOSED_WON
+- **Auto-Naming System**: Intelligent opportunity naming following pattern: `[Organization] - [Principal] - [Context] - [Month Year]`
+- **Batch Creation**: Create multiple opportunities for different principals simultaneously
+- **KPI Dashboard**: Real-time metrics including total opportunities, active count, average probability, and monthly wins
+- **Advanced Filtering**: Search and filter by stage, organization, product, date range, and probability
+- **Contextual Creation**: Create opportunities directly from contact and organization detail pages
+
+**Architecture Components:**
+
+**Data Layer:**
+- `OpportunityStore` (Pinia) - Comprehensive state management with reactive KPIs
+- `ProductStore` (Pinia) - Product catalog with principal-specific filtering
+- `opportunitiesApi.ts` - Full CRUD operations with batch creation support
+- `opportunityNaming.ts` - Auto-naming service with template system
+
+**View Components:**
+- `OpportunitiesListView.vue` - Main list with KPI cards, search, and filtering
+- `OpportunityCreateView.vue` - Multi-step creation wizard with batch support
+- `OpportunityDetailView.vue` - Individual opportunity details and actions
+- `OpportunityEditView.vue` - Edit form with auto-naming preservation
+
+**Form Components:**
+- `OpportunityFormWrapper.vue` - 3-step wizard orchestration with validation
+- `OpportunityNameField.vue` - Auto-naming with manual override capability
+- `PrincipalMultiSelect.vue` - Multi-selection with batch preview
+- `OpportunityKPICards.vue` - Responsive dashboard metrics
+- `OpportunityTable.vue` - Sortable table with bulk operations
+
+**Database Schema:**
+```sql
+-- Core opportunities table
+CREATE TABLE opportunities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  stage opportunity_stage NOT NULL DEFAULT 'NEW_LEAD',
+  probability_percent INTEGER CHECK (probability_percent >= 0 AND probability_percent <= 100),
+  expected_close_date DATE,
+  organization_id UUID REFERENCES organizations(id),
+  principal_id UUID REFERENCES principals(id),
+  product_id UUID REFERENCES products(id),
+  deal_owner TEXT,
+  notes TEXT,
+  name_template TEXT, -- For auto-naming tracking
+  context opportunity_context,
+  custom_context TEXT,
+  is_won BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
+-- Products table with principal relationships
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  category TEXT,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE product_principals (
+  product_id UUID REFERENCES products(id),
+  principal_id UUID REFERENCES principals(id),
+  PRIMARY KEY (product_id, principal_id)
+);
+```
+
+**Type Definitions:**
+- `opportunities.ts` - Complete type system with 7-stage enum and form interfaces
+- `opportunityForm.ts` - Form-specific types with validation schemas
+- `products.ts` - Product catalog types with principal relationships
+
+**Navigation Integration:**
+```
+/opportunities (List View with KPIs)
+├── /opportunities/new (3-Step Creation Wizard)
+├── /opportunities/:id (Detail View)
+├── /opportunities/:id/edit (Edit Form)
+└── Contextual creation from:
+    ├── /contacts/:id (Pre-populated organization)
+    └── /organizations/:id (Pre-selected organization)
+```
+
+**Auto-Naming System:**
+- **Pattern**: `[Organization] - [Principal] - [Context] - [Month Year]`
+- **Template System**: Tracks naming templates for consistency
+- **Manual Override**: Toggle between auto-generation and custom names
+- **Batch Preview**: Shows generated names for multiple principals
+- **Uniqueness**: Automatic collision detection and resolution
+
+**Batch Creation Workflow:**
+1. Select organization and context
+2. Choose multiple principals
+3. Preview generated opportunity names
+4. Configure shared product and stage settings
+5. Submit batch with progress feedback
+
+**KPI Calculations:**
+- **Total Opportunities**: All non-deleted opportunities
+- **Active Opportunities**: Opportunities not in CLOSED_WON stage
+- **Average Probability**: Mean probability across active opportunities
+- **Won This Month**: Opportunities marked as won in current month
+
+**Integration Points:**
+- **Contacts**: Create opportunities from contact detail pages
+- **Organizations**: Bulk opportunity creation from organization view
+- **Products**: Principal-filtered product selection
+- **Dashboard**: Opportunity metrics in main dashboard overview
+
 ## Design System Architecture
 
 **Comprehensive Design System (`src/design-system/`):**

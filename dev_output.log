@@ -1,0 +1,20 @@
+
+> supabase-project@0.1.0 dev
+> vite
+
+Port 3000 is in use, trying another one...
+Port 3001 is in use, trying another one...
+Port 3002 is in use, trying another one...
+
+  VITE v5.4.19  ready in 2473 ms
+
+  ➜  Local:   http://localhost:3003/
+  ➜  Network: use --host to expose
+5:47:00 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
+5:47:10 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
+5:47:15 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
+5:47:21 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
+5:47:41 PM [vite] page reload src/stores/opportunityStore.ts
+5:48:01 PM [vite] page reload src/stores/opportunityStore.ts
+5:48:12 PM [vite] page reload src/stores/opportunityStore.ts
+5:48:21 PM [vite] page reload src/stores/opportunityStore.ts

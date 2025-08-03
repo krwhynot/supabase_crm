@@ -1,6 +1,5 @@
 <template>
-  <DashboardLayout>
-    <div class="opportunity-create-view">
+  <div class="opportunity-create-view">
       <!-- Page Header -->
       <div class="mb-8">
         <!-- Breadcrumb Navigation -->
@@ -53,7 +52,7 @@
             </svg>
           </router-link>
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">Create New Opportunity</h1>
+            <h1 class="text-3xl font-bold text-gray-900" data-testid="page-title">Create New Opportunity</h1>
             <p class="mt-2 text-gray-600">
               Set up a new sales opportunity with auto-naming, multi-principal support, and stage tracking.
             </p>
@@ -62,13 +61,14 @@
       </div>
 
       <!-- Opportunity Form -->
-      <div class="max-w-4xl">
+      <div class="max-w-4xl" data-testid="opportunity-form-container">
         <OpportunityFormWrapper
           :is-editing="false"
           :initial-data="contextData"
           @success="handleSuccess"
           @cancel="handleCancel"
           @error="handleError"
+          data-testid="opportunity-form"
         />
       </div>
       
@@ -110,13 +110,11 @@
         </div>
       </div>
     </div>
-  </DashboardLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import OpportunityFormWrapper from '@/components/opportunities/OpportunityFormWrapper.vue'
 import type { OpportunityFormWrapperData } from '@/types/opportunityForm'
 
@@ -245,7 +243,7 @@ const clearError = () => {
 }
 
 .opportunity-create-view nav ol li[aria-current="page"] span {
-  @apply text-gray-500;
+  color: rgb(107 114 128);
 }
 
 /* Back button enhancements */
@@ -285,19 +283,19 @@ const clearError = () => {
 /* High contrast mode */
 @media (prefers-contrast: high) {
   .opportunity-create-view .border-red-300 {
-    @apply border-red-600;
+    border-color: rgb(220 38 38);
   }
   
   .opportunity-create-view .border-green-300 {
-    @apply border-green-600;
+    border-color: rgb(22 163 74);
   }
   
   .opportunity-create-view .text-gray-500 {
-    @apply text-gray-800;
+    color: rgb(31 41 55);
   }
   
   .opportunity-create-view .text-gray-600 {
-    @apply text-gray-900;
+    color: rgb(17 24 39);
   }
 }
 

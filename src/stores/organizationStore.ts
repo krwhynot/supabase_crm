@@ -326,6 +326,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   
   /**
    * Fetch organizations associated with specific principals
+   * Enhanced for opportunity management with contact-principal relationships
    */
   const fetchOrganizationsByPrincipal = async (
     principalId: string,
@@ -333,6 +334,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       includeDirectRelationships?: boolean
       includeContactRelationships?: boolean
       useCache?: boolean
+      includeOpportunityData?: boolean
     } = {}
   ): Promise<OrganizationListItem[] | null> => {
     try {
@@ -346,30 +348,57 @@ export const useOrganizationStore = defineStore('organization', () => {
         if (cached) return cached
       }
       
-      // Build query to find organizations related to principal
-      let query = supabase
-        .from('organizations')
-        .select('*')
+      let organizationsFromDirect: any[] = []
+      let organizationsFromContacts: any[] = []
       
       // Direct relationship: organization is the principal
       if (options.includeDirectRelationships !== false) {
-        query = query.or(`id.eq.${principalId}`)
+        const { data: directData, error: directError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', principalId)
+          
+        if (directError) {
+          console.warn('Failed to fetch direct principal organizations:', directError.message)
+        } else {
+          organizationsFromDirect = directData || []
+        }
       }
       
-      // TODO: Add contact_principals junction table query when available
-      // This would find organizations through contact relationships with principals
-      if (options.includeContactRelationships) {
-        // Future implementation for contact-principal relationships
+      // Contact-principal relationships: find organizations through contacts that have principal relationships
+      if (options.includeContactRelationships !== false) {
+        const { data: contactPrincipalData, error: contactError } = await supabase
+          .from('contact_principals')
+          .select(`
+            contact_id,
+            contacts!inner(
+              organization_id,
+              organizations!inner(*)
+            )
+          `)
+          .eq('principal_id', principalId)
+          
+        if (contactError) {
+          console.warn('Failed to fetch contact-principal organizations:', contactError.message)
+        } else {
+          // Extract organizations from contact relationships
+          organizationsFromContacts = (contactPrincipalData || [])
+            .map(cp => (cp.contacts as any)?.organizations)
+            .filter(org => org)
+        }
       }
       
-      const { data, error } = await query
-      
-      if (error) {
-        throw new Error(error.message)
-      }
+      // Combine and deduplicate organizations
+      const allOrganizations = [...organizationsFromDirect, ...organizationsFromContacts]
+      const uniqueOrganizations = allOrganizations.reduce((acc: any[], org: any) => {
+        if (!acc.find((existing: any) => existing.id === org.id)) {
+          acc.push(org)
+        }
+        return acc
+      }, [] as any[])
       
       // Transform to OrganizationListItem format
-      const transformedData: OrganizationListItem[] = (data || []).map(item => ({
+      const transformedData: OrganizationListItem[] = uniqueOrganizations.map((item: any) => ({
         id: item.id || '',
         name: item.name || '',
         legal_name: item.legal_name,
@@ -1283,6 +1312,185 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   /**
+   * Fetch all available principals with their contact information for opportunity selection
+   */
+  const fetchAvailablePrincipals = async (options: {
+    includeContactCount?: boolean
+    useCache?: boolean
+  } = {}): Promise<Array<{
+    id: string
+    name: string
+    type: string | null
+    contact_count?: number
+    primary_contact?: {
+      id: string
+      name: string
+      email: string | null
+      phone: string | null
+    } | null
+  }> | null> => {
+    try {
+      loading.organizations = true
+      clearError('organizations')
+      
+      const cacheKey = `available_principals_${JSON.stringify(options)}`
+      
+      if (options.useCache !== false) {
+        const cached = getCachedData<any[]>(cacheKey)
+        if (cached) return cached
+      }
+      
+      // Fetch organizations that are marked as principals
+      const { data: principals, error: principalError } = await supabase
+        .from('organizations')
+        .select('id, name, type, custom_fields')
+        .contains('custom_fields', { is_principal: true })
+        .order('name')
+      
+      if (principalError) throw new Error(principalError.message)
+      
+      const result = await Promise.all((principals || []).map(async (principal) => {
+        let contactCount = 0
+        let primaryContact = null
+        
+        if (options.includeContactCount) {
+          // Get contact count and primary contact for each principal
+          const { data: contacts, error: contactError } = await supabase
+            .from('contacts')
+            .select('id, first_name, last_name, email, phone, is_primary')
+            .eq('organization_id', principal.id)
+            .order('is_primary', { ascending: false })
+            .limit(1)
+            
+          if (!contactError && contacts?.length) {
+            contactCount = contacts.length
+            const contact = contacts[0]
+            primaryContact = {
+              id: contact.id,
+              name: `${contact.first_name} ${contact.last_name}`,
+              email: contact.email,
+              phone: contact.phone
+            }
+          }
+        }
+        
+        return {
+          id: principal.id,
+          name: principal.name,
+          type: principal.type,
+          ...(options.includeContactCount && { 
+            contact_count: contactCount,
+            primary_contact: primaryContact 
+          })
+        }
+      }))
+      
+      setCacheData(cacheKey, result, 300000) // 5 minutes cache
+      return result
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch available principals'
+      setError('organizations', message)
+      return null
+    } finally {
+      loading.organizations = false
+    }
+  }
+
+  /**
+   * Fetch organizations that have relationships with multiple principals (for opportunity targeting)
+   */
+  const fetchMultiPrincipalOrganizations = async (options: {
+    minimumPrincipalCount?: number
+    useCache?: boolean
+  } = {}): Promise<Array<{
+    id: string
+    name: string
+    type: string | null
+    principal_count: number
+    principal_names: string[]
+    total_opportunities?: number
+  }> | null> => {
+    try {
+      loading.organizations = true
+      clearError('organizations')
+      
+      const minimumCount = options.minimumPrincipalCount || 2
+      const cacheKey = `multi_principal_orgs_${minimumCount}`
+      
+      if (options.useCache !== false) {
+        const cached = getCachedData<any[]>(cacheKey)
+        if (cached) return cached
+      }
+      
+      // Query to find organizations with multiple principal relationships through contacts
+      const { data: orgPrincipalData, error } = await supabase
+        .from('contact_principals')
+        .select(`
+          contacts!inner(
+            organization_id,
+            organizations!inner(id, name, type)
+          ),
+          organizations!principal_id!inner(id, name)
+        `)
+      
+      if (error) throw new Error(error.message)
+      
+      // Group by organization and count principals
+      const orgPrincipalMap = new Map<string, {
+        org: any
+        principals: Set<string>
+        principalNames: string[]
+      }>()
+      
+      orgPrincipalData?.forEach(item => {
+        const org = (item.contacts as any)?.organizations
+        const principal = (item.organizations as any)
+        
+        if (org && principal) {
+          const orgId = org.id
+          
+          if (!orgPrincipalMap.has(orgId)) {
+            orgPrincipalMap.set(orgId, {
+              org,
+              principals: new Set(),
+              principalNames: []
+            })
+          }
+          
+          const entry = orgPrincipalMap.get(orgId)!
+          if (!entry.principals.has(principal.id)) {
+            entry.principals.add(principal.id)
+            entry.principalNames.push(principal.name)
+          }
+        }
+      })
+      
+      // Filter organizations with minimum principal count
+      const result = Array.from(orgPrincipalMap.values())
+        .filter(entry => entry.principals.size >= minimumCount)
+        .map(entry => ({
+          id: entry.org.id,
+          name: entry.org.name,
+          type: entry.org.type,
+          principal_count: entry.principals.size,
+          principal_names: entry.principalNames
+        }))
+        .sort((a, b) => b.principal_count - a.principal_count)
+      
+      setCacheData(cacheKey, result, 300000) // 5 minutes cache
+      return result
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch multi-principal organizations'
+      setError('organizations', message)
+      return null
+    } finally {
+      loading.organizations = false
+    }
+  }
+
+  /**
    * Fetch principal-organization relationship analytics
    */
   const fetchPrincipalAnalytics = async (): Promise<any | null> => {
@@ -1302,6 +1510,20 @@ export const useOrganizationStore = defineStore('organization', () => {
       
       if (error) throw new Error(error.message)
       
+      // Get contact-principal relationship counts
+      const { data: contactPrincipalCounts, error: countError } = await supabase
+        .from('contact_principals')
+        .select('principal_id, contact_id')
+      
+      if (countError) throw new Error(countError.message)
+      
+      // Count relationships per principal
+      const principalRelationshipCounts = new Map<string, number>()
+      contactPrincipalCounts?.forEach(cp => {
+        const count = principalRelationshipCounts.get(cp.principal_id) || 0
+        principalRelationshipCounts.set(cp.principal_id, count + 1)
+      })
+      
       // Analyze principal-distributor relationships
       const analytics = {
         principalDistribution: principalOrgs?.filter(org => 
@@ -1320,7 +1542,22 @@ export const useOrganizationStore = defineStore('organization', () => {
           return principals.length > 0 
             ? principals.reduce((sum, org) => sum + (org.lead_score || 0), 0) / principals.length
             : 0
-        })()
+        })(),
+        totalContactRelationships: contactPrincipalCounts?.length || 0,
+        averageRelationshipsPerPrincipal: principalRelationshipCounts.size > 0 
+          ? Array.from(principalRelationshipCounts.values()).reduce((sum, count) => sum + count, 0) / principalRelationshipCounts.size
+          : 0,
+        topPrincipalsByRelationships: Array.from(principalRelationshipCounts.entries())
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 10)
+          .map(([principalId, count]) => {
+            const principal = principalOrgs?.find(org => org.id === principalId)
+            return {
+              id: principalId,
+              name: principal?.name || 'Unknown',
+              relationship_count: count
+            }
+          })
       }
       
       setCacheData(cacheKey, analytics, 300000) // 5 minutes cache
@@ -1335,6 +1572,124 @@ export const useOrganizationStore = defineStore('organization', () => {
     }
   }
   
+  /**
+   * Get principals with opportunity potential (for batch opportunity creation)
+   * Returns principals with active organizations and contact relationships
+   */
+  const getPrincipalsForOpportunityCreation = async (options: {
+    organizationId?: string
+    includeExistingOpportunities?: boolean
+    useCache?: boolean
+  } = {}): Promise<Array<{
+    id: string
+    name: string
+    organization_type: string | null
+    contact_relationships: number
+    existing_opportunities?: number
+    last_opportunity_date?: string | null
+    recommended_for_batch: boolean
+  }> | null> => {
+    try {
+      loading.organizations = true
+      clearError('organizations')
+      
+      const cacheKey = `principals_for_opportunities_${JSON.stringify(options)}`
+      
+      if (options.useCache !== false) {
+        const cached = getCachedData<any[]>(cacheKey)
+        if (cached) return cached
+      }
+      
+      // Get all principals
+      const { data: principals, error: principalError } = await supabase
+        .from('organizations')
+        .select('id, name, type, custom_fields')
+        .contains('custom_fields', { is_principal: true })
+      
+      if (principalError) throw new Error(principalError.message)
+      
+      // Get contact relationships for each principal
+      const { data: contactRelationships, error: contactError } = await supabase
+        .from('contact_principals')
+        .select('principal_id, contact_id, contacts!inner(organization_id)')
+      
+      if (contactError) throw new Error(contactError.message)
+      
+      // Optionally get existing opportunities
+      let opportunityData: any[] = []
+      if (options.includeExistingOpportunities) {
+        const { data: opportunities, error: oppError } = await supabase
+          .from('opportunities')
+          .select('organization_id, created_at')
+          .order('created_at', { ascending: false })
+        
+        if (!oppError) {
+          opportunityData = opportunities || []
+        }
+      }
+      
+      // Build principal summary
+      const result = (principals || []).map(principal => {
+        // Count contact relationships
+        const relationships = contactRelationships?.filter(cr => cr.principal_id === principal.id) || []
+        
+        // Filter by organization if specified
+        const relevantRelationships = options.organizationId 
+          ? relationships.filter(r => (r.contacts as any)?.organization_id === options.organizationId)
+          : relationships
+        
+        // Count existing opportunities if requested
+        let existingOpportunities = 0
+        let lastOpportunityDate: string | null = null
+        
+        if (options.includeExistingOpportunities) {
+          const orgIds = relationships.map(r => (r.contacts as any)?.organization_id).filter(Boolean)
+          const principalOpportunities = opportunityData.filter(opp => orgIds.includes(opp.organization_id))
+          existingOpportunities = principalOpportunities.length
+          
+          if (principalOpportunities.length > 0) {
+            lastOpportunityDate = principalOpportunities[0].created_at
+          }
+        }
+        
+        // Determine if recommended for batch creation
+        const recommendedForBatch = relevantRelationships.length > 0 && 
+          (existingOpportunities === 0 || 
+           (lastOpportunityDate && new Date(lastOpportunityDate) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))) // No opportunities in last 30 days
+        
+        return {
+          id: principal.id,
+          name: principal.name,
+          organization_type: principal.type,
+          contact_relationships: relevantRelationships.length,
+          ...(options.includeExistingOpportunities && {
+            existing_opportunities: existingOpportunities,
+            last_opportunity_date: lastOpportunityDate
+          }),
+          recommended_for_batch: recommendedForBatch
+        }
+      })
+      .filter(p => p.contact_relationships > 0) // Only include principals with relationships
+      .sort((a, b) => {
+        // Sort by recommendation, then by relationship count
+        if (a.recommended_for_batch !== b.recommended_for_batch) {
+          return a.recommended_for_batch ? -1 : 1
+        }
+        return b.contact_relationships - a.contact_relationships
+      })
+      
+      setCacheData(cacheKey, result, 300000) // 5 minutes cache
+      return result
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to get principals for opportunity creation'
+      setError('organizations', message)
+      return null
+    } finally {
+      loading.organizations = false
+    }
+  }
+
   /**
    * Fetch organization analytics data
    */
@@ -1779,6 +2134,11 @@ export const useOrganizationStore = defineStore('organization', () => {
     fetchPerformanceData,
     fetchLeadScoringData,
     fetchPrincipalAnalytics,
+    
+    // Principal-specific methods for opportunity management
+    fetchAvailablePrincipals,
+    fetchMultiPrincipalOrganizations,
+    getPrincipalsForOpportunityCreation,
     
     // Interaction management
     fetchInteractions,

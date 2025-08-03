@@ -245,7 +245,7 @@ class OpportunityNamingService {
    */
   async generateUniqueName(baseOptions: NameGenerationOptions): Promise<ApiResponse<string>> {
     try {
-      let baseName = this.generateOpportunityName(baseOptions)
+      const baseName = this.generateOpportunityName(baseOptions)
       let finalName = baseName
       let counter = 1
 
