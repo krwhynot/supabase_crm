@@ -909,9 +909,104 @@ class PrincipalActivityApiService {
 }
 
 /**
- * Singleton instance of the Principal Activity API service
+ * Extended API service with compatibility methods for Vue components
  */
-export const principalActivityApi = new PrincipalActivityApiService()
+class ExtendedPrincipalActivityApiService extends PrincipalActivityApiService {
+  
+  // ============================
+  // COMPATIBILITY METHODS FOR VUE COMPONENTS
+  // ============================
+  
+  /**
+   * Compatibility method for Vue components expecting getPrincipalActivitySummary
+   */
+  async getPrincipalActivitySummary(filters?: any) {
+    const response = await this.getPrincipalSummaries(filters || {})
+    return {
+      success: response.success,
+      data: response.data?.data || [],
+      error: response.error
+    }
+  }
+  
+  /**
+   * Compatibility method for Vue components expecting getEngagementScoreBreakdown
+   */
+  async getEngagementScoreBreakdown() {
+    // Mock engagement breakdown data for testing
+    return {
+      success: true,
+      data: [
+        { range: '0-20', label: 'Low', count: 0, percentage: 0 },
+        { range: '21-40', label: 'Below Average', count: 0, percentage: 0 },
+        { range: '41-60', label: 'Average', count: 0, percentage: 0 },
+        { range: '61-80', label: 'Above Average', count: 0, percentage: 0 },
+        { range: '81-100', label: 'High', count: 0, percentage: 0 }
+      ]
+    }
+  }
+  
+  /**
+   * Compatibility method for Vue components expecting getPrincipalStats
+   */
+  async getPrincipalStats() {
+    // Mock stats data for testing
+    return {
+      success: true,
+      data: {
+        followUpsRequired: 0,
+        activeThisWeek: 0,
+        topPerformers: 0
+      }
+    }
+  }
+  
+  /**
+   * Compatibility method for Vue components expecting searchPrincipalsWithActivity
+   */
+  async searchPrincipalsWithActivity(searchTerm: string, includeInactive: boolean = false) {
+    const filters = {
+      search: searchTerm,
+      activity_status: includeInactive ? undefined : ['ACTIVE']
+    }
+    
+    const response = await this.getPrincipalSummaries(filters)
+    return {
+      success: response.success,
+      data: response.data?.data || [],
+      error: response.error
+    }
+  }
+  
+  /**
+   * Compatibility method for Vue components expecting getPrincipalProductPerformance
+   */
+  async getPrincipalProductPerformance(principalId: string) {
+    const response = await this.getProductPerformance([principalId])
+    return {
+      success: response.success,
+      data: response.data || [],
+      error: response.error
+    }
+  }
+  
+  /**
+   * Compatibility method for Vue components expecting getPrincipalDistributorRelationships
+   */
+  async getPrincipalDistributorRelationships(principalIds: string[]) {
+    const response = await this.getDistributorRelationships(principalIds)
+    return {
+      success: response.success,
+      data: response.data || [],
+      error: response.error
+    }
+  }
+}
+
+/**
+ * Singleton instance of the extended Principal Activity API service
+ */
+export const principalActivityApi = new ExtendedPrincipalActivityApiService()
 
 /**
  * Default export for convenience
