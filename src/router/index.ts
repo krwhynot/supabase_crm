@@ -235,8 +235,32 @@ const router = createRouter({
   routes,
 })
 
-// Navigation guards for page titles and authentication
-router.beforeEach((to, from, next) => {
+// Route validation utilities
+const isValidUUID = (id: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(id)
+}
+
+const isValidPrincipalId = async (principalId: string): Promise<boolean> => {
+  try {
+    // Basic format validation
+    if (!isValidUUID(principalId)) {
+      return false
+    }
+    
+    // Future: Add actual principal existence check
+    // const principalStore = usePrincipalStore()
+    // await principalStore.validatePrincipalAccess(principalId)
+    
+    return true
+  } catch (error) {
+    console.error('Principal validation error:', error)
+    return false
+  }
+}
+
+// Navigation guards for page titles, authentication, and validation
+router.beforeEach(async (to, from, next) => {
   // Set page title from route meta
   if (to.meta.title) {
     document.title = `${to.meta.title} - CRM`
@@ -251,8 +275,59 @@ router.beforeEach((to, from, next) => {
     const isPWA = window.matchMedia('(display-mode: standalone)').matches
     
     if (!isMobile && !isPWA) {
-      // Redirect mobile-only routes to desktop equivalent (will be implemented in Stage 5)
+      // Redirect mobile-only routes to desktop equivalent
       next('/')
+      return
+    }
+  }
+
+  // Principal route validation
+  if (to.path.startsWith('/principals/') && to.params.id) {
+    const principalId = to.params.id as string
+    
+    // Skip validation for special routes
+    if (principalId === 'dashboard') {
+      next()
+      return
+    }
+    
+    try {
+      const isValid = await isValidPrincipalId(principalId)
+      if (!isValid) {
+        console.warn(`Invalid principal ID: ${principalId}`)
+        // Redirect to principals list instead of error
+        next('/principals')
+        return
+      }
+    } catch (error) {
+      console.error('Principal validation failed:', error)
+      next('/principals')
+      return
+    }
+  }
+
+  // Organization/Contact ID validation
+  if ((to.path.startsWith('/organizations/') || to.path.startsWith('/contacts/') || to.path.startsWith('/opportunities/')) && to.params.id) {
+    const id = to.params.id as string
+    
+    // Skip validation for 'new' routes
+    if (id === 'new') {
+      next()
+      return
+    }
+    
+    if (!isValidUUID(id)) {
+      console.warn(`Invalid entity ID: ${id}`)
+      // Redirect to respective list view
+      if (to.path.startsWith('/organizations/')) {
+        next('/organizations')
+      } else if (to.path.startsWith('/contacts/')) {
+        next('/contacts')
+      } else if (to.path.startsWith('/opportunities/')) {
+        next('/opportunities')
+      } else {
+        next('/')
+      }
       return
     }
   }

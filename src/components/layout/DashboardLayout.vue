@@ -122,35 +122,136 @@
             <span v-if="!sidebarCollapsed" class="ml-3">Interactions</span>
           </router-link>
 
-          <router-link
-            to="/principals"
-            :class="[
-              'nav-item',
-              $route.path === '/principals'
-                ? 'nav-item-active'
-                : 'nav-item-inactive'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span v-if="!sidebarCollapsed" class="ml-3">Principals</span>
-          </router-link>
+          <!-- Principals Section with Submenu -->
+          <div class="space-y-1">
+            <!-- Main Principals Link -->
+            <div class="flex items-center">
+              <router-link
+                to="/principals"
+                :class="[
+                  'nav-item flex-1',
+                  $route.path.startsWith('/principals')
+                    ? 'nav-item-active'
+                    : 'nav-item-inactive'
+                ]"
+              >
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span v-if="!sidebarCollapsed" class="ml-3">Principals</span>
+              </router-link>
+              
+              <!-- Submenu Toggle -->
+              <button
+                v-if="!sidebarCollapsed"
+                @click="togglePrincipalsSubmenu"
+                :class="[
+                  'p-1 rounded-md transition-colors duration-200 ml-2 flex-shrink-0',
+                  principalsSubmenuOpen
+                    ? 'text-gray-700 bg-gray-100'
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                ]"
+                :aria-label="principalsSubmenuOpen ? 'Collapse principals menu' : 'Expand principals menu'"
+              >
+                <svg 
+                  :class="['w-4 h-4 transform transition-transform duration-200', principalsSubmenuOpen ? 'rotate-90' : '']" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
 
-          <router-link
-            to="/principals/dashboard"
-            :class="[
-              'nav-item ml-6',
-              $route.path === '/principals/dashboard'
-                ? 'nav-item-active'
-                : 'nav-item-inactive'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <span v-if="!sidebarCollapsed" class="ml-3">Activity Dashboard</span>
-          </router-link>
+            <!-- Principals Submenu -->
+            <div
+              v-if="!sidebarCollapsed && principalsSubmenuOpen"
+              class="ml-6 space-y-1 border-l border-gray-200 pl-4"
+            >
+              <router-link
+                to="/principals/dashboard"
+                :class="[
+                  'nav-item text-sm',
+                  $route.path === '/principals/dashboard'
+                    ? 'nav-item-active'
+                    : 'nav-item-inactive'
+                ]"
+              >
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span class="ml-2">Activity Dashboard</span>
+              </router-link>
+
+              <!-- Dynamic Principal Links -->
+              <div v-if="selectedPrincipal" class="space-y-1">
+                <div class="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ selectedPrincipal.name }}
+                </div>
+                
+                <router-link
+                  :to="`/principals/${selectedPrincipal.id}`"
+                  :class="[
+                    'nav-item text-sm',
+                    $route.path === `/principals/${selectedPrincipal.id}`
+                      ? 'nav-item-active'
+                      : 'nav-item-inactive'
+                  ]"
+                >
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span class="ml-2">Overview</span>
+                </router-link>
+
+                <router-link
+                  :to="`/principals/${selectedPrincipal.id}/analytics`"
+                  :class="[
+                    'nav-item text-sm',
+                    $route.path === `/principals/${selectedPrincipal.id}/analytics`
+                      ? 'nav-item-active'
+                      : 'nav-item-inactive'
+                  ]"
+                >
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span class="ml-2">Analytics</span>
+                </router-link>
+
+                <router-link
+                  :to="`/principals/${selectedPrincipal.id}/products`"
+                  :class="[
+                    'nav-item text-sm',
+                    $route.path === `/principals/${selectedPrincipal.id}/products`
+                      ? 'nav-item-active'
+                      : 'nav-item-inactive'
+                  ]"
+                >
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <span class="ml-2">Products</span>
+                </router-link>
+
+                <router-link
+                  :to="`/principals/${selectedPrincipal.id}/distributors`"
+                  :class="[
+                    'nav-item text-sm',
+                    $route.path === `/principals/${selectedPrincipal.id}/distributors`
+                      ? 'nav-item-active'
+                      : 'nav-item-inactive'
+                  ]"
+                >
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span class="ml-2">Distributors</span>
+                </router-link>
+              </div>
+            </div>
+          </div>
 
         </div>
 
@@ -228,6 +329,9 @@
 
       <!-- Page content -->
       <main class="flex-1 p-6">
+        <!-- Navigation Breadcrumbs -->
+        <NavigationBreadcrumbs v-if="showBreadcrumbs" />
+        
         <router-view />
       </main>
     </div>
@@ -235,16 +339,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboardStore'
+import { usePrincipalStore } from '@/stores/principalStore'
+import NavigationBreadcrumbs from '@/components/navigation/NavigationBreadcrumbs.vue'
 
 // Dashboard store integration
 const dashboardStore = useDashboardStore()
+const principalStore = usePrincipalStore()
+const route = useRoute()
 
 // Sidebar state - integrated with store
 const sidebarCollapsed = ref(dashboardStore.preferences.sidebarCollapsed)
 const showMobileSidebar = ref(false)
 const weekFilterActive = ref(dashboardStore.preferences.weekFilterEnabled)
+
+// Principals navigation state
+const principalsSubmenuOpen = ref(false)
+
+// Selected principal for dynamic navigation
+const selectedPrincipal = computed(() => {
+  // Extract principal ID from current route if on a principal-specific page
+  const principalId = route.params.id as string
+  if (principalId && route.path.startsWith('/principals/') && route.path !== '/principals/dashboard') {
+    // Find principal in store or create basic info from route
+    const principal = principalStore.principals.find(p => p.id === principalId)
+    return principal || { 
+      id: principalId, 
+      name: `Principal ${principalId.slice(0, 8)}` 
+    }
+  }
+  return null
+})
+
+// Breadcrumb visibility - show on all pages except dashboard root
+const showBreadcrumbs = computed(() => {
+  return route.path !== '/'
+})
 
 // Mobile detection
 const isMobile = ref(false)
@@ -268,6 +400,10 @@ const toggleWeekFilter = () => {
   dashboardStore.updatePreferences({ weekFilterEnabled: weekFilterActive.value })
 }
 
+const togglePrincipalsSubmenu = () => {
+  principalsSubmenuOpen.value = !principalsSubmenuOpen.value
+}
+
 const checkMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
@@ -286,10 +422,21 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
+// Watch route changes to auto-open principals submenu
+watch(() => route.path, (newPath) => {
+  // Auto-open principals submenu when navigating to principal routes
+  if (newPath.startsWith('/principals')) {
+    principalsSubmenuOpen.value = true
+  }
+}, { immediate: true })
+
 // Initialize component
-onMounted(() => {
+onMounted(async () => {
   // Initialize dashboard store
   dashboardStore.initializeDashboard()
+  
+  // Initialize principal store for navigation
+  await principalStore.fetchPrincipalOptions()
   
   // Sync local state with store
   sidebarCollapsed.value = dashboardStore.preferences.sidebarCollapsed
