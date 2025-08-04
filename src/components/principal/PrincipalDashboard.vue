@@ -224,13 +224,14 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/vue/24/outline'
 import { usePrincipalStore } from '@/stores/principalStore'
-import PrincipalActivityApi from '@/services/principalActivityApi'
+import { usePrincipalActivityStore } from '@/stores/principalActivityStore'
+import { principalActivityApi } from '@/services/principalActivityApi'
 import type {
   PrincipalActivitySummary,
-  PrincipalDistributorRelationships,
+  PrincipalDistributorRelationship,
   PrincipalProductPerformance,
-  PrincipalTimelineSummary
-} from '@/services/principalActivityApi'
+  PrincipalTimelineEntry
+} from '@/types/principal'
 
 // Component imports
 import PrincipalSelector from './PrincipalSelector.vue'
@@ -251,6 +252,7 @@ import ManagePrincipalProductsButton from './ManagePrincipalProductsButton.vue'
 // ===============================
 
 const principalStore = usePrincipalStore()
+const principalActivityStore = usePrincipalActivityStore()
 
 // ===============================
 // REACTIVE STATE
@@ -272,9 +274,9 @@ const isLoadingInteractions = ref(false)
 
 // Data states
 const activitySummary = ref<PrincipalActivitySummary[]>([])
-const timelineData = ref<PrincipalTimelineSummary[]>([])
+const timelineData = ref<PrincipalTimelineEntry[]>([])
 const productPerformanceData = ref<PrincipalProductPerformance[]>([])
-const distributorData = ref<PrincipalDistributorRelationships[]>([])
+const distributorData = ref<PrincipalDistributorRelationship[]>([])
 const engagementBreakdown = ref<any>(null)
 const principalStats = ref<any>(null)
 
@@ -285,7 +287,7 @@ const selectorError = ref<string | null>(null)
 // COMPUTED PROPERTIES
 // ===============================
 
-const hasError = computed(() => !!error.value || principalStore.hasError)
+const hasError = computed(() => !!error.value || principalActivityStore.hasError)
 
 const selectedPrincipal = computed(() => {
   if (!selectedPrincipalId.value) return null
@@ -371,23 +373,14 @@ const loadDashboardData = async () => {
   error.value = null
 
   try {
-    // Load engagement breakdown
-    const engagementResponse = await PrincipalActivityApi.getEngagementScoreBreakdown()
-    if (engagementResponse.success) {
-      engagementBreakdown.value = engagementResponse.data
-    }
-
-    // Load principal stats
-    const statsResponse = await PrincipalActivityApi.getPrincipalStats()
-    if (statsResponse.success) {
-      principalStats.value = statsResponse.data
-    }
-
-    // Load activity summary for all principals
-    const summaryResponse = await PrincipalActivityApi.getPrincipalActivitySummary()
-    if (summaryResponse.success) {
-      activitySummary.value = summaryResponse.data || []
-    }
+    // Load data using the store which handles API calls
+    await principalActivityStore.loadEngagementBreakdown()
+    await principalActivityStore.loadPrincipalStats()
+    await principalActivityStore.loadActivitySummaries()
+    
+    engagementBreakdown.value = principalActivityStore.engagementBreakdown
+    principalStats.value = principalActivityStore.principalStats
+    activitySummary.value = principalActivityStore.activitySummaries
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load dashboard data'
   } finally {
@@ -419,10 +412,8 @@ const loadTimelineData = async (principalId: string) => {
   isLoadingTimeline.value = true
   
   try {
-    const response = await PrincipalActivityApi.getPrincipalTimeline(principalId)
-    if (response.success) {
-      timelineData.value = response.data || []
-    }
+    await principalActivityStore.fetchPrincipalTimeline(principalId)
+    timelineData.value = principalActivityStore.selectedPrincipalTimeline
   } catch (err) {
     console.error('Failed to load timeline data:', err)
   } finally {
@@ -434,10 +425,8 @@ const loadProductData = async (principalId: string) => {
   isLoadingProducts.value = true
   
   try {
-    const response = await PrincipalActivityApi.getPrincipalProductPerformance(principalId)
-    if (response.success) {
-      productPerformanceData.value = response.data || []
-    }
+    await principalActivityStore.fetchProductPerformance(principalId)
+    productPerformanceData.value = principalActivityStore.productPerformances
   } catch (err) {
     console.error('Failed to load product data:', err)
   } finally {
@@ -449,10 +438,8 @@ const loadDistributorData = async (principalId: string) => {
   isLoadingDistributors.value = true
   
   try {
-    const response = await PrincipalActivityApi.getPrincipalDistributorRelationships([principalId])
-    if (response.success) {
-      distributorData.value = response.data || []
-    }
+    await principalActivityStore.fetchDistributorRelationships([principalId])
+    distributorData.value = principalActivityStore.distributorRelationships
   } catch (err) {
     console.error('Failed to load distributor data:', err)
   } finally {
@@ -504,10 +491,12 @@ onMounted(async () => {
 
 // Watch for principal store errors
 watch(
-  () => principalStore.error,
-  (newError) => {
-    if (newError) {
-      error.value = newError
+  [() => principalStore.error, () => principalActivityStore.error],
+  ([principalError, activityError]) => {
+    if (principalError) {
+      error.value = principalError
+    } else if (activityError) {
+      error.value = activityError
     }
   }
 )

@@ -177,6 +177,15 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'principals/dashboard',
+        name: 'PrincipalDashboard',
+        component: () => import('@/views/principals/PrincipalDashboardView.vue'),
+        meta: {
+          title: 'Principal Dashboard',
+          description: 'Comprehensive principal activity analytics and insights'
+        }
+      },
+      {
         path: 'principals/:id',
         name: 'PrincipalDetail',
         component: () => import('@/views/principals/PrincipalDetailView.vue'),

@@ -8,7 +8,11 @@
 // ===============================
 // CORE DASHBOARD COMPONENTS
 // ===============================
+export { default as PrincipalDashboard } from './PrincipalDashboard.vue'
 export { default as PrincipalActionBar } from './PrincipalActionBar.vue'
+export { default as PrincipalSelector } from './PrincipalSelector.vue'
+export { default as PrincipalKPICards } from './PrincipalKPICards.vue'
+export { default as PrincipalActivityTimeline } from './PrincipalActivityTimeline.vue'
 
 // ===============================
 // ANALYTICS COMPONENTS
@@ -36,6 +40,8 @@ export { default as ManagePrincipalProductsButton } from './ManagePrincipalProdu
 // ===============================
 export { default as DistributorRelationshipTable } from './DistributorRelationshipTable.vue'
 export { default as ProductPerformanceIndicator } from './ProductPerformanceIndicator.vue'
+export { default as PrincipalOpportunityList } from './PrincipalOpportunityList.vue'
+export { default as PrincipalInteractionList } from './PrincipalInteractionList.vue'
 
 // ===============================
 // TYPE EXPORTS
