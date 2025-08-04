@@ -1,13 +1,13 @@
 /**
  * Interaction Store - Comprehensive State Management
- * Manages interaction data, follow-up tracking, KPI calculations, and batch operations
+ * Manages interaction data, KPIs, follow-up tracking, and analytics
  * Follows Pinia Composition API patterns with reactive state management
+ * Integrates seamlessly with opportunity system for MVP compliance
  */
 
 import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
-import { supabase } from '@/config/supabaseClient'
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import { interactionsApi } from '@/services/interactionsApi'
 import type {
   Interaction,
   InteractionListView,
@@ -18,17 +18,13 @@ import type {
   InteractionPagination,
   InteractionListResponse,
   InteractionType,
-  BatchInteractionCreate,
-  BatchInteractionResult,
-  FollowUpAction
+  InteractionStatus,
+  InteractionOutcome
 } from '@/types/interactions'
-import type { InteractionFormWrapperData, BatchInteractionFormData } from '@/types/interactionForm'
 import type { 
-  ExtendedInteractionKPIs, 
-  ActivityTrends, 
-  PrincipalMetrics,
-  FollowUpMetrics
-} from '@/services/interactionKPIs'
+  InteractionInsert,
+  InteractionUpdate
+} from '@/types/database.types'
 
 /**
  * Store state interface for better type safety
@@ -37,6 +33,7 @@ interface InteractionStoreState {
   // Data collections
   interactions: InteractionListView[]
   selectedInteraction: InteractionDetailView | null
+  opportunityInteractions: { [opportunityId: string]: InteractionListView[] }
   
   // UI state
   loading: boolean
@@ -55,25 +52,16 @@ interface InteractionStoreState {
   
   // KPIs and analytics
   kpis: InteractionKPIs | null
-  extendedKPIs: ExtendedInteractionKPIs | null
   typeDistribution: { [K in InteractionType]: InteractionListView[] } | null
-  activityTrends: ActivityTrends | null
-  principalMetrics: PrincipalMetrics | null
-  followUpMetrics: FollowUpMetrics | null
+  statusDistribution: { [K in InteractionStatus]: InteractionListView[] } | null
   
   // Follow-up management
-  followUpTracking: {
-    overdue: InteractionListView[]
-    upcoming: InteractionListView[]
-    pending: InteractionListView[]
-  } | null
+  upcomingFollowUps: InteractionListView[]
+  overdueFollowUps: InteractionListView[]
   
-  // Batch operations
-  batchCreationResult: BatchInteractionResult | null
-  
-  // Real-time subscriptions
-  realtimeChannel: RealtimeChannel | null
-  isConnected: boolean
+  // Timeline and activity tracking
+  recentActivity: InteractionListView[]
+  monthlyInteractionCounts: { [month: string]: number }
 }
 
 export const useInteractionStore = defineStore('interaction', () => {
@@ -85,6 +73,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     // Data collections
     interactions: [],
     selectedInteraction: null,
+    opportunityInteractions: {},
     
     // UI state
     loading: false,
@@ -103,21 +92,16 @@ export const useInteractionStore = defineStore('interaction', () => {
     
     // KPIs and analytics
     kpis: null,
-    extendedKPIs: null,
     typeDistribution: null,
-    activityTrends: null,
-    principalMetrics: null,
-    followUpMetrics: null,
+    statusDistribution: null,
     
     // Follow-up management
-    followUpTracking: null,
+    upcomingFollowUps: [],
+    overdueFollowUps: [],
     
-    // Batch operations
-    batchCreationResult: null,
-    
-    // Real-time subscriptions
-    realtimeChannel: null,
-    isConnected: false
+    // Timeline and activity tracking
+    recentActivity: [],
+    monthlyInteractionCounts: {}
   })
 
   // Active filters for list view
@@ -125,7 +109,7 @@ export const useInteractionStore = defineStore('interaction', () => {
   const activePagination = ref<InteractionPagination>({
     page: 1,
     limit: 20,
-    sort_by: 'date',
+    sort_by: 'interaction_date',
     sort_order: 'desc'
   })
 
@@ -145,71 +129,48 @@ export const useInteractionStore = defineStore('interaction', () => {
     return (id: string) => state.interactions.find(interaction => interaction.id === id)
   })
   
-  const getInteractionsByOpportunity = computed(() => {
-    return (opportunityId: string) => 
-      state.interactions.filter(interaction => interaction.opportunity_id === opportunityId)
-  })
-  
-  const getInteractionsByContact = computed(() => {
-    return (contactId: string) => 
-      state.interactions.filter(interaction => interaction.contact_id === contactId)
-  })
-  
   const getInteractionsByType = computed(() => {
     return (type: InteractionType) => 
-      state.interactions.filter(interaction => interaction.interaction_type === type)
+      state.interactions.filter(interaction => interaction.type === type)
   })
   
-  const getUpcomingFollowUps = computed(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    return state.interactions.filter(interaction => {
-      if (!interaction.follow_up_needed || !interaction.follow_up_date) return false
-      const followUpDate = new Date(interaction.follow_up_date)
-      followUpDate.setHours(0, 0, 0, 0)
-      return followUpDate >= today
-    }).sort((a, b) => {
-      if (!a.follow_up_date || !b.follow_up_date) return 0
-      return new Date(a.follow_up_date).getTime() - new Date(b.follow_up_date).getTime()
-    })
+  const getInteractionsByStatus = computed(() => {
+    return (status: InteractionStatus) => 
+      state.interactions.filter(interaction => interaction.status === status)
   })
   
-  const getOverdueFollowUps = computed(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    return state.interactions.filter(interaction => {
-      if (!interaction.follow_up_needed || !interaction.follow_up_date) return false
-      const followUpDate = new Date(interaction.follow_up_date)
-      followUpDate.setHours(0, 0, 0, 0)
-      return followUpDate < today
-    }).sort((a, b) => {
-      if (!a.follow_up_date || !b.follow_up_date) return 0
-      return new Date(a.follow_up_date).getTime() - new Date(b.follow_up_date).getTime()
-    })
+  const getInteractionsByOpportunity = computed(() => {
+    return (opportunityId: string) => 
+      state.opportunityInteractions[opportunityId] || []
   })
   
-  const totalInteractionsThisWeek = computed(() => {
-    const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-    weekStart.setHours(0, 0, 0, 0)
-    
-    return state.interactions.filter(interaction => {
-      const interactionDate = new Date(interaction.date)
-      return interactionDate >= weekStart
-    }).length
+  // KPI Calculations
+  const totalInteractions = computed(() => {
+    return state.kpis?.total_interactions || state.interactions.length
   })
   
-  const totalInteractionsThisMonth = computed(() => {
-    const monthStart = new Date()
-    monthStart.setDate(1)
-    monthStart.setHours(0, 0, 0, 0)
-    
-    return state.interactions.filter(interaction => {
-      const interactionDate = new Date(interaction.date)
-      return interactionDate >= monthStart
-    }).length
+  const completedInteractions = computed(() => {
+    return state.interactions.filter(i => i.status === 'COMPLETED').length
+  })
+  
+  const positiveOutcomes = computed(() => {
+    return state.interactions.filter(i => i.outcome === 'POSITIVE').length
+  })
+  
+  const averageRating = computed(() => {
+    const ratedInteractions = state.interactions.filter(i => i.rating !== null)
+    if (ratedInteractions.length === 0) return 0
+    const total = ratedInteractions.reduce((sum, i) => sum + (i.rating || 0), 0)
+    return Math.round((total / ratedInteractions.length) * 10) / 10
+  })
+  
+  const successRate = computed(() => {
+    if (completedInteractions.value === 0) return 0
+    return Math.round((positiveOutcomes.value / completedInteractions.value) * 100)
+  })
+  
+  const pendingFollowUps = computed(() => {
+    return state.upcomingFollowUps.length + state.overdueFollowUps.length
   })
 
   // ===============================
@@ -218,7 +179,6 @@ export const useInteractionStore = defineStore('interaction', () => {
   
   /**
    * Fetch interactions with optional filtering and pagination
-   * Integrates with real Supabase database with fallback to demo data
    */
   const fetchInteractions = async (
     filters: InteractionFilters = {},
@@ -228,8 +188,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     state.error = null
     
     try {
-      // Try real API first, fallback to demo data
-      const response = await fetchInteractionsFromDatabase(filters, pagination)
+      const response = await interactionsApi.getInteractionsWithFilters(filters, pagination)
       
       if (response.success && response.data) {
         state.interactions = response.data.interactions
@@ -243,85 +202,51 @@ export const useInteractionStore = defineStore('interaction', () => {
         activePagination.value = pagination
       } else {
         // Fallback to demo data if API fails
-        console.warn('API failed, using demo data:', response.error)
-        const demoInteractions = getDemoInteractions()
-      
-      // Apply filters to demo data
-      let filteredInteractions = demoInteractions
-      
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase()
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          interaction.subject.toLowerCase().includes(searchLower) ||
-          (interaction.notes && interaction.notes.toLowerCase().includes(searchLower)) ||
-          (interaction.contact_name && interaction.contact_name.toLowerCase().includes(searchLower)) ||
-          (interaction.opportunity_name && interaction.opportunity_name.toLowerCase().includes(searchLower))
-        )
-      }
-      
-      if (filters.interaction_type && filters.interaction_type.length > 0) {
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          filters.interaction_type!.includes(interaction.interaction_type)
-        )
-      }
-      
-      if (filters.opportunity_id) {
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          interaction.opportunity_id === filters.opportunity_id
-        )
-      }
-      
-      if (filters.contact_id) {
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          interaction.contact_id === filters.contact_id
-        )
-      }
-      
-      if (filters.follow_up_needed !== undefined) {
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          interaction.follow_up_needed === filters.follow_up_needed
-        )
-      }
-      
-      if (filters.follow_up_overdue) {
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        filteredInteractions = filteredInteractions.filter(interaction =>
-          interaction.follow_up_needed && 
-          interaction.follow_up_date &&
-          new Date(interaction.follow_up_date) < today
-        )
-      }
-      
-      // Apply pagination
-      const startIndex = (pagination.page - 1) * pagination.limit
-      const endIndex = startIndex + pagination.limit
-      const paginatedInteractions = filteredInteractions.slice(startIndex, endIndex)
-      
-      // Update state
-      state.interactions = paginatedInteractions
-      state.totalCount = filteredInteractions.length
-      state.currentPage = pagination.page
-      state.hasNextPage = endIndex < filteredInteractions.length
-      state.hasPreviousPage = pagination.page > 1
-      
-      // Update active filters and pagination
+        console.warn('Interactions API failed, using demo data:', response.error)
+        state.interactions = getDemoInteractions()
+        state.totalCount = state.interactions.length
+        state.currentPage = 1
+        state.hasNextPage = false
+        state.hasPreviousPage = false
+        
         activeFilters.value = filters
         activePagination.value = pagination
       }
-      
     } catch (error) {
-      console.warn('API error, using demo data:', error)
+      console.warn('Interactions API error, using demo data:', error)
       // Fallback to demo data on any error
-      const demoInteractions = getDemoInteractions()
-      state.interactions = demoInteractions
-      state.totalCount = demoInteractions.length
+      state.interactions = getDemoInteractions()
+      state.totalCount = state.interactions.length
       state.currentPage = 1
       state.hasNextPage = false
       state.hasPreviousPage = false
       
       activeFilters.value = filters
       activePagination.value = pagination
+    } finally {
+      state.loading = false
+    }
+  }
+  
+  /**
+   * Fetch interactions for a specific opportunity
+   */
+  const fetchInteractionsByOpportunity = async (opportunityId: string): Promise<void> => {
+    state.loading = true
+    state.error = null
+    
+    try {
+      const response = await interactionsApi.getInteractionsByOpportunity(opportunityId)
+      
+      if (response.success && response.data) {
+        state.opportunityInteractions[opportunityId] = response.data
+      } else {
+        state.error = response.error || 'Failed to fetch opportunity interactions'
+        state.opportunityInteractions[opportunityId] = []
+      }
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
+      state.opportunityInteractions[opportunityId] = []
     } finally {
       state.loading = false
     }
@@ -335,82 +260,12 @@ export const useInteractionStore = defineStore('interaction', () => {
     state.error = null
     
     try {
-      // Try to fetch from database first
-      const { data, error } = await supabase
-        .from('interactions')
-        .select(`
-          *,
-          opportunities:opportunity_id(name, stage, probability_percent, expected_close_date, deal_owner, context),
-          contacts:contact_id(
-            name, 
-            position, 
-            email, 
-            phone,
-            is_primary,
-            organization:organization_id(id, name, type, industry, website, email, phone)
-          )
-        `)
-        .eq('id', id)
-        .is('deleted_at', null)
-        .single()
+      const response = await interactionsApi.getInteractionById(id)
       
-      if (data && !error) {
-        // Convert to detailed view
-        state.selectedInteraction = {
-          ...convertDatabaseRecordToListView(data),
-          // Additional detail fields
-          opportunity_probability: data.opportunities?.probability_percent || null,
-          opportunity_expected_close: data.opportunities?.expected_close_date || null,
-          opportunity_deal_owner: data.opportunities?.deal_owner || null,
-          opportunity_context: data.opportunities?.context || null,
-          contact_email: data.contacts?.email || null,
-          contact_phone: data.contacts?.phone || null,
-          contact_is_primary: data.contacts?.is_primary || null,
-          organization_id: data.contacts?.organization?.id || null,
-          organization_name: data.contacts?.organization?.name || null,
-          organization_type: data.contacts?.organization?.type || null,
-          organization_industry: data.contacts?.organization?.industry || null,
-          organization_website: data.contacts?.organization?.website || null,
-          organization_email: data.contacts?.organization?.email || null,
-          organization_phone: data.contacts?.organization?.phone || null,
-          related_interactions_count: 0, // Would need separate query
-          next_scheduled_interaction: null, // Would need separate query
-          last_interaction_before_this: null, // Would need separate query
-          interaction_sequence_number: 1 // Would need separate query
-        }
+      if (response.success && response.data) {
+        state.selectedInteraction = response.data
       } else {
-        // Fallback to demo data
-        console.warn('Database fetch failed, using demo data:', error?.message)
-        const demoInteractions = getDemoInteractions()
-        const interaction = demoInteractions.find(i => i.id === id)
-        
-        if (interaction) {
-          // Convert to detailed view (in real implementation, API would return detailed view)
-          state.selectedInteraction = {
-            ...interaction,
-            // Additional detail fields would be populated by API
-            opportunity_probability: 75,
-            opportunity_expected_close: '2024-09-15',
-            opportunity_deal_owner: 'Sarah Johnson',
-            opportunity_context: 'Enterprise Integration',
-            contact_email: 'mike.chen@techcorp.com',
-            contact_phone: '+1-555-0123',
-            contact_is_primary: true,
-            organization_id: 'org-1',
-            organization_name: 'TechCorp Solutions',
-            organization_type: 'Technology',
-            organization_industry: 'Software',
-            organization_website: 'https://techcorp.com',
-            organization_email: 'info@techcorp.com',
-            organization_phone: '+1-555-0100',
-            related_interactions_count: 3,
-            next_scheduled_interaction: '2024-08-20',
-            last_interaction_before_this: '2024-07-25',
-            interaction_sequence_number: 2
-          }
-        } else {
-          state.error = 'Interaction not found'
-        }
+        state.error = response.error || 'Failed to fetch interaction'
       }
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
@@ -420,148 +275,50 @@ export const useInteractionStore = defineStore('interaction', () => {
   }
   
   /**
-   * Create a single interaction
+   * Create a new interaction
    */
-  const createInteraction = async (interactionData: InteractionFormWrapperData): Promise<boolean> => {
+  const createInteraction = async (interactionData: InteractionFormData): Promise<boolean> => {
     state.creating = true
     state.error = null
     
     try {
-      // Convert form data to database format
-      const dbData = {
-        interaction_type: interactionData.interactionType as InteractionType,
-        date: interactionData.date,
-        subject: interactionData.subject,
-        notes: interactionData.notes || null,
-        opportunity_id: interactionData.selectedOpportunity || null,
-        contact_id: interactionData.selectedContact || null,
-        follow_up_needed: interactionData.followUpNeeded,
-        follow_up_date: interactionData.followUpDate || null,
-        created_by: 'current-user' // TODO: Get from auth context
-      }
+      const response = await interactionsApi.createInteraction(interactionData)
       
-      // Try real database insert first
-      const { data, error } = await supabase
-        .from('interactions')
-        .insert(dbData)
-        .select()
-        .single()
-      
-      if (data && !error) {
-        // Real-time subscription will handle adding to state
-        console.log('Successfully created interaction:', data.id)
+      if (response.success && response.data) {
+        // Add to local state if we're on the first page
+        if (state.currentPage === 1) {
+          const newInteraction: InteractionListView = {
+            id: response.data.id,
+            type: response.data.type,
+            subject: response.data.subject,
+            interaction_date: response.data.interaction_date,
+            opportunity_id: response.data.opportunity_id,
+            status: response.data.status || 'SCHEDULED',
+            outcome: response.data.outcome,
+            duration_minutes: response.data.duration_minutes,
+            rating: response.data.rating,
+            follow_up_required: response.data.follow_up_required || false,
+            follow_up_date: response.data.follow_up_date,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            opportunity_name: '',
+            organization_name: '',
+            days_since_interaction: 0,
+            days_until_followup: null
+          }
+          state.interactions.unshift(newInteraction)
+        }
+        
+        // Update opportunity interactions cache if relevant
+        if (state.opportunityInteractions[interactionData.opportunity_id]) {
+          await fetchInteractionsByOpportunity(interactionData.opportunity_id)
+        }
+        
         return true
       } else {
-        // Fallback to demo mode
-        console.warn('Database insert failed, using demo mode:', error?.message)
-        console.log('Creating interaction (demo mode):', dbData)
-      
-      // Add to local state if we're on the first page
-      if (state.currentPage === 1) {
-        const newInteraction: InteractionListView = {
-          id: `demo-${Date.now()}`,
-          interaction_type: dbData.interaction_type,
-          date: dbData.date,
-          subject: dbData.subject,
-          notes: dbData.notes,
-          follow_up_needed: dbData.follow_up_needed,
-          follow_up_date: dbData.follow_up_date,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: 'current-user',
-          opportunity_id: dbData.opportunity_id,
-          opportunity_name: dbData.opportunity_id ? 'Demo Opportunity' : null,
-          opportunity_stage: dbData.opportunity_id ? 'DEMO_SCHEDULED' : null,
-          opportunity_organization: dbData.opportunity_id ? 'Demo Organization' : null,
-          contact_id: dbData.contact_id,
-          contact_name: dbData.contact_id ? 'Demo Contact' : null,
-          contact_position: dbData.contact_id ? 'Manager' : null,
-          contact_organization: dbData.contact_id ? 'Demo Organization' : null,
-          days_since_interaction: 0,
-          days_to_follow_up: dbData.follow_up_date ? 
-            Math.ceil((new Date(dbData.follow_up_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null,
-          is_overdue_follow_up: false,
-          interaction_priority: 'Medium'
-        }
-        state.interactions.unshift(newInteraction)
+        state.error = response.error || 'Failed to create interaction'
+        return false
       }
-      
-      return true
-      }
-    } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
-      return false
-    } finally {
-      state.creating = false
-    }
-  }
-  
-  /**
-   * Create multiple interactions (batch creation)
-   */
-  const createBatchInteractions = async (formData: BatchInteractionFormData): Promise<boolean> => {
-    state.creating = true
-    state.error = null
-    state.batchCreationResult = null
-    
-    try {
-      // Convert to API format
-      const batchData: BatchInteractionCreate = {
-        template: {
-          interaction_type: formData.interactionType as InteractionType,
-          date: formData.date,
-          subject: formData.subject,
-          notes: formData.notes,
-          follow_up_needed: formData.followUpNeeded,
-          follow_up_date: formData.followUpDate
-        },
-        targets: []
-      }
-      
-      // Add targets based on selection
-      if (formData.createPerOpportunity) {
-        formData.selectedOpportunities.forEach(opportunityId => {
-          batchData.targets.push({ opportunity_id: opportunityId })
-        })
-      }
-      
-      if (formData.createPerContact) {
-        formData.selectedContacts.forEach(contactId => {
-          batchData.targets.push({ contact_id: contactId })
-        })
-      }
-      
-      console.log('Creating batch interactions (demo mode):', batchData)
-      
-      // Simulate batch creation result
-      const createdInteractions: Interaction[] = batchData.targets.map((target, index) => ({
-        id: `demo-batch-${Date.now()}-${index}`,
-        interaction_type: batchData.template.interaction_type,
-        date: batchData.template.date,
-        subject: batchData.template.subject,
-        notes: batchData.template.notes,
-        opportunity_id: target.opportunity_id || null,
-        contact_id: target.contact_id || null,
-        created_by: 'current-user',
-        follow_up_needed: batchData.template.follow_up_needed,
-        follow_up_date: batchData.template.follow_up_date,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        deleted_at: null
-      }))
-      
-      state.batchCreationResult = {
-        success: true,
-        created_interactions: createdInteractions,
-        failed_creations: [],
-        total_created: createdInteractions.length,
-        total_failed: 0
-      }
-      
-      // Refresh interactions list
-      await fetchInteractions(activeFilters.value, activePagination.value)
-      
-      return true
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
       return false
@@ -573,63 +330,47 @@ export const useInteractionStore = defineStore('interaction', () => {
   /**
    * Update an existing interaction
    */
-  const updateInteraction = async (id: string, updates: Partial<InteractionFormWrapperData>): Promise<boolean> => {
+  const updateInteraction = async (id: string, updates: Partial<InteractionUpdate>): Promise<boolean> => {
     state.updating = true
     state.error = null
     
     try {
-      // Convert form updates to database format
-      const dbUpdates: any = {}
-      if (updates.interactionType) dbUpdates.interaction_type = updates.interactionType
-      if (updates.date) dbUpdates.date = updates.date
-      if (updates.subject) dbUpdates.subject = updates.subject
-      if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null
-      if (updates.selectedOpportunity !== undefined) dbUpdates.opportunity_id = updates.selectedOpportunity || null
-      if (updates.selectedContact !== undefined) dbUpdates.contact_id = updates.selectedContact || null
-      if (updates.followUpNeeded !== undefined) dbUpdates.follow_up_needed = updates.followUpNeeded
-      if (updates.followUpDate !== undefined) dbUpdates.follow_up_date = updates.followUpDate || null
+      const response = await interactionsApi.updateInteraction(id, updates)
       
-      // Try real database update first
-      const { data, error } = await supabase
-        .from('interactions')
-        .update(dbUpdates)
-        .eq('id', id)
-        .select()
-        .single()
-      
-      if (data && !error) {
-        // Real-time subscription will handle updating state
-        console.log('Successfully updated interaction:', data.id)
+      if (response.success && response.data) {
+        // Update in local state
+        const index = state.interactions.findIndex(interaction => interaction.id === id)
+        if (index !== -1) {
+          state.interactions[index] = {
+            ...state.interactions[index],
+            type: response.data.type,
+            subject: response.data.subject,
+            interaction_date: response.data.interaction_date,
+            status: response.data.status || 'SCHEDULED',
+            outcome: response.data.outcome,
+            duration_minutes: response.data.duration_minutes,
+            rating: response.data.rating,
+            follow_up_required: response.data.follow_up_required || false,
+            follow_up_date: response.data.follow_up_date,
+            updated_at: response.data.updated_at
+          }
+        }
+        
+        // Update selected interaction if it's the same one
+        if (state.selectedInteraction?.id === id) {
+          await fetchInteractionById(id)
+        }
+        
+        // Update opportunity interactions cache
+        const opportunityId = response.data.opportunity_id
+        if (state.opportunityInteractions[opportunityId]) {
+          await fetchInteractionsByOpportunity(opportunityId)
+        }
+        
         return true
       } else {
-        // Fallback to demo mode
-        console.warn('Database update failed, using demo mode:', error?.message)
-        console.log('Updating interaction (demo mode):', id, updates)
-      
-      // Update in local state
-      const index = state.interactions.findIndex(interaction => interaction.id === id)
-      if (index !== -1) {
-        const currentInteraction = state.interactions[index]
-        state.interactions[index] = {
-          ...currentInteraction,
-          ...(updates.interactionType && { interaction_type: updates.interactionType as InteractionType }),
-          ...(updates.date && { date: updates.date }),
-          ...(updates.subject && { subject: updates.subject }),
-          ...(updates.notes !== undefined && { notes: updates.notes }),
-          ...(updates.selectedOpportunity !== undefined && { opportunity_id: updates.selectedOpportunity }),
-          ...(updates.selectedContact !== undefined && { contact_id: updates.selectedContact }),
-          ...(updates.followUpNeeded !== undefined && { follow_up_needed: updates.followUpNeeded }),
-          ...(updates.followUpDate !== undefined && { follow_up_date: updates.followUpDate }),
-          updated_at: new Date().toISOString()
-        }
-      }
-      
-      // Update selected interaction if it's the same one
-      if (state.selectedInteraction?.id === id) {
-        await fetchInteractionById(id)
-      }
-      
-      return true
+        state.error = response.error || 'Failed to update interaction'
+        return false
       }
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
@@ -637,6 +378,42 @@ export const useInteractionStore = defineStore('interaction', () => {
     } finally {
       state.updating = false
     }
+  }
+  
+  /**
+   * Complete an interaction with outcome and rating
+   */
+  const completeInteraction = async (
+    id: string, 
+    outcome: InteractionOutcome, 
+    rating?: number,
+    notes?: string
+  ): Promise<boolean> => {
+    const updates: Partial<InteractionUpdate> = {
+      status: 'COMPLETED',
+      outcome,
+      rating,
+      notes
+    }
+    
+    return await updateInteraction(id, updates)
+  }
+  
+  /**
+   * Schedule a follow-up for an interaction
+   */
+  const scheduleFollowUp = async (
+    id: string,
+    followUpDate: string,
+    followUpNotes?: string
+  ): Promise<boolean> => {
+    const updates: Partial<InteractionUpdate> = {
+      follow_up_required: true,
+      follow_up_date: followUpDate,
+      follow_up_notes: followUpNotes
+    }
+    
+    return await updateInteraction(id, updates)
   }
   
   /**
@@ -647,33 +424,30 @@ export const useInteractionStore = defineStore('interaction', () => {
     state.error = null
     
     try {
-      // Try real database soft delete first
-      const { error } = await supabase
-        .from('interactions')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id)
+      const response = await interactionsApi.deleteInteraction(id)
       
-      if (!error) {
-        // Real-time subscription will handle removing from state
-        console.log('Successfully deleted interaction:', id)
+      if (response.success) {
+        // Remove from local state
+        const index = state.interactions.findIndex(interaction => interaction.id === id)
+        if (index !== -1) {
+          const interaction = state.interactions[index]
+          state.interactions.splice(index, 1)
+          
+          // Update opportunity interactions cache
+          if (state.opportunityInteractions[interaction.opportunity_id]) {
+            await fetchInteractionsByOpportunity(interaction.opportunity_id)
+          }
+        }
+        
+        // Clear selected interaction if it was deleted
+        if (state.selectedInteraction?.id === id) {
+          state.selectedInteraction = null
+        }
+        
         return true
       } else {
-        // Fallback to demo mode
-        console.warn('Database delete failed, using demo mode:', error.message)
-        console.log('Deleting interaction (demo mode):', id)
-      
-      // Remove from local state
-      const index = state.interactions.findIndex(interaction => interaction.id === id)
-      if (index !== -1) {
-        state.interactions.splice(index, 1)
-      }
-      
-      // Clear selected interaction if it was deleted
-      if (state.selectedInteraction?.id === id) {
-        state.selectedInteraction = null
-      }
-      
-      return true
+        state.error = response.error || 'Failed to delete interaction'
+        return false
       }
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
@@ -682,135 +456,60 @@ export const useInteractionStore = defineStore('interaction', () => {
       state.deleting = false
     }
   }
-  
-  /**
-   * Process follow-up action (complete, reschedule, cancel)
-   */
-  const processFollowUpAction = async (action: FollowUpAction): Promise<boolean> => {
-    state.updating = true
-    state.error = null
-    
-    try {
-      console.log('Processing follow-up action (demo mode):', action)
-      
-      const index = state.interactions.findIndex(interaction => interaction.id === action.interaction_id)
-      if (index !== -1) {
-        const interaction = state.interactions[index]
-        
-        switch (action.action) {
-          case 'complete':
-            state.interactions[index] = {
-              ...interaction,
-              follow_up_needed: false,
-              follow_up_date: null,
-              updated_at: new Date().toISOString()
-            }
-            
-            // Create new interaction if specified
-            if (action.new_interaction) {
-              await createInteraction({
-                interactionType: action.new_interaction.interaction_type,
-                date: action.new_interaction.date,
-                subject: action.new_interaction.subject,
-                notes: action.new_interaction.notes,
-                selectedOpportunity: interaction.opportunity_id,
-                selectedContact: interaction.contact_id,
-                followUpNeeded: action.new_interaction.follow_up_needed,
-                followUpDate: action.new_interaction.follow_up_date
-              })
-            }
-            break
-            
-          case 'reschedule':
-            state.interactions[index] = {
-              ...interaction,
-              follow_up_date: action.new_date || null,
-              updated_at: new Date().toISOString()
-            }
-            break
-            
-          case 'cancel':
-            state.interactions[index] = {
-              ...interaction,
-              follow_up_needed: false,
-              follow_up_date: null,
-              updated_at: new Date().toISOString()
-            }
-            break
-        }
-      }
-      
-      return true
-    } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
-      return false
-    } finally {
-      state.updating = false
-    }
-  }
 
   // ===============================
   // ACTIONS - ANALYTICS & KPIs
   // ===============================
   
   /**
-   * Fetch interaction KPIs for dashboard using comprehensive KPI service
+   * Fetch interaction KPIs for dashboard
    */
-  const fetchKPIs = async (filters: InteractionFilters = {}): Promise<void> => {
+  const fetchKPIs = async (): Promise<void> => {
     state.loading = true
     state.error = null
     
     try {
-      // Use the comprehensive KPI calculation service
-      const { calculateInteractionKPIs } = await import('@/services/interactionKPIs')
-      const kpis = await calculateInteractionKPIs(filters)
+      const response = await interactionsApi.getInteractionKPIs()
       
-      // Convert extended KPIs to basic KPIs interface for store compatibility
-      state.kpis = {
-        total_interactions: kpis.total_interactions,
-        interactions_this_week: kpis.interactions_this_week,
-        interactions_this_month: kpis.interactions_this_month,
-        overdue_follow_ups: kpis.overdue_follow_ups,
-        scheduled_follow_ups: kpis.scheduled_follow_ups,
-        avg_interactions_per_week: kpis.avg_interactions_per_week,
-        type_distribution: kpis.type_distribution,
-        follow_up_completion_rate: kpis.follow_up_completion_rate,
-        avg_days_to_follow_up: kpis.avg_days_to_follow_up,
-        interactions_with_opportunities: kpis.interactions_with_opportunities,
-        interactions_with_contacts: kpis.interactions_with_contacts,
-        unique_contacts_contacted: kpis.unique_contacts_contacted,
-        unique_opportunities_touched: kpis.unique_opportunities_touched,
-        created_this_week: kpis.created_this_week,
-        follow_ups_completed_this_week: kpis.follow_ups_completed_this_week,
-        follow_ups_scheduled_this_week: kpis.follow_ups_scheduled_this_week
+      if (response.success && response.data) {
+        state.kpis = response.data
+      } else {
+        // Fallback to demo KPIs
+        console.warn('Interaction KPI API failed, using demo data:', response.error)
+        state.kpis = getDemoKPIs()
       }
     } catch (error) {
-      console.warn('KPI calculation error, using demo data:', error)
-      state.kpis = calculateDemoKPIs()
-      state.error = error instanceof Error ? error.message : 'KPI calculation failed'
+      console.warn('Interaction KPI API error, using demo data:', error)
+      // Fallback to demo KPIs
+      state.kpis = getDemoKPIs()
     } finally {
       state.loading = false
     }
   }
   
   /**
-   * Fetch interactions grouped by type for analytics
+   * Fetch upcoming follow-ups for task management
    */
-  const fetchTypeDistribution = async (): Promise<void> => {
+  const fetchUpcomingFollowUps = async (): Promise<void> => {
     state.loading = true
     state.error = null
     
     try {
-      const interactions = getDemoInteractions()
-      const distribution: { [K in InteractionType]: InteractionListView[] } = {
-        EMAIL: interactions.filter(i => i.interaction_type === 'EMAIL'),
-        CALL: interactions.filter(i => i.interaction_type === 'CALL'),
-        IN_PERSON: interactions.filter(i => i.interaction_type === 'IN_PERSON'),
-        DEMO: interactions.filter(i => i.interaction_type === 'DEMO'),
-        FOLLOW_UP: interactions.filter(i => i.interaction_type === 'FOLLOW_UP')
-      }
+      const response = await interactionsApi.getUpcomingFollowUps()
       
-      state.typeDistribution = distribution
+      if (response.success && response.data) {
+        const now = new Date()
+        
+        // Separate upcoming and overdue follow-ups
+        state.upcomingFollowUps = response.data.filter(interaction => 
+          interaction.follow_up_date && new Date(interaction.follow_up_date) >= now
+        )
+        state.overdueFollowUps = response.data.filter(interaction => 
+          interaction.follow_up_date && new Date(interaction.follow_up_date) < now
+        )
+      } else {
+        state.error = response.error || 'Failed to fetch follow-ups'
+      }
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
     } finally {
@@ -819,159 +518,22 @@ export const useInteractionStore = defineStore('interaction', () => {
   }
   
   /**
-   * Fetch follow-up tracking data using comprehensive KPI service
+   * Fetch recent interaction activity
    */
-  const fetchFollowUpTracking = async (filters: InteractionFilters = {}): Promise<void> => {
+  const fetchRecentActivity = async (limit: number = 10): Promise<void> => {
     state.loading = true
     state.error = null
     
     try {
-      const { calculateFollowUpMetrics } = await import('@/services/interactionKPIs')
-      const followUpMetrics = await calculateFollowUpMetrics(filters)
+      const response = await interactionsApi.getRecentInteractions(limit)
       
-      // Store the follow-up metrics
-      state.followUpMetrics = followUpMetrics
-      
-      // Convert to store format and get actual interaction data
-      const interactions = await fetchInteractionData(filters)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
-      const nextWeek = new Date(today)
-      nextWeek.setDate(today.getDate() + 7)
-      
-      state.followUpTracking = {
-        overdue: interactions.filter(i => i.is_overdue_follow_up),
-        pending: interactions.filter(i => {
-          if (!i.follow_up_needed || !i.follow_up_date) return false
-          const followUpDate = new Date(i.follow_up_date)
-          followUpDate.setHours(0, 0, 0, 0)
-          return followUpDate >= today
-        }),
-        upcoming: interactions.filter(i => {
-          if (!i.follow_up_needed || !i.follow_up_date) return false
-          const followUpDate = new Date(i.follow_up_date)
-          followUpDate.setHours(0, 0, 0, 0)
-          return followUpDate >= today && followUpDate <= nextWeek
-        })
+      if (response.success && response.data) {
+        state.recentActivity = response.data
+      } else {
+        state.error = response.error || 'Failed to fetch recent activity'
       }
     } catch (error) {
       state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
-      
-      // Fallback to demo data
-      const interactions = getDemoInteractions()
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
-      const nextWeek = new Date(today)
-      nextWeek.setDate(today.getDate() + 7)
-      
-      state.followUpTracking = {
-        overdue: interactions.filter(i => {
-          if (!i.follow_up_needed || !i.follow_up_date) return false
-          const followUpDate = new Date(i.follow_up_date)
-          followUpDate.setHours(0, 0, 0, 0)
-          return followUpDate < today
-        }),
-        pending: interactions.filter(i => {
-          if (!i.follow_up_needed || !i.follow_up_date) return false
-          const followUpDate = new Date(i.follow_up_date)
-          followUpDate.setHours(0, 0, 0, 0)
-          return followUpDate >= today
-        }),
-        upcoming: interactions.filter(i => {
-          if (!i.follow_up_needed || !i.follow_up_date) return false
-          const followUpDate = new Date(i.follow_up_date)
-          followUpDate.setHours(0, 0, 0, 0)
-          return followUpDate >= today && followUpDate <= nextWeek
-        })
-      }
-    } finally {
-      state.loading = false
-    }
-  }
-
-  /**
-   * Fetch enhanced KPIs with advanced metrics
-   */
-  const fetchExtendedKPIs = async (filters: InteractionFilters = {}): Promise<void> => {
-    state.loading = true
-    state.error = null
-    
-    try {
-      const { calculateInteractionKPIs } = await import('@/services/interactionKPIs')
-      const extendedKPIs = await calculateInteractionKPIs(filters)
-      
-      // Store extended KPIs in a separate state property for advanced dashboard components
-      // This allows components to access both basic and extended metrics
-      state.extendedKPIs = extendedKPIs
-      
-      // Also update basic KPIs for backward compatibility
-      state.kpis = {
-        total_interactions: extendedKPIs.total_interactions,
-        interactions_this_week: extendedKPIs.interactions_this_week,
-        interactions_this_month: extendedKPIs.interactions_this_month,
-        overdue_follow_ups: extendedKPIs.overdue_follow_ups,
-        scheduled_follow_ups: extendedKPIs.scheduled_follow_ups,
-        avg_interactions_per_week: extendedKPIs.avg_interactions_per_week,
-        type_distribution: extendedKPIs.type_distribution,
-        follow_up_completion_rate: extendedKPIs.follow_up_completion_rate,
-        avg_days_to_follow_up: extendedKPIs.avg_days_to_follow_up,
-        interactions_with_opportunities: extendedKPIs.interactions_with_opportunities,
-        interactions_with_contacts: extendedKPIs.interactions_with_contacts,
-        unique_contacts_contacted: extendedKPIs.unique_contacts_contacted,
-        unique_opportunities_touched: extendedKPIs.unique_opportunities_touched,
-        created_this_week: extendedKPIs.created_this_week,
-        follow_ups_completed_this_week: extendedKPIs.follow_ups_completed_this_week,
-        follow_ups_scheduled_this_week: extendedKPIs.follow_ups_scheduled_this_week
-      }
-    } catch (error) {
-      console.warn('Extended KPI calculation error, using demo data:', error)
-      state.error = error instanceof Error ? error.message : 'Extended KPI calculation failed'
-      // Fallback to basic KPIs
-      await fetchKPIs(filters)
-    } finally {
-      state.loading = false
-    }
-  }
-
-  /**
-   * Fetch activity trends for period analysis
-   */
-  const fetchActivityTrends = async (period: 'week' | 'month' | 'quarter' = 'month'): Promise<void> => {
-    state.loading = true
-    state.error = null
-    
-    try {
-      const { calculateActivityTrends } = await import('@/services/interactionKPIs')
-      const trends = await calculateActivityTrends(period)
-      
-      // Store activity trends for dashboard components
-      state.activityTrends = trends
-    } catch (error) {
-      console.warn('Activity trends calculation error:', error)
-      state.error = error instanceof Error ? error.message : 'Activity trends calculation failed'
-    } finally {
-      state.loading = false
-    }
-  }
-
-  /**
-   * Fetch principal performance metrics
-   */
-  const fetchPrincipalMetrics = async (principalId?: string): Promise<void> => {
-    state.loading = true
-    state.error = null
-    
-    try {
-      const { calculatePrincipalPerformance } = await import('@/services/interactionKPIs')
-      const metrics = await calculatePrincipalPerformance(principalId)
-      
-      // Store principal metrics
-      state.principalMetrics = metrics
-    } catch (error) {
-      console.warn('Principal metrics calculation error:', error)
-      state.error = error instanceof Error ? error.message : 'Principal metrics calculation failed'
     } finally {
       state.loading = false
     }
@@ -996,10 +558,14 @@ export const useInteractionStore = defineStore('interaction', () => {
   }
   
   /**
-   * Clear batch creation results
+   * Clear opportunity interactions cache
    */
-  const clearBatchResults = (): void => {
-    state.batchCreationResult = null
+  const clearOpportunityCache = (opportunityId?: string): void => {
+    if (opportunityId) {
+      delete state.opportunityInteractions[opportunityId]
+    } else {
+      state.opportunityInteractions = {}
+    }
   }
   
   /**
@@ -1010,7 +576,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     activePagination.value = {
       page: 1,
       limit: 20,
-      sort_by: 'date',
+      sort_by: 'interaction_date',
       sort_order: 'desc'
     }
   }
@@ -1022,354 +588,34 @@ export const useInteractionStore = defineStore('interaction', () => {
     await fetchInteractions(activeFilters.value, activePagination.value)
   }
   
-  // ===============================
-  // REAL-TIME SUBSCRIPTION ACTIONS
-  // ===============================
-  
   /**
-   * Subscribe to real-time updates for interactions
+   * Refresh all dashboard data
    */
-  const subscribeToChanges = async (): Promise<void> => {
-    try {
-      // Unsubscribe from existing channel if any
-      if (state.realtimeChannel) {
-        await supabase.removeChannel(state.realtimeChannel)
-      }
-      
-      // Create new channel for interactions table
-      const channel = supabase
-        .channel('interactions-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'interactions'
-          },
-          (payload) => {
-            console.log('Real-time interaction change:', payload)
-            handleRealtimeChange(payload)
-          }
-        )
-        .subscribe((status) => {
-          console.log('Interaction subscription status:', status)
-          state.isConnected = status === 'SUBSCRIBED'
-        })
-      
-      state.realtimeChannel = channel
-    } catch (error) {
-      console.error('Failed to subscribe to interaction changes:', error)
-      state.isConnected = false
-    }
-  }
-  
-  /**
-   * Unsubscribe from real-time updates
-   */
-  const unsubscribeFromChanges = async (): Promise<void> => {
-    try {
-      if (state.realtimeChannel) {
-        await supabase.removeChannel(state.realtimeChannel)
-        state.realtimeChannel = null
-        state.isConnected = false
-      }
-    } catch (error) {
-      console.error('Failed to unsubscribe from interaction changes:', error)
-    }
-  }
-  
-  /**
-   * Handle real-time database changes
-   */
-  const handleRealtimeChange = (payload: any): void => {
-    const { eventType, new: newRecord, old: oldRecord } = payload
-    
-    switch (eventType) {
-      case 'INSERT':
-        if (newRecord && state.currentPage === 1) {
-          // Convert database record to InteractionListView format
-          const newInteraction = convertDatabaseRecordToListView(newRecord)
-          state.interactions.unshift(newInteraction)
-        }
-        break
-        
-      case 'UPDATE':
-        if (newRecord) {
-          const index = state.interactions.findIndex(interaction => interaction.id === newRecord.id)
-          if (index !== -1) {
-            const updatedInteraction = convertDatabaseRecordToListView(newRecord)
-            state.interactions[index] = updatedInteraction
-          }
-          
-          // Update selected interaction if it's the same one
-          if (state.selectedInteraction?.id === newRecord.id) {
-            fetchInteractionById(newRecord.id)
-          }
-        }
-        break
-        
-      case 'DELETE':
-        if (oldRecord) {
-          const index = state.interactions.findIndex(interaction => interaction.id === oldRecord.id)
-          if (index !== -1) {
-            state.interactions.splice(index, 1)
-          }
-          
-          // Clear selected interaction if it was deleted
-          if (state.selectedInteraction?.id === oldRecord.id) {
-            state.selectedInteraction = null
-          }
-        }
-        break
-    }
+  const refreshDashboard = async (): Promise<void> => {
+    await Promise.all([
+      fetchKPIs(),
+      fetchUpcomingFollowUps(),
+      fetchRecentActivity()
+    ])
   }
 
-  // ===============================
-  // DATABASE INTEGRATION FUNCTIONS
-  // ===============================
-  
-  /**
-   * Fetch interactions from Supabase database with filtering and pagination
-   */
-  const fetchInteractionsFromDatabase = async (
-    filters: InteractionFilters,
-    pagination: InteractionPagination
-  ): Promise<{ success: boolean, data: InteractionListResponse | null, error: string | null }> => {
-    try {
-      let query = supabase
-        .from('interactions')
-        .select(`
-          *,
-          opportunities:opportunity_id(name, stage, organization_id),
-          contacts:contact_id(
-            name, 
-            position, 
-            email, 
-            phone,
-            is_primary,
-            organization:organization_id(name, type)
-          )
-        `)
-        .is('deleted_at', null)
-
-      // Apply filters
-      if (filters.search) {
-        query = query.or(`subject.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`)
-      }
-
-      if (filters.interaction_type && filters.interaction_type.length > 0) {
-        query = query.in('interaction_type', filters.interaction_type)
-      }
-
-      if (filters.opportunity_id) {
-        query = query.eq('opportunity_id', filters.opportunity_id)
-      }
-
-      if (filters.contact_id) {
-        query = query.eq('contact_id', filters.contact_id)
-      }
-
-      if (filters.follow_up_needed !== undefined) {
-        query = query.eq('follow_up_needed', filters.follow_up_needed)
-      }
-
-      if (filters.follow_up_overdue) {
-        const today = new Date().toISOString().split('T')[0]
-        query = query
-          .eq('follow_up_needed', true)
-          .lt('follow_up_date', today)
-      }
-
-      if (filters.date_from) {
-        query = query.gte('date', filters.date_from)
-      }
-
-      if (filters.date_to) {
-        query = query.lte('date', filters.date_to)
-      }
-
-      // Apply sorting
-      query = query.order(pagination.sort_by, { ascending: pagination.sort_order === 'asc' })
-
-      // Apply pagination
-      const from = (pagination.page - 1) * pagination.limit
-      const to = from + pagination.limit - 1
-      query = query.range(from, to)
-
-      const { data, error, count } = await query
-
-      if (error) {
-        console.error('Database error:', error)
-        return { success: false, data: null, error: error.message }
-      }
-
-      // Transform data to InteractionListView format
-      const transformedData: InteractionListView[] = data?.map(interaction => 
-        convertDatabaseRecordToListView(interaction)
-      ) || []
-
-      // Get total count for pagination
-      const totalCount = count || 0
-
-      const response: InteractionListResponse = {
-        interactions: transformedData,
-        total_count: totalCount,
-        page: pagination.page,
-        limit: pagination.limit,
-        has_next: (pagination.page * pagination.limit) < totalCount,
-        has_previous: pagination.page > 1
-      }
-
-      return { success: true, data: response, error: null }
-
-    } catch (error) {
-      console.error('Database integration error:', error)
-      return { 
-        success: false, 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown database error' 
-      }
-    }
-  }
-
-  /**
-   * Convert database record to InteractionListView format
-   */
-  const convertDatabaseRecordToListView = (record: any): InteractionListView => {
-    const calculateDaysSince = (dateString: string): number => {
-      const date = new Date(dateString)
-      const today = new Date()
-      const diffTime = today.getTime() - date.getTime()
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    }
-
-    const calculateDaysToFollowUp = (followUpDate: string | null): number | null => {
-      if (!followUpDate) return null
-      const followUp = new Date(followUpDate)
-      const today = new Date()
-      const diffTime = followUp.getTime() - today.getTime()
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    }
-
-    const isOverdue = (followUpDate: string | null, followUpNeeded: boolean): boolean => {
-      if (!followUpNeeded || !followUpDate) return false
-      const followUp = new Date(followUpDate)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      return followUp < today
-    }
-
-    return {
-      id: record.id,
-      interaction_type: record.interaction_type,
-      date: record.date,
-      subject: record.subject,
-      notes: record.notes,
-      follow_up_needed: record.follow_up_needed,
-      follow_up_date: record.follow_up_date,
-      created_at: record.created_at,
-      updated_at: record.updated_at,
-      created_by: record.created_by,
-      
-      // Opportunity data
-      opportunity_id: record.opportunity_id,
-      opportunity_name: record.opportunities?.name || null,
-      opportunity_stage: record.opportunities?.stage || null,
-      opportunity_organization: record.opportunities?.organization_id || null,
-      
-      // Contact data
-      contact_id: record.contact_id,
-      contact_name: record.contacts?.name || null,
-      contact_position: record.contacts?.position || null,
-      contact_organization: record.contacts?.organization?.name || null,
-      
-      // Calculated fields
-      days_since_interaction: calculateDaysSince(record.date),
-      days_to_follow_up: calculateDaysToFollowUp(record.follow_up_date),
-      is_overdue_follow_up: isOverdue(record.follow_up_date, record.follow_up_needed),
-      interaction_priority: calculateInteractionPriority(record)
-    }
-  }
-
-  /**
-   * Calculate interaction priority based on type and context
-   */
-  const calculateInteractionPriority = (interaction: any): 'High' | 'Medium' | 'Low' => {
-    const { interaction_type, follow_up_needed, follow_up_date, opportunity_id } = interaction
-    
-    // Check if follow-up is overdue
-    const isOverdue = follow_up_needed && follow_up_date && new Date(follow_up_date) < new Date()
-    
-    // High priority: overdue follow-ups or demos with opportunities
-    if (isOverdue || (interaction_type === 'DEMO' && opportunity_id)) {
-      return 'High'
-    }
-    
-    // Medium priority: follow-ups needed or calls with opportunities
-    if (follow_up_needed || 
-        (interaction_type === 'CALL' && opportunity_id) ||
-        interaction_type === 'IN_PERSON') {
-      return 'Medium'
-    }
-    
-    // Low priority: emails and follow-ups without opportunities
-    return 'Low'
-  }
-
-  // ===============================
-  // DEMO DATA FUNCTIONS
-  // ===============================
-  
   /**
    * Generate demo KPI data for testing/fallback
    */
-  const calculateDemoKPIs = (): InteractionKPIs => {
-    const interactions = getDemoInteractions()
-    
-    const thisWeek = interactions.filter(i => {
-      const weekStart = new Date()
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-      weekStart.setHours(0, 0, 0, 0)
-      return new Date(i.date) >= weekStart
-    })
-    
-    const thisMonth = interactions.filter(i => {
-      const monthStart = new Date()
-      monthStart.setDate(1)
-      monthStart.setHours(0, 0, 0, 0)
-      return new Date(i.date) >= monthStart
-    })
-    
-    const followUpsNeeded = interactions.filter(i => i.follow_up_needed)
-    const overdue = getOverdueFollowUps.value
-    
+  const getDemoKPIs = (): InteractionKPIs => {
     return {
-      total_interactions: interactions.length,
-      interactions_this_week: thisWeek.length,
-      interactions_this_month: thisMonth.length,
-      overdue_follow_ups: overdue.length,
-      scheduled_follow_ups: followUpsNeeded.length - overdue.length,
-      avg_interactions_per_week: Math.round(interactions.length / 4), // Assuming 4 weeks of data
-      
-      type_distribution: {
-        EMAIL: interactions.filter(i => i.interaction_type === 'EMAIL').length,
-        CALL: interactions.filter(i => i.interaction_type === 'CALL').length,
-        IN_PERSON: interactions.filter(i => i.interaction_type === 'IN_PERSON').length,
-        DEMO: interactions.filter(i => i.interaction_type === 'DEMO').length,
-        FOLLOW_UP: interactions.filter(i => i.interaction_type === 'FOLLOW_UP').length
-      },
-      
-      follow_up_completion_rate: 85,
-      avg_days_to_follow_up: 5,
-      
-      interactions_with_opportunities: interactions.filter(i => i.opportunity_id).length,
-      interactions_with_contacts: interactions.filter(i => i.contact_id).length,
-      unique_contacts_contacted: new Set(interactions.filter(i => i.contact_id).map(i => i.contact_id)).size,
-      unique_opportunities_touched: new Set(interactions.filter(i => i.opportunity_id).map(i => i.opportunity_id)).size,
-      
-      created_this_week: thisWeek.length,
-      follow_ups_completed_this_week: 3,
-      follow_ups_scheduled_this_week: 5
+      total_interactions: 42,
+      completed_interactions: 38,
+      scheduled_interactions: 4,
+      positive_outcomes: 28,
+      success_rate: 74,
+      average_rating: 4.2,
+      pending_follow_ups: 6,
+      overdue_follow_ups: 2,
+      interactions_this_month: 15,
+      interactions_last_month: 23,
+      average_duration_minutes: 35,
+      most_common_type: 'CALL'
     }
   }
 
@@ -1380,147 +626,79 @@ export const useInteractionStore = defineStore('interaction', () => {
     return [
       {
         id: 'demo-int-1',
-        interaction_type: 'DEMO',
-        date: '2024-08-15',
-        subject: 'Product demonstration for TechCorp integration',
-        notes: 'Presented our enterprise integration solution. Very positive response from technical team.',
-        follow_up_needed: true,
-        follow_up_date: '2024-08-20',
-        created_at: '2024-08-15T14:00:00Z',
-        updated_at: '2024-08-15T14:00:00Z',
-        created_by: 'sarah.johnson@company.com',
-        opportunity_id: 'demo-opp-1',
+        type: 'CALL',
+        subject: 'Product Demo Discussion',
+        interaction_date: '2024-08-03T14:00:00Z',
+        opportunity_id: 'demo-1',
+        status: 'COMPLETED',
+        outcome: 'POSITIVE',
+        duration_minutes: 45,
+        rating: 5,
+        follow_up_required: true,
+        follow_up_date: '2024-08-10T10:00:00Z',
+        created_at: '2024-08-03T14:00:00Z',
+        updated_at: '2024-08-03T15:00:00Z',
         opportunity_name: 'Enterprise Integration - TechCorp',
-        opportunity_stage: 'DEMO_SCHEDULED',
-        opportunity_organization: 'TechCorp Solutions',
-        contact_id: 'demo-contact-1',
-        contact_name: 'Mike Chen',
-        contact_position: 'CTO',
-        contact_organization: 'TechCorp Solutions',
-        days_since_interaction: 1,
-        days_to_follow_up: 5,
-        is_overdue_follow_up: false,
-        interaction_priority: 'High'
+        organization_name: 'TechCorp Solutions',
+        days_since_interaction: 0,
+        days_until_followup: 7
       },
       {
         id: 'demo-int-2',
-        interaction_type: 'CALL',
-        date: '2024-08-12',
-        subject: 'Initial outreach call - StartupCo opportunity',
-        notes: 'Connected with Lisa Wang to discuss cloud migration needs. Scheduled follow-up demo.',
-        follow_up_needed: true,
-        follow_up_date: '2024-08-19',
-        created_at: '2024-08-12T10:30:00Z',
-        updated_at: '2024-08-12T10:30:00Z',
-        created_by: 'alex.rodriguez@company.com',
-        opportunity_id: 'demo-opp-2',
+        type: 'EMAIL',
+        subject: 'Follow-up on Pricing Discussion',
+        interaction_date: '2024-08-02T09:30:00Z',
+        opportunity_id: 'demo-2',
+        status: 'COMPLETED',
+        outcome: 'NEUTRAL',
+        duration_minutes: null,
+        rating: 3,
+        follow_up_required: false,
+        follow_up_date: null,
+        created_at: '2024-08-02T09:30:00Z',
+        updated_at: '2024-08-02T09:35:00Z',
         opportunity_name: 'Cloud Migration - StartupCo',
-        opportunity_stage: 'INITIAL_OUTREACH',
-        opportunity_organization: 'StartupCo Inc',
-        contact_id: 'demo-contact-2',
-        contact_name: 'Lisa Wang',
-        contact_position: 'VP Engineering',
-        contact_organization: 'StartupCo Inc',
-        days_since_interaction: 4,
-        days_to_follow_up: 7,
-        is_overdue_follow_up: false,
-        interaction_priority: 'Medium'
+        organization_name: 'StartupCo Inc',
+        days_since_interaction: 1,
+        days_until_followup: null
       },
       {
         id: 'demo-int-3',
-        interaction_type: 'EMAIL',
-        date: '2024-08-08',
-        subject: 'Follow-up: Data analytics proposal',
-        notes: 'Sent detailed proposal for analytics suite implementation. Awaiting feedback.',
-        follow_up_needed: true,
-        follow_up_date: '2024-08-14',
-        created_at: '2024-08-08T16:45:00Z',
-        updated_at: '2024-08-08T16:45:00Z',
-        created_by: 'emma.thompson@company.com',
-        opportunity_id: 'demo-opp-3',
+        type: 'IN_PERSON',
+        subject: 'Site Visit and Requirements Review',
+        interaction_date: '2024-08-01T13:00:00Z',
+        opportunity_id: 'demo-3',
+        status: 'COMPLETED',
+        outcome: 'POSITIVE',
+        duration_minutes: 120,
+        rating: 4,
+        follow_up_required: true,
+        follow_up_date: '2024-08-05T14:00:00Z',
+        created_at: '2024-08-01T13:00:00Z',
+        updated_at: '2024-08-01T15:30:00Z',
         opportunity_name: 'Data Analytics - RetailGiant',
-        opportunity_stage: 'FEEDBACK_LOGGED',
-        opportunity_organization: 'RetailGiant Corp',
-        contact_id: 'demo-contact-3',
-        contact_name: 'David Kim',
-        contact_position: 'Data Director',
-        contact_organization: 'RetailGiant Corp',
-        days_since_interaction: 8,
-        days_to_follow_up: -2,
-        is_overdue_follow_up: true,
-        interaction_priority: 'High'
+        organization_name: 'RetailGiant Corp',
+        days_since_interaction: 2,
+        days_until_followup: 2
       },
       {
         id: 'demo-int-4',
-        interaction_type: 'IN_PERSON',
-        date: '2024-08-05',
-        subject: 'Site visit and security assessment',
-        notes: 'Conducted on-site security assessment. Identified key integration points for our platform.',
-        follow_up_needed: true,
-        follow_up_date: '2024-08-12',
-        created_at: '2024-08-05T09:15:00Z',
-        updated_at: '2024-08-05T09:15:00Z',
-        created_by: 'james.wilson@company.com',
-        opportunity_id: 'demo-opp-4',
-        opportunity_name: 'Security Upgrade - FinanceSecure',
-        opportunity_stage: 'SAMPLE_VISIT_OFFERED',
-        opportunity_organization: 'Finance Secure Ltd',
-        contact_id: 'demo-contact-4',
-        contact_name: 'Rachel Green',
-        contact_position: 'CISO',
-        contact_organization: 'Finance Secure Ltd',
-        days_since_interaction: 11,
-        days_to_follow_up: -4,
-        is_overdue_follow_up: true,
-        interaction_priority: 'High'
-      },
-      {
-        id: 'demo-int-5',
-        interaction_type: 'FOLLOW_UP',
-        date: '2024-08-10',
-        subject: 'Check-in: Implementation timeline',
-        notes: 'Discussed project timeline and resource allocation. All systems go for Q4 implementation.',
-        follow_up_needed: false,
+        type: 'DEMO',
+        subject: 'Technical Demo Scheduled',
+        interaction_date: '2024-08-05T11:00:00Z',
+        opportunity_id: 'demo-1',
+        status: 'SCHEDULED',
+        outcome: null,
+        duration_minutes: null,
+        rating: null,
+        follow_up_required: false,
         follow_up_date: null,
-        created_at: '2024-08-10T13:20:00Z',
-        updated_at: '2024-08-10T13:20:00Z',
-        created_by: 'sarah.johnson@company.com',
-        opportunity_id: null,
-        opportunity_name: null,
-        opportunity_stage: null,
-        opportunity_organization: null,
-        contact_id: 'demo-contact-5',
-        contact_name: 'Tom Brown',
-        contact_position: 'Project Manager',
-        contact_organization: 'Implementation Partners',
-        days_since_interaction: 6,
-        days_to_follow_up: null,
-        is_overdue_follow_up: false,
-        interaction_priority: 'Low'
-      },
-      {
-        id: 'demo-int-6',
-        interaction_type: 'EMAIL',
-        date: '2024-08-14',
-        subject: 'Product inquiry: Integration capabilities',
-        notes: 'Responded to inquiry about API integration capabilities. Sent technical documentation.',
-        follow_up_needed: true,
-        follow_up_date: '2024-08-21',
-        created_at: '2024-08-14T11:10:00Z',
-        updated_at: '2024-08-14T11:10:00Z',
-        created_by: 'alex.rodriguez@company.com',
-        opportunity_id: null,
-        opportunity_name: null,
-        opportunity_stage: null,
-        opportunity_organization: null,
-        contact_id: 'demo-contact-6',
-        contact_name: 'Jennifer Lopez',
-        contact_position: 'Technical Lead',
-        contact_organization: 'Innovation Labs',
-        days_since_interaction: 2,
-        days_to_follow_up: 5,
-        is_overdue_follow_up: false,
-        interaction_priority: 'Medium'
+        created_at: '2024-08-03T16:00:00Z',
+        updated_at: '2024-08-03T16:00:00Z',
+        opportunity_name: 'Enterprise Integration - TechCorp',
+        organization_name: 'TechCorp Solutions',
+        days_since_interaction: -2,
+        days_until_followup: null
       }
     ]
   }
@@ -1540,41 +718,37 @@ export const useInteractionStore = defineStore('interaction', () => {
     hasError,
     interactionCount,
     getInteractionById,
-    getInteractionsByOpportunity,
-    getInteractionsByContact,
     getInteractionsByType,
-    getUpcomingFollowUps,
-    getOverdueFollowUps,
-    overdueFollowUps: getOverdueFollowUps,
-    totalInteractionsThisWeek,
-    totalInteractionsThisMonth,
+    getInteractionsByStatus,
+    getInteractionsByOpportunity,
+    totalInteractions,
+    completedInteractions,
+    positiveOutcomes,
+    averageRating,
+    successRate,
+    pendingFollowUps,
     
     // Actions - CRUD
     fetchInteractions,
+    fetchInteractionsByOpportunity,
     fetchInteractionById,
     createInteraction,
-    createBatchInteractions,
     updateInteraction,
+    completeInteraction,
+    scheduleFollowUp,
     deleteInteraction,
-    processFollowUpAction,
     
     // Actions - Analytics
     fetchKPIs,
-    fetchExtendedKPIs,
-    fetchTypeDistribution,
-    fetchFollowUpTracking,
-    fetchActivityTrends,
-    fetchPrincipalMetrics,
+    fetchUpcomingFollowUps,
+    fetchRecentActivity,
     
     // Actions - Utilities
     clearError,
     clearSelectedInteraction,
-    clearBatchResults,
+    clearOpportunityCache,
     resetFilters,
     refresh,
-    
-    // Actions - Real-time
-    subscribeToChanges,
-    unsubscribeFromChanges
+    refreshDashboard
   }
 })

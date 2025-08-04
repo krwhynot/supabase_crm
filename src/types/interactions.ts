@@ -1,221 +1,202 @@
-import * as yup from 'yup'
+// =============================================================================
+// Interaction Types for CRM Interaction Management
+// =============================================================================
+// TypeScript type definitions for the interactions system following
+// opportunity system patterns for consistency and integration.
+//
+// Architecture Reference: src/types/opportunities.ts patterns
+// Database Reference: sql/32_interactions_schema.sql
+// Updated: Stage 3.3 - Form validation schemas and comprehensive types
+// =============================================================================
+
+import type { 
+  Database,
+  InteractionType,
+  InteractionStatus,
+  InteractionOutcome,
+  Interaction as DatabaseInteraction,
+  InteractionInsert,
+  InteractionUpdate
+} from './database.types'
+
+// Re-export database types for convenience
+export type { InteractionType, InteractionStatus, InteractionOutcome }
+export type { InteractionInsert, InteractionUpdate }
+
+// ===============================
+// BASE INTERACTION TYPES
+// ===============================
 
 /**
- * Interaction Type Enum - 5 main interaction types
+ * Core interaction data structure (extends database record)
  */
-export enum InteractionType {
-  EMAIL = 'EMAIL',
-  CALL = 'CALL', 
-  IN_PERSON = 'IN_PERSON',
-  DEMO = 'DEMO',
-  FOLLOW_UP = 'FOLLOW_UP'
+export interface Interaction extends DatabaseInteraction {
+  // Computed fields for UI
+  days_since_interaction?: number
+  days_until_followup?: number | null
 }
 
 /**
- * Base Interaction interface matching database schema
- */
-export interface Interaction {
-  id: string
-  interaction_type: InteractionType
-  date: string
-  subject: string
-  notes: string | null
-  opportunity_id: string | null
-  contact_id: string | null
-  created_by: string | null
-  follow_up_needed: boolean
-  follow_up_date: string | null
-  created_at: string | null
-  updated_at: string | null
-  deleted_at: string | null
-}
-
-/**
- * Interaction insert interface for creating new interactions
- */
-export interface InteractionInsert {
-  interaction_type: InteractionType
-  date: string
-  subject: string
-  notes?: string | null
-  opportunity_id?: string | null
-  contact_id?: string | null
-  created_by?: string | null
-  follow_up_needed?: boolean
-  follow_up_date?: string | null
-}
-
-/**
- * Interaction update interface for editing interactions
- */
-export interface InteractionUpdate {
-  interaction_type?: InteractionType
-  date?: string
-  subject?: string
-  notes?: string | null
-  opportunity_id?: string | null
-  contact_id?: string | null
-  follow_up_needed?: boolean
-  follow_up_date?: string | null
-}
-
-/**
- * Enhanced interaction with related data for list views
+ * Interaction list view interface for table display
  */
 export interface InteractionListView {
   id: string
-  interaction_type: InteractionType
-  date: string
+  type: InteractionType
   subject: string
-  notes: string | null
-  follow_up_needed: boolean
+  interaction_date: string
+  opportunity_id: string
+  status: InteractionStatus
+  outcome: InteractionOutcome | null
+  duration_minutes: number | null
+  rating: number | null
+  follow_up_required: boolean
   follow_up_date: string | null
-  created_at: string | null
+  created_at: string
   updated_at: string | null
-  created_by: string | null
   
-  // Related opportunity data
-  opportunity_id: string | null
-  opportunity_name: string | null
-  opportunity_stage: string | null
-  opportunity_organization: string | null
+  // Related entity data
+  opportunity_name: string
+  organization_name: string
   
-  // Related contact data
-  contact_id: string | null
-  contact_name: string | null
-  contact_position: string | null
-  contact_organization: string | null
-  
-  // Calculated fields
+  // Computed fields
   days_since_interaction: number
-  days_to_follow_up: number | null
-  is_overdue_follow_up: boolean
-  interaction_priority: 'High' | 'Medium' | 'Low'
+  days_until_followup: number | null
 }
 
 /**
- * Comprehensive interaction with all related data for detail views
+ * Detailed interaction view for individual interaction pages
  */
-export interface InteractionDetailView extends InteractionListView {
-  // Full opportunity details
-  opportunity_probability: number | null
-  opportunity_expected_close: string | null
-  opportunity_deal_owner: string | null
-  opportunity_context: string | null
-  
-  // Full contact details
-  contact_email: string | null
-  contact_phone: string | null
-  contact_is_primary: boolean | null
-  
-  // Full organization details
-  organization_id: string | null
-  organization_name: string | null
-  organization_type: string | null
-  organization_industry: string | null
-  organization_website: string | null
-  organization_email: string | null
-  organization_phone: string | null
-  
-  // Activity indicators
-  related_interactions_count: number
-  next_scheduled_interaction: string | null
-  last_interaction_before_this: string | null
-  interaction_sequence_number: number
+export interface InteractionDetailView extends Interaction {
+  opportunity?: {
+    id: string
+    name: string
+    stage: string
+    organization: {
+      id: string
+      name: string
+      type: string | null
+    } | null
+  } | null
 }
 
+// ===============================
+// FORM AND INPUT INTERFACES
+// ===============================
+
 /**
- * Form data interface for interaction creation/editing
+ * Form data structure for creating/editing interactions
  */
 export interface InteractionFormData {
-  interaction_type: InteractionType | ''
-  date: string
+  type: InteractionType
   subject: string
-  notes: string
-  opportunity_id: string | null
-  contact_id: string | null
-  follow_up_needed: boolean
-  follow_up_date: string | null
+  interaction_date: string
+  opportunity_id: string
+  status?: InteractionStatus
+  outcome?: InteractionOutcome | null
+  notes?: string | null
+  duration_minutes?: number | null
+  location?: string | null
+  follow_up_required?: boolean
+  follow_up_date?: string | null
+  follow_up_notes?: string | null
+  rating?: number | null
+  next_action?: string | null
+  contact_method?: string | null
+  participants?: string[] | null
+  attachments?: string[] | null
+  tags?: string[] | null
+  custom_fields?: Record<string, any> | null
+  created_by?: string | null
 }
 
 /**
- * Context data interface for pre-populating the form from other pages
+ * Validation schema for interaction forms
  */
-export interface InteractionContextData {
-  interaction_type?: InteractionType
-  opportunity_id?: string | null
-  contact_id?: string | null
-  subject?: string
-  notes?: string
-  date?: string
-}
-
-/**
- * Interaction KPI interface for dashboard metrics
- */
-export interface InteractionKPIs {
-  total_interactions: number
-  interactions_this_week: number
-  interactions_this_month: number
-  overdue_follow_ups: number
-  scheduled_follow_ups: number
-  avg_interactions_per_week: number
-  
-  // Type distribution
-  type_distribution: {
-    [K in InteractionType]: number
+export interface InteractionValidationSchema {
+  subject: {
+    required: boolean
+    minLength: number
+    maxLength: number
   }
-  
-  // Follow-up metrics
-  follow_up_completion_rate: number
-  avg_days_to_follow_up: number
-  
-  // Relationship metrics
-  interactions_with_opportunities: number
-  interactions_with_contacts: number
-  unique_contacts_contacted: number
-  unique_opportunities_touched: number
-  
-  // Recent activity
-  created_this_week: number
-  follow_ups_completed_this_week: number
-  follow_ups_scheduled_this_week: number
+  interaction_date: {
+    required: boolean
+    validation: 'date'
+  }
+  opportunity_id: {
+    required: boolean
+    validation: 'uuid'
+  }
+  type: {
+    required: boolean
+    enum: InteractionType[]
+  }
+  status: {
+    required: boolean
+    enum: InteractionStatus[]
+  }
+  outcome: {
+    required: false
+    enum: (InteractionOutcome | null)[]
+  }
+  rating: {
+    required: false
+    min: number
+    max: number
+    validation: 'integer'
+  }
+  duration_minutes: {
+    required: false
+    min: number
+    max: number
+    validation: 'integer'
+  }
+  follow_up_date: {
+    required: false
+    validation: 'date'
+    conditional: {
+      dependsOn: 'follow_up_required'
+      value: true
+    }
+  }
 }
 
+// ===============================
+// FILTERING AND PAGINATION
+// ===============================
+
 /**
- * Search and filter parameters
+ * Filtering options for interaction queries
  */
 export interface InteractionFilters {
-  search?: string
-  interaction_type?: InteractionType[]
   opportunity_id?: string
-  contact_id?: string
-  organization_id?: string
-  created_by?: string
+  type?: InteractionType
+  status?: InteractionStatus
+  outcome?: InteractionOutcome
   date_from?: string
   date_to?: string
-  follow_up_needed?: boolean
-  follow_up_overdue?: boolean
-  follow_up_date_from?: string
-  follow_up_date_to?: string
-  has_opportunity?: boolean
-  has_contact?: boolean
-  created_after?: string
-  created_before?: string
+  search?: string
+  follow_up_required?: boolean
+  rating_min?: number
+  rating_max?: number
+  created_by?: string
+  organization_id?: string
+  has_notes?: boolean
+  has_attachments?: boolean
+  tags?: string[]
 }
 
 /**
- * Pagination parameters
+ * Pagination and sorting options
  */
 export interface InteractionPagination {
   page: number
   limit: number
-  sort_by: string
+  sort_by: 'interaction_date' | 'created_at' | 'updated_at' | 'subject' | 'rating' | 'duration_minutes'
   sort_order: 'asc' | 'desc'
 }
 
 /**
- * API response interface
+ * API response for interaction lists with pagination
  */
 export interface InteractionListResponse {
   interactions: InteractionListView[]
@@ -226,259 +207,399 @@ export interface InteractionListResponse {
   has_previous: boolean
 }
 
+// ===============================
+// ANALYTICS AND REPORTING
+// ===============================
+
 /**
- * Batch creation interface for multiple interactions
+ * Key Performance Indicators for interactions
  */
-export interface BatchInteractionCreate {
-  template: Omit<InteractionFormData, 'contact_id' | 'opportunity_id'>
-  targets: {
-    contact_id?: string | null
-    opportunity_id?: string | null
-    subject_override?: string
-    notes_override?: string
-  }[]
+export interface InteractionKPIs {
+  total_interactions: number
+  completed_interactions: number
+  scheduled_interactions: number
+  positive_outcomes: number
+  success_rate: number // percentage of positive outcomes
+  average_rating: number
+  pending_follow_ups: number
+  overdue_follow_ups: number
+  interactions_this_month: number
+  interactions_last_month: number
+  average_duration_minutes: number
+  most_common_type: InteractionType
+}
+
+// ===============================
+// FORM STEP INTERFACES
+// ===============================
+
+/**
+ * Multi-step form interfaces for interaction creation
+ */
+export interface InteractionFormStep1 {
+  type: InteractionType
+  subject: string
+  opportunity_id: string
+  interaction_date: string
+}
+
+export interface InteractionFormStep2 {
+  status: InteractionStatus
+  duration_minutes?: number | null
+  location?: string | null
+  contact_method?: string | null
+  participants?: string[] | null
+}
+
+export interface InteractionFormStep3 {
+  outcome?: InteractionOutcome | null
+  rating?: number | null
+  notes?: string | null
+  follow_up_required?: boolean
+  follow_up_date?: string | null
+  follow_up_notes?: string | null
+  next_action?: string | null
+  tags?: string[] | null
+  attachments?: string[] | null
+  custom_fields?: Record<string, any> | null
+}
+
+// ===============================
+// UI STATE INTERFACES
+// ===============================
+
+/**
+ * Store state interface (following opportunity store patterns)
+ */
+export interface InteractionStoreState {
+  interactions: Interaction[]
+  selectedInteraction: Interaction | null
+  loading: boolean
+  creating: boolean
+  updating: boolean
+  deleting: boolean
+  error: string | null
+  kpis: InteractionKPIs | null
+  filters: InteractionFilters
+  sorting: InteractionSorting
+  pagination: {
+    page: number
+    limit: number
+    total: number
+  }
 }
 
 /**
- * Batch creation result interface
+ * Sorting configuration interface
  */
-export interface BatchInteractionResult {
-  success: boolean
-  created_interactions: Interaction[]
-  failed_creations: {
-    target_index: number
-    contact_id?: string | null
-    opportunity_id?: string | null
-    error: string
-  }[]
-  total_created: number
-  total_failed: number
+export interface InteractionSorting {
+  field: 'interaction_date' | 'created_at' | 'updated_at' | 'subject' | 'rating' | 'duration_minutes'
+  direction: 'asc' | 'desc'
 }
 
-/**
- * Follow-up management interface
- */
-export interface FollowUpAction {
-  interaction_id: string
-  action: 'complete' | 'reschedule' | 'cancel'
-  new_date?: string | null
-  completion_notes?: string
-  new_interaction?: Omit<InteractionFormData, 'opportunity_id' | 'contact_id'>
+// Quick template interface for mobile optimization
+export interface InteractionQuickTemplate {
+  id: string
+  label: string
+  type: InteractionType
+  subject_template: string
+  notes_template?: string
+  default_duration?: number
+  default_location?: string
+  icon?: string
 }
 
-/**
- * Yup validation schema for interaction forms
- */
-export const interactionValidationSchema = yup.object({
-  interaction_type: yup
-    .string()
-    .required('Interaction type is required')
-    .oneOf(Object.values(InteractionType), 'Invalid interaction type selected'),
-    
-  date: yup
-    .string()
-    .required('Date is required')
-    .test('valid-date', 'Please enter a valid date', function(value) {
-      if (!value) return false
-      const date = new Date(value)
-      return !isNaN(date.getTime())
-    })
-    .test('not-future', 'Interaction date cannot be in the future', function(value) {
-      if (!value) return true
-      const interactionDate = new Date(value)
-      const today = new Date()
-      today.setHours(23, 59, 59, 999) // End of today
-      return interactionDate <= today
-    }),
-    
-  subject: yup
-    .string()
-    .required('Subject is required')
-    .min(3, 'Subject must be at least 3 characters')
-    .max(255, 'Subject must be less than 255 characters'),
-    
-  notes: yup
-    .string()
-    .max(2000, 'Notes must be less than 2000 characters')
-    .nullable(),
-    
-  opportunity_id: yup
-    .string()
-    .uuid('Invalid opportunity ID')
-    .nullable(),
-    
-  contact_id: yup
-    .string()
-    .uuid('Invalid contact ID')
-    .nullable(),
-    
-  follow_up_needed: yup
-    .boolean()
-    .default(false),
-    
-  follow_up_date: yup
-    .string()
-    .nullable()
-    .test('future-date', 'Follow-up date should be in the future', function(value) {
-      if (!value) return true
-      const followUpDate = new Date(value)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      return followUpDate >= today
-    })
-    .test('required-when-needed', 'Follow-up date is required when follow-up is needed', function(value) {
-      const followUpNeeded = this.parent.follow_up_needed
-      if (followUpNeeded && !value) {
-        return false
-      }
-      return true
-    })
+// Constants for interaction management
+export const INTERACTION_TYPES: { value: InteractionType; label: string }[] = [
+  { value: 'EMAIL', label: 'Email' },
+  { value: 'CALL', label: 'Phone Call' },
+  { value: 'IN_PERSON', label: 'In-Person Meeting' },
+  { value: 'DEMO', label: 'Product Demo' },
+  { value: 'FOLLOW_UP', label: 'Follow-up' },
+  { value: 'SAMPLE_DELIVERY', label: 'Sample Delivery' }
+]
+
+export const INTERACTION_STATUSES: { value: InteractionStatus; label: string }[] = [
+  { value: 'SCHEDULED', label: 'Scheduled' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'NO_SHOW', label: 'No Show' }
+]
+
+export const INTERACTION_OUTCOMES: { value: InteractionOutcome; label: string }[] = [
+  { value: 'POSITIVE', label: 'Positive' },
+  { value: 'NEUTRAL', label: 'Neutral' }, 
+  { value: 'NEGATIVE', label: 'Negative' },
+  { value: 'NEEDS_FOLLOW_UP', label: 'Needs Follow-up' }
+]
+
+// Quick templates for mobile optimization
+export const QUICK_TEMPLATES: InteractionQuickTemplate[] = [
+  {
+    id: 'sample-drop',
+    label: 'Dropped Samples',
+    type: 'SAMPLE_DELIVERY',
+    subject_template: 'Product samples delivered',
+    notes_template: 'Product samples delivered for evaluation',
+    default_duration: 15,
+    icon: '📦'
+  },
+  {
+    id: 'quick-call',
+    label: 'Quick Call',
+    type: 'CALL',  
+    subject_template: 'Brief phone conversation',
+    notes_template: 'Brief phone conversation',
+    default_duration: 10,
+    icon: '📞'
+  },
+  {
+    id: 'product-demo',
+    label: 'Product Demo',
+    type: 'DEMO',
+    subject_template: 'Product demonstration',
+    notes_template: 'Product demonstration session',
+    default_duration: 60,
+    icon: '🎯'
+  },
+  {
+    id: 'follow-up',
+    label: 'Follow-up',
+    type: 'FOLLOW_UP',
+    subject_template: 'Follow-up contact',
+    notes_template: 'Follow-up on previous interaction',
+    default_duration: 20,
+    icon: '📋'
+  }
+]
+
+// Utility functions for interaction data processing
+export const getInteractionTypeLabel = (type: InteractionType): string => {
+  return INTERACTION_TYPES.find(t => t.value === type)?.label || type
+}
+
+export const getInteractionStatusLabel = (status: InteractionStatus): string => {
+  return INTERACTION_STATUSES.find(s => s.value === status)?.label || status
+}
+
+export const getInteractionOutcomeLabel = (outcome: InteractionOutcome): string => {
+  return INTERACTION_OUTCOMES.find(o => o.value === outcome)?.label || outcome
+}
+
+// Type guards for interaction data validation
+export const isInteractionType = (value: string): value is InteractionType => {
+  return INTERACTION_TYPES.some(type => type.value === value)
+}
+
+export const isInteractionStatus = (value: string): value is InteractionStatus => {
+  return INTERACTION_STATUSES.some(status => status.value === value)
+}
+
+export const isInteractionOutcome = (value: string): value is InteractionOutcome => {
+  return INTERACTION_OUTCOMES.some(outcome => outcome.value === value)
+}
+
+// Default values for new interactions
+export const getDefaultInteractionFormData = (opportunityId?: string): Partial<InteractionFormData> => ({
+  opportunity_id: opportunityId || '',
+  type: 'CALL',
+  subject: '',
+  interaction_date: new Date().toISOString(),
+  status: 'SCHEDULED',
+  follow_up_required: false,
+  notes: '',
+  participants: [],
+  tags: []
 })
 
-/**
- * Type inference from validation schema
- */
-export type InteractionFormValidation = yup.InferType<typeof interactionValidationSchema>
+// Validation helpers
+export const isValidRating = (rating?: number | null): boolean => {
+  return rating === null || rating === undefined || (rating >= 1 && rating <= 5)
+}
+
+export const isFollowUpDateValid = (followUpRequired: boolean, followUpDate?: string | null): boolean => {
+  if (!followUpRequired) return true
+  if (!followUpDate) return false
+  return new Date(followUpDate) > new Date()
+}
+
+// ===============================
+// VALIDATION SCHEMAS AND RULES
+// ===============================
 
 /**
- * Interaction type configuration for UI components
+ * Comprehensive validation rules for interaction forms
  */
-export const INTERACTION_TYPE_CONFIG: { 
-  [K in InteractionType]: {
-    label: string
-    description: string
-    icon: string
-    color: string
-    defaultSubject: string
-    requiresFollowUp: boolean
-  } 
-} = {
-  [InteractionType.EMAIL]: {
-    label: 'Email',
-    description: 'Email communication',
-    icon: 'envelope',
-    color: 'blue',
-    defaultSubject: 'Email follow-up',
-    requiresFollowUp: true
+export const INTERACTION_VALIDATION_RULES = {
+  subject: {
+    required: true,
+    minLength: 3,
+    maxLength: 255,
+    pattern: /^[a-zA-Z0-9\s\-_.,!?]+$/,
+    message: 'Subject must be 3-255 characters and contain only letters, numbers, and basic punctuation'
   },
-  [InteractionType.CALL]: {
-    label: 'Phone Call',
-    description: 'Phone conversation',
-    icon: 'phone',
-    color: 'green',
-    defaultSubject: 'Phone call',
-    requiresFollowUp: true
+  interaction_date: {
+    required: true,
+    validation: 'datetime-local',
+    maxDate: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    message: 'Interaction date is required and cannot be more than 30 days in the future'
   },
-  [InteractionType.IN_PERSON]: {
-    label: 'In-Person Meeting',
-    description: 'Face-to-face meeting',
-    icon: 'users',
-    color: 'purple',
-    defaultSubject: 'In-person meeting',
-    requiresFollowUp: true
+  opportunity_id: {
+    required: true,
+    validation: 'uuid',
+    pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    message: 'Valid opportunity must be selected'
   },
-  [InteractionType.DEMO]: {
-    label: 'Product Demo',
-    description: 'Product demonstration',
-    icon: 'presentation-chart-line',
-    color: 'orange',
-    defaultSubject: 'Product demonstration',
-    requiresFollowUp: true
+  type: {
+    required: true,
+    enum: ['EMAIL', 'CALL', 'IN_PERSON', 'DEMO', 'FOLLOW_UP', 'SAMPLE_DELIVERY'],
+    message: 'Valid interaction type must be selected'
   },
-  [InteractionType.FOLLOW_UP]: {
-    label: 'Follow-up',
-    description: 'Follow-up interaction',
-    icon: 'arrow-path',
-    color: 'indigo',
-    defaultSubject: 'Follow-up',
-    requiresFollowUp: false
+  status: {
+    required: true,
+    enum: ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'],
+    message: 'Valid status must be selected'
+  },
+  outcome: {
+    required: false,
+    enum: ['POSITIVE', 'NEUTRAL', 'NEGATIVE', 'NEEDS_FOLLOW_UP', null],
+    conditional: {
+      dependsOn: 'status',
+      value: 'COMPLETED',
+      message: 'Outcome is required when interaction is completed'
+    }
+  },
+  rating: {
+    required: false,
+    min: 1,
+    max: 5,
+    validation: 'integer',
+    conditional: {
+      dependsOn: 'status',
+      value: 'COMPLETED',
+      message: 'Rating should be provided for completed interactions'
+    }
+  },
+  duration_minutes: {
+    required: false,
+    min: 1,
+    max: 480, // 8 hours max
+    validation: 'integer',
+    message: 'Duration must be between 1 and 480 minutes'
+  },
+  follow_up_date: {
+    required: false,
+    validation: 'datetime-local',
+    minDate: () => new Date(),
+    conditional: {
+      dependsOn: 'follow_up_required',
+      value: true,
+      required: true,
+      message: 'Follow-up date is required when follow-up is needed'
+    }
+  },
+  notes: {
+    required: false,
+    maxLength: 2000,
+    message: 'Notes cannot exceed 2000 characters'
+  },
+  location: {
+    required: false,
+    maxLength: 255,
+    conditional: {
+      dependsOn: 'type',
+      value: 'IN_PERSON',
+      message: 'Location should be provided for in-person meetings'
+    }
+  },
+  contact_method: {
+    required: false,
+    maxLength: 100,
+    enum: ['Phone', 'Email', 'Video Call', 'In Person', 'Text', 'Social Media', 'Other'],
+    message: 'Contact method should be specified when applicable'
   }
-}
+} as const
 
 /**
- * Priority calculation based on interaction type and context
+ * Default form values for different interaction types
  */
-export const calculateInteractionPriority = (
-  interaction: Partial<InteractionListView>
-): 'High' | 'Medium' | 'Low' => {
-  const { interaction_type, follow_up_needed, is_overdue_follow_up, opportunity_id } = interaction
-  
-  // High priority: overdue follow-ups or demos with opportunities
-  if (is_overdue_follow_up || 
-      (interaction_type === InteractionType.DEMO && opportunity_id)) {
-    return 'High'
+export const INTERACTION_FORM_DEFAULTS = {
+  EMAIL: {
+    duration_minutes: null,
+    location: null,
+    contact_method: 'Email',
+    follow_up_required: false
+  },
+  CALL: {
+    duration_minutes: 15,
+    location: null,
+    contact_method: 'Phone',
+    follow_up_required: false
+  },
+  IN_PERSON: {
+    duration_minutes: 60,
+    location: '',
+    contact_method: 'In Person',
+    follow_up_required: true
+  },
+  DEMO: {
+    duration_minutes: 45,
+    location: '',
+    contact_method: 'In Person',
+    follow_up_required: true
+  },
+  FOLLOW_UP: {
+    duration_minutes: 20,
+    location: null,
+    contact_method: 'Phone',
+    follow_up_required: false
+  },
+  SAMPLE_DELIVERY: {
+    duration_minutes: 15,
+    location: '',
+    contact_method: 'In Person',
+    follow_up_required: true
   }
-  
-  // Medium priority: follow-ups needed or calls with opportunities
-  if (follow_up_needed || 
-      (interaction_type === InteractionType.CALL && opportunity_id) ||
-      interaction_type === InteractionType.IN_PERSON) {
-    return 'Medium'
-  }
-  
-  // Low priority: emails and follow-ups without opportunities
-  return 'Low'
+} as const
+
+/**
+ * Stage-based probability mappings for analytics
+ */
+export const INTERACTION_SUCCESS_PROBABILITIES = {
+  POSITIVE: 0.9,
+  NEUTRAL: 0.5,
+  NEGATIVE: 0.1,
+  NEEDS_FOLLOW_UP: 0.7
+} as const
+
+/**
+ * Form validation state interface
+ */
+export interface InteractionFormValidation {
+  isValid: boolean
+  errors: Record<string, string[]>
+  warnings: Record<string, string[]>
+  touched: Record<string, boolean>
+  step1Valid: boolean
+  step2Valid: boolean
+  step3Valid: boolean
 }
 
 /**
- * Default follow-up periods by interaction type (in days)
+ * Form submission result interface
  */
-export const DEFAULT_FOLLOW_UP_DAYS: { [K in InteractionType]: number } = {
-  [InteractionType.EMAIL]: 3,
-  [InteractionType.CALL]: 7,
-  [InteractionType.IN_PERSON]: 5,
-  [InteractionType.DEMO]: 2,
-  [InteractionType.FOLLOW_UP]: 7
+export interface InteractionFormSubmissionResult {
+  success: boolean
+  data?: Interaction
+  errors?: Record<string, string[]>
+  warnings?: string[]
+  created_id?: string
 }
 
-/**
- * Interaction type color coding for UI components
- */
-export const INTERACTION_TYPE_COLORS: { [K in InteractionType]: string } = {
-  [InteractionType.EMAIL]: 'blue',
-  [InteractionType.CALL]: 'green',
-  [InteractionType.IN_PERSON]: 'purple',
-  [InteractionType.DEMO]: 'orange',
-  [InteractionType.FOLLOW_UP]: 'indigo'
-}
-
-/**
- * Subject templates for different interaction types
- */
-export const INTERACTION_SUBJECT_TEMPLATES: { [K in InteractionType]: string[] } = {
-  [InteractionType.EMAIL]: [
-    'Follow-up: {opportunity_name}',
-    'Product inquiry: {product_name}',
-    'Meeting request: {organization_name}',
-    'Proposal discussion',
-    'General follow-up'
-  ],
-  [InteractionType.CALL]: [
-    'Initial outreach call',
-    'Follow-up call: {opportunity_name}',
-    'Product discussion call',
-    'Check-in call',
-    'Closing call: {opportunity_name}'
-  ],
-  [InteractionType.IN_PERSON]: [
-    'Site visit: {organization_name}',
-    'Business meeting: {opportunity_name}',
-    'Product presentation',
-    'Contract discussion',
-    'Relationship building meeting'
-  ],
-  [InteractionType.DEMO]: [
-    'Product demo: {product_name}',
-    'Live demonstration: {opportunity_name}',
-    'Technical demo session',
-    'Custom demo presentation',
-    'Product walkthrough'
-  ],
-  [InteractionType.FOLLOW_UP]: [
-    'Follow-up: Previous meeting',
-    'Action items follow-up',
-    'Status check: {opportunity_name}',
-    'Next steps discussion',
-    'General follow-up'
-  ]
+// Export types for external use
+export type {
+  Database,
+  DatabaseInteraction,
+  InteractionInsert as DatabaseInteractionInsert,
+  InteractionUpdate as DatabaseInteractionUpdate
 }

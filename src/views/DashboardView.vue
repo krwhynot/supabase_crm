@@ -35,7 +35,7 @@
       <!-- Interaction KPIs -->
       <div>
         <h3 class="text-lg font-medium text-gray-800 mb-3">Customer Engagement</h3>
-        <InteractionKPICards :show-extended="false" />
+        <!-- <InteractionKPICards :show-extended="false" /> -->
       </div>
     </div>
 
@@ -210,7 +210,7 @@
 
           <!-- Interactions Tab -->
           <div v-if="activeTab === 'interactions'">
-            <RecentInteractionsCard :limit="5" />
+            <!-- <RecentInteractionsCard :limit="5" /> -->
           </div>
         </div>
       </div>
@@ -225,8 +225,8 @@ import { useDashboardStore } from '@/stores/dashboardStore'
 import { useOpportunityStore } from '@/stores/opportunityStore'
 import { useInteractionStore } from '@/stores/interactionStore'
 import OpportunityKPICards from '@/components/opportunities/OpportunityKPICards.vue'
-import InteractionKPICards from '@/components/interactions/InteractionKPICards.vue'
-import RecentInteractionsCard from '@/components/interactions/RecentInteractionsCard.vue'
+// import InteractionKPICards from '@/components/interactions/InteractionKPICards.vue'
+// import RecentInteractionsCard from '@/components/interactions/RecentInteractionsCard.vue'
 import type { OpportunityListView } from '@/types/opportunities'
 
 // Composables

@@ -229,15 +229,187 @@
           </div>
         </div>
 
-        <!-- Activity/History Section (Future Enhancement) -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Activity History</h3>
-          <div class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h4 class="mt-2 text-sm font-medium text-gray-900">Activity tracking coming soon</h4>
-            <p class="mt-1 text-sm text-gray-500">Stage changes, notes, and timeline will be tracked here.</p>
+        <!-- Interactions Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-gray-900">Interactions</h3>
+              <router-link
+                :to="`/interactions/new?opportunity_id=${opportunity.id}`"
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Interaction
+              </router-link>
+            </div>
+          </div>
+          
+          <!-- Interaction Tabs -->
+          <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+              <button
+                @click="activeInteractionTab = 'recent'"
+                :class="[
+                  activeInteractionTab === 'recent'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                ]"
+              >
+                Recent Activity
+              </button>
+              <button
+                @click="activeInteractionTab = 'upcoming'"
+                :class="[
+                  activeInteractionTab === 'upcoming'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                ]"
+              >
+                Follow-ups
+                <span v-if="upcomingFollowUps > 0" class="ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-medium">
+                  {{ upcomingFollowUps }}
+                </span>
+              </button>
+              <button
+                @click="activeInteractionTab = 'all'"
+                :class="[
+                  activeInteractionTab === 'all'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                ]"
+              >
+                All ({{ interactionCount }})
+              </button>
+            </nav>
+          </div>
+
+          <!-- Interaction Content -->
+          <div class="p-6">
+            <!-- Loading State -->
+            <div v-if="interactionsLoading" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="filteredInteractions.length === 0" class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.449L3 21l2.551-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+              </svg>
+              <h4 class="mt-2 text-sm font-medium text-gray-900">
+                {{ activeInteractionTab === 'upcoming' ? 'No upcoming follow-ups' : 'No interactions yet' }}
+              </h4>
+              <p class="mt-1 text-sm text-gray-500">
+                {{ activeInteractionTab === 'upcoming' 
+                    ? 'All follow-ups for this opportunity are complete.' 
+                    : 'Get started by adding your first interaction with this opportunity.' 
+                }}
+              </p>
+              <div v-if="activeInteractionTab !== 'upcoming'" class="mt-4">
+                <router-link
+                  :to="`/interactions/new?opportunity_id=${opportunity.id}`"
+                  class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add First Interaction
+                </router-link>
+              </div>
+            </div>
+
+            <!-- Interaction List -->
+            <div v-else class="space-y-4">
+              <div
+                v-for="interaction in filteredInteractions"
+                :key="interaction.id"
+                class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-150"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex items-start space-x-3">
+                    <!-- Interaction Type Icon -->
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <component :is="getInteractionIcon(interaction.type)" class="h-4 w-4 text-blue-600" />
+                    </div>
+
+                    <!-- Interaction Details -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center space-x-2 mb-1">
+                        <h5 class="text-sm font-medium text-gray-900 truncate">
+                          {{ interaction.subject }}
+                        </h5>
+                        <span :class="getStatusBadgeClass(interaction.status)" class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full">
+                          {{ getInteractionStatusLabel(interaction.status) }}
+                        </span>
+                        <span v-if="interaction.outcome" :class="getOutcomeBadgeClass(interaction.outcome)" class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full">
+                          {{ getInteractionOutcomeLabel(interaction.outcome) }}
+                        </span>
+                      </div>
+                      
+                      <div class="flex items-center space-x-4 text-sm text-gray-500 mb-2">
+                        <span>{{ getInteractionTypeLabel(interaction.type) }}</span>
+                        <span>{{ formatInteractionDate(interaction.interaction_date) }}</span>
+                        <span v-if="interaction.duration_minutes">{{ interaction.duration_minutes }}min</span>
+                        <div v-if="interaction.rating" class="flex items-center">
+                          <svg class="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          {{ interaction.rating }}/5
+                        </div>
+                      </div>
+
+                      <p v-if="interaction.notes" class="text-sm text-gray-700 line-clamp-2 mb-2">
+                        {{ interaction.notes }}
+                      </p>
+
+                      <!-- Follow-up Information -->
+                      <div v-if="interaction.follow_up_required && interaction.follow_up_date" class="flex items-center text-sm">
+                        <svg class="h-4 w-4 text-orange-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span :class="isFollowUpOverdue(interaction.follow_up_date) ? 'text-red-600' : 'text-orange-600'">
+                          Follow-up {{ isFollowUpOverdue(interaction.follow_up_date) ? 'overdue' : 'due' }}: 
+                          {{ formatInteractionDate(interaction.follow_up_date) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex items-center space-x-2">
+                    <router-link
+                      :to="`/interactions/${interaction.id}`"
+                      class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      View
+                    </router-link>
+                    <router-link
+                      :to="`/interactions/${interaction.id}/edit`"
+                      class="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                    >
+                      Edit
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Show More Link -->
+              <div v-if="hasMoreInteractions" class="text-center pt-4">
+                <router-link
+                  :to="`/interactions?opportunity_id=${opportunity.id}`"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  View All Interactions ({{ interactionCount }})
+                  <svg class="ml-2 -mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </router-link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -283,17 +455,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOpportunityStore } from '@/stores/opportunityStore'
+import { useInteractionStore } from '@/stores/interactionStore'
 import StageTag from '@/components/opportunities/StageTag.vue'
 import ProbabilityBar from '@/components/opportunities/ProbabilityBar.vue'
 import type { OpportunityDetailView } from '@/types/opportunities'
+import type { InteractionListView, InteractionType } from '@/types/interactions'
+import {
+  getInteractionTypeLabel,
+  getInteractionStatusLabel,
+  getInteractionOutcomeLabel
+} from '@/types/interactions'
+import {
+  PhoneIcon,
+  EnvelopeIcon,
+  UserGroupIcon,
+  PresentationChartLineIcon,
+  ArrowPathIcon,
+  TruckIcon,
+  ChatBubbleLeftRightIcon
+} from '@heroicons/vue/24/outline'
 
 // Dependencies
 const route = useRoute()
 const router = useRouter()
 const opportunityStore = useOpportunityStore()
+const interactionStore = useInteractionStore()
 
 // Get opportunity ID from route params
 const opportunityId = route.params.id as string
@@ -307,6 +496,74 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
 const deleting = ref(false)
+
+// Interaction-related state
+const activeInteractionTab = ref<'recent' | 'upcoming' | 'all'>('recent')
+const interactions = ref<InteractionListView[]>([])
+const interactionsLoading = ref(false)
+
+// ===============================
+// COMPUTED PROPERTIES
+// ===============================
+
+/**
+ * Filter interactions based on active tab
+ */
+const filteredInteractions = computed(() => {
+  if (!interactions.value.length) return []
+
+  const now = new Date()
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+  switch (activeInteractionTab.value) {
+    case 'recent':
+      return interactions.value
+        .filter(interaction => new Date(interaction.interaction_date) >= thirtyDaysAgo)
+        .sort((a, b) => new Date(b.interaction_date).getTime() - new Date(a.interaction_date).getTime())
+        .slice(0, 5) // Show only 5 most recent
+
+    case 'upcoming':
+      return interactions.value
+        .filter(interaction => 
+          interaction.follow_up_required && 
+          interaction.follow_up_date &&
+          new Date(interaction.follow_up_date) >= now
+        )
+        .sort((a, b) => new Date(a.follow_up_date!).getTime() - new Date(b.follow_up_date!).getTime())
+
+    case 'all':
+      return interactions.value
+        .sort((a, b) => new Date(b.interaction_date).getTime() - new Date(a.interaction_date).getTime())
+        .slice(0, 10) // Show 10 most recent for 'all' tab
+
+    default:
+      return []
+  }
+})
+
+/**
+ * Count of total interactions for this opportunity
+ */
+const interactionCount = computed(() => interactions.value.length)
+
+/**
+ * Count of upcoming follow-ups
+ */
+const upcomingFollowUps = computed(() => {
+  const now = new Date()
+  return interactions.value.filter(interaction => 
+    interaction.follow_up_required && 
+    interaction.follow_up_date &&
+    new Date(interaction.follow_up_date) >= now
+  ).length
+})
+
+/**
+ * Check if there are more interactions than displayed
+ */
+const hasMoreInteractions = computed(() => {
+  return interactions.value.length > filteredInteractions.value.length
+})
 
 // ===============================
 // DATA LOADING
@@ -324,6 +581,8 @@ const loadOpportunity = async () => {
     
     if (success) {
       opportunity.value = opportunityStore.currentOpportunity
+      // Load interactions for this opportunity
+      await loadInteractions()
     } else {
       error.value = opportunityStore.error || 'Opportunity not found'
     }
@@ -332,6 +591,28 @@ const loadOpportunity = async () => {
     error.value = 'An unexpected error occurred while loading the opportunity'
   } finally {
     loading.value = false
+  }
+}
+
+/**
+ * Load interactions for this opportunity
+ */
+const loadInteractions = async () => {
+  try {
+    interactionsLoading.value = true
+    
+    // Fetch interactions filtered by opportunity ID
+    await interactionStore.fetchInteractions(
+      { opportunity_id: opportunityId },
+      { page: 1, limit: 50, sort_by: 'interaction_date', sort_order: 'desc' }
+    )
+    
+    interactions.value = interactionStore.interactions || []
+  } catch (err) {
+    console.error('Error loading interactions:', err)
+    // Don't show error for interactions - just show empty state
+  } finally {
+    interactionsLoading.value = false
   }
 }
 
@@ -389,6 +670,65 @@ const formatDate = (dateString: string | null): string => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+/**
+ * Format interaction date for display
+ */
+const formatInteractionDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+/**
+ * Get icon component for interaction type
+ */
+const getInteractionIcon = (type: InteractionType) => {
+  const iconMap = {
+    EMAIL: EnvelopeIcon,
+    CALL: PhoneIcon,
+    IN_PERSON: UserGroupIcon,
+    DEMO: PresentationChartLineIcon,
+    FOLLOW_UP: ArrowPathIcon,
+    SAMPLE_DELIVERY: TruckIcon
+  }
+  return iconMap[type] || ChatBubbleLeftRightIcon
+}
+
+/**
+ * Get CSS classes for status badges
+ */
+const getStatusBadgeClass = (status: string) => {
+  const classes = {
+    SCHEDULED: 'bg-blue-100 text-blue-800',
+    COMPLETED: 'bg-green-100 text-green-800',
+    CANCELLED: 'bg-gray-100 text-gray-800',
+    NO_SHOW: 'bg-red-100 text-red-800'
+  }
+  return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
+}
+
+/**
+ * Get CSS classes for outcome badges
+ */
+const getOutcomeBadgeClass = (outcome: string) => {
+  const classes = {
+    POSITIVE: 'bg-green-100 text-green-800',
+    NEUTRAL: 'bg-yellow-100 text-yellow-800',
+    NEGATIVE: 'bg-red-100 text-red-800',
+    NEEDS_FOLLOW_UP: 'bg-orange-100 text-orange-800'
+  }
+  return classes[outcome as keyof typeof classes] || 'bg-gray-100 text-gray-800'
+}
+
+/**
+ * Check if follow-up is overdue
+ */
+const isFollowUpOverdue = (followUpDate: string): boolean => {
+  return new Date(followUpDate) < new Date()
 }
 
 // ===============================

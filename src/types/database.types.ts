@@ -7,511 +7,111 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
-      contacts: {
-        Row: {
-          id: string
-          first_name: string
-          last_name: string
-          organization_id: string
-          position: string
-          phone: string | null
-          email: string | null
-          address: string | null
-          city: string | null
-          state: string | null
-          zip_code: string | null
-          website: string | null
-          account_manager: string | null
-          notes: string | null
-          is_primary: boolean | null
-          created_at: string | null
-          updated_at: string | null
-          created_by: string | null
-        }
-        Insert: {
-          id?: string
-          first_name: string
-          last_name: string
-          organization_id: string
-          position: string
-          phone?: string | null
-          email?: string | null
-          address?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          website?: string | null
-          account_manager?: string | null
-          notes?: string | null
-          is_primary?: boolean | null
-          created_at?: string | null
-          updated_at?: string | null
-          created_by?: string | null
-        }
-        Update: {
-          id?: string
-          first_name?: string
-          last_name?: string
-          organization_id?: string
-          position?: string
-          phone?: string | null
-          email?: string | null
-          address?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          website?: string | null
-          account_manager?: string | null
-          notes?: string | null
-          is_primary?: boolean | null
-          created_at?: string | null
-          updated_at?: string | null
-          created_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      contact_principals: {
-        Row: {
-          id: string
-          contact_id: string
-          principal_id: string
-          advocacy_level: "High" | "Medium" | "Low"
-          notes: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          contact_id: string
-          principal_id: string
-          advocacy_level?: "High" | "Medium" | "Low"
-          notes?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          contact_id?: string
-          principal_id?: string
-          advocacy_level?: "High" | "Medium" | "Low"
-          notes?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contact_principals_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_principals_principal_id_fkey"
-            columns: ["principal_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      organizations: {
-        Row: {
-          id: string
-          name: string
-          legal_name: string | null
-          description: string | null
-          industry: string | null
-          type: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
-          size: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
-          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
-          website: string | null
-          email: string | null
-          primary_phone: string | null
-          secondary_phone: string | null
-          address_line_1: string | null
-          address_line_2: string | null
-          city: string | null
-          state_province: string | null
-          postal_code: string | null
-          country: string | null
-          founded_year: number | null
-          employees_count: number | null
-          annual_revenue: number | null
-          currency_code: string | null
-          lead_source: string | null
-          lead_score: number | null
-          tags: Json | null
-          custom_fields: Json | null
-          parent_org_id: string | null
-          assigned_user_id: string | null
-          last_contact_date: string | null
-          next_follow_up_date: string | null
-          created_at: string | null
-          updated_at: string | null
-          deleted_at: string | null
-        }
-        Insert: {
-          id?: string
-          name: string
-          legal_name?: string | null
-          description?: string | null
-          industry?: string | null
-          type?: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
-          size?: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
-          status?: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
-          website?: string | null
-          email?: string | null
-          primary_phone?: string | null
-          secondary_phone?: string | null
-          address_line_1?: string | null
-          address_line_2?: string | null
-          city?: string | null
-          state_province?: string | null
-          postal_code?: string | null
-          country?: string | null
-          founded_year?: number | null
-          employees_count?: number | null
-          annual_revenue?: number | null
-          currency_code?: string | null
-          lead_source?: string | null
-          lead_score?: number | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          parent_org_id?: string | null
-          assigned_user_id?: string | null
-          last_contact_date?: string | null
-          next_follow_up_date?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          deleted_at?: string | null
-        }
-        Update: {
-          id?: string
-          name?: string
-          legal_name?: string | null
-          description?: string | null
-          industry?: string | null
-          type?: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
-          size?: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
-          status?: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
-          website?: string | null
-          email?: string | null
-          primary_phone?: string | null
-          secondary_phone?: string | null
-          address_line_1?: string | null
-          address_line_2?: string | null
-          city?: string | null
-          state_province?: string | null
-          postal_code?: string | null
-          country?: string | null
-          founded_year?: number | null
-          employees_count?: number | null
-          annual_revenue?: number | null
-          currency_code?: string | null
-          lead_source?: string | null
-          lead_score?: number | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          parent_org_id?: string | null
-          assigned_user_id?: string | null
-          last_contact_date?: string | null
-          next_follow_up_date?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-          deleted_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organizations_parent_org_id_fkey"
-            columns: ["parent_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      organization_interactions: {
-        Row: {
-          id: string
-          organization_id: string
-          contact_id: string | null
-          type: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
-          direction: "Inbound" | "Outbound" | null
-          subject: string | null
-          description: string | null
-          interaction_date: string | null
-          duration_minutes: number | null
-          tags: Json | null
-          metadata: Json | null
-          created_by_user_id: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          contact_id?: string | null
-          type?: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
-          direction?: "Inbound" | "Outbound" | null
-          subject?: string | null
-          description?: string | null
-          interaction_date?: string | null
-          duration_minutes?: number | null
-          tags?: Json | null
-          metadata?: Json | null
-          created_by_user_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          contact_id?: string | null
-          type?: "Email" | "Phone" | "Meeting" | "Demo" | "Proposal" | "Contract" | "Note" | "Task" | "Event" | "Social" | "Website" | "Other" | null
-          direction?: "Inbound" | "Outbound" | null
-          subject?: string | null
-          description?: string | null
-          interaction_date?: string | null
-          duration_minutes?: number | null
-          tags?: Json | null
-          metadata?: Json | null
-          created_by_user_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_interactions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_interactions_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      organization_documents: {
-        Row: {
-          id: string
-          organization_id: string
-          name: string
-          description: string | null
-          file_type: string | null
-          file_size_bytes: number | null
-          storage_path: string | null
-          external_url: string | null
-          category: string | null
-          tags: Json | null
-          is_public: boolean | null
-          access_level: string | null
-          version: string | null
-          parent_document_id: string | null
-          uploaded_by_user_id: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          name: string
-          description?: string | null
-          file_type?: string | null
-          file_size_bytes?: number | null
-          storage_path?: string | null
-          external_url?: string | null
-          category?: string | null
-          tags?: Json | null
-          is_public?: boolean | null
-          access_level?: string | null
-          version?: string | null
-          parent_document_id?: string | null
-          uploaded_by_user_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          name?: string
-          description?: string | null
-          file_type?: string | null
-          file_size_bytes?: number | null
-          storage_path?: string | null
-          external_url?: string | null
-          category?: string | null
-          tags?: Json | null
-          is_public?: boolean | null
-          access_level?: string | null
-          version?: string | null
-          parent_document_id?: string | null
-          uploaded_by_user_id?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_documents_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_documents_parent_document_id_fkey"
-            columns: ["parent_document_id"]
-            isOneToOne: false
-            referencedRelation: "organization_documents"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      organization_analytics: {
-        Row: {
-          id: string
-          organization_id: string
-          period_start: string | null
-          period_end: string | null
-          period_type: string | null
-          total_interactions: number | null
-          email_interactions: number | null
-          phone_interactions: number | null
-          meeting_interactions: number | null
-          revenue_generated: number | null
-          deals_closed: number | null
-          deals_in_progress: number | null
-          lead_score_change: number | null
-          conversion_events: number | null
-          documents_added: number | null
-          documents_accessed: number | null
-          new_contacts_added: number | null
-          active_contacts: number | null
-          custom_metrics: Json | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          period_start: string | null
-          period_end: string | null
-          period_type: string | null
-          total_interactions?: number | null
-          email_interactions?: number | null
-          phone_interactions?: number | null
-          meeting_interactions?: number | null
-          revenue_generated?: number | null
-          deals_closed?: number | null
-          deals_in_progress?: number | null
-          lead_score_change?: number | null
-          conversion_events?: number | null
-          documents_added?: number | null
-          documents_accessed?: number | null
-          new_contacts_added?: number | null
-          active_contacts?: number | null
-          custom_metrics?: Json | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          period_start?: string | null
-          period_end?: string | null
-          period_type?: string | null
-          total_interactions?: number | null
-          email_interactions?: number | null
-          phone_interactions?: number | null
-          meeting_interactions?: number | null
-          revenue_generated?: number | null
-          deals_closed?: number | null
-          deals_in_progress?: number | null
-          lead_score_change?: number | null
-          conversion_events?: number | null
-          documents_added?: number | null
-          documents_accessed?: number | null
-          new_contacts_added?: number | null
-          active_contacts?: number | null
-          custom_metrics?: Json | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_analytics_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       interactions: {
         Row: {
-          id: string
-          interaction_type: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
-          date: string
-          subject: string
-          notes: string | null
-          opportunity_id: string | null
-          contact_id: string | null
-          created_by: string | null
-          follow_up_needed: boolean
-          follow_up_date: string | null
+          attachments: Json | null
+          contact_method: string | null
           created_at: string | null
-          updated_at: string | null
+          created_by: string | null
+          custom_fields: Json | null
           deleted_at: string | null
+          duration_minutes: number | null
+          follow_up_date: string | null
+          follow_up_notes: string | null
+          follow_up_required: boolean | null
+          id: string
+          interaction_date: string
+          location: string | null
+          next_action: string | null
+          notes: string | null
+          opportunity_id: string
+          outcome: Database["public"]["Enums"]["interaction_outcome"] | null
+          participants: Json | null
+          rating: number | null
+          status: Database["public"]["Enums"]["interaction_status"] | null
+          subject: string
+          tags: Json | null
+          type: Database["public"]["Enums"]["interaction_type"]
+          updated_at: string | null
         }
         Insert: {
-          id?: string
-          interaction_type: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
-          date: string
-          subject: string
-          notes?: string | null
-          opportunity_id?: string | null
-          contact_id?: string | null
-          created_by?: string | null
-          follow_up_needed?: boolean
-          follow_up_date?: string | null
+          attachments?: Json | null
+          contact_method?: string | null
           created_at?: string | null
-          updated_at?: string | null
+          created_by?: string | null
+          custom_fields?: Json | null
           deleted_at?: string | null
+          duration_minutes?: number | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          interaction_date: string
+          location?: string | null
+          next_action?: string | null
+          notes?: string | null
+          opportunity_id: string
+          outcome?: Database["public"]["Enums"]["interaction_outcome"] | null
+          participants?: Json | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["interaction_status"] | null
+          subject: string
+          tags?: Json | null
+          type: Database["public"]["Enums"]["interaction_type"]
+          updated_at?: string | null
         }
         Update: {
-          id?: string
-          interaction_type?: "EMAIL" | "CALL" | "IN_PERSON" | "DEMO" | "FOLLOW_UP"
-          date?: string
-          subject?: string
-          notes?: string | null
-          opportunity_id?: string | null
-          contact_id?: string | null
-          created_by?: string | null
-          follow_up_needed?: boolean
-          follow_up_date?: string | null
+          attachments?: Json | null
+          contact_method?: string | null
           created_at?: string | null
-          updated_at?: string | null
+          created_by?: string | null
+          custom_fields?: Json | null
           deleted_at?: string | null
+          duration_minutes?: number | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          interaction_date?: string
+          location?: string | null
+          next_action?: string | null
+          notes?: string | null
+          opportunity_id?: string
+          outcome?: Database["public"]["Enums"]["interaction_outcome"] | null
+          participants?: Json | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["interaction_status"] | null
+          subject?: string
+          tags?: Json | null
+          type?: Database["public"]["Enums"]["interaction_type"]
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -520,187 +120,114 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "opportunities"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "interactions_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
           }
         ]
       }
-      user_submissions: {
-        Row: {
-          age: number
-          created_at: string | null
-          favorite_color: string
-          first_name: string
-          id: number
-          last_name: string
-          updated_at: string | null
-        }
-        Insert: {
-          age: number
-          created_at?: string | null
-          favorite_color: string
-          first_name: string
-          id?: number
-          last_name: string
-          updated_at?: string | null
-        }
-        Update: {
-          age?: number
-          created_at?: string | null
-          favorite_color?: string
-          first_name?: string
-          id?: number
-          last_name?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      dashboard_preferences: {
-        Row: {
-          id: number
-          user_id: string
-          widget_layout: Json
-          visible_widgets: Json
-          dashboard_theme: string
-          refresh_interval: number
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: number
-          user_id: string
-          widget_layout?: Json
-          visible_widgets?: Json
-          dashboard_theme?: string
-          refresh_interval?: number
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: number
-          user_id?: string
-          widget_layout?: Json
-          visible_widgets?: Json
-          dashboard_theme?: string
-          refresh_interval?: number
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       opportunities: {
         Row: {
+          actual_value: number | null
+          auto_generated_name: boolean | null
+          context: Database["public"]["Enums"]["opportunity_context"] | null
+          created_at: string | null
+          created_by: string | null
+          currency_code: string | null
+          custom_fields: Json | null
+          deal_owner: string | null
+          deleted_at: string | null
+          estimated_value: number | null
+          expected_close_date: string | null
           id: string
+          internal_notes: string | null
+          is_lost: boolean | null
+          is_won: boolean | null
+          last_activity_date: string | null
+          lead_source: string | null
+          lost_date: string | null
+          lost_reason: string | null
           name: string
+          name_template: string | null
+          next_follow_up_date: string | null
+          notes: string | null
           organization_id: string
           principal_id: string | null
-          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          probability_percent: number | null
           product_id: string | null
-          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
-          probability_percent: number
-          expected_close_date: string | null
-          estimated_value: number | null
-          actual_value: number | null
-          currency_code: string
-          deal_owner: string | null
-          lead_source: string | null
-          competitor_info: string | null
-          is_won: boolean
-          is_lost: boolean
-          lost_reason: string | null
-          won_date: string | null
-          lost_date: string | null
-          notes: string | null
-          internal_notes: string | null
-          tags: Json | null
-          custom_fields: Json | null
-          auto_generated_name: boolean
-          name_template: string | null
-          last_activity_date: string | null
-          next_follow_up_date: string | null
+          stage: Database["public"]["Enums"]["opportunity_stage"]
           stage_changed_at: string | null
           stage_changed_by: string | null
-          created_at: string | null
+          tags: Json | null
           updated_at: string | null
-          created_by: string | null
-          deleted_at: string | null
+          won_date: string | null
         }
         Insert: {
+          actual_value?: number | null
+          auto_generated_name?: boolean | null
+          context?: Database["public"]["Enums"]["opportunity_context"] | null
+          created_at?: string | null
+          created_by?: string | null
+          currency_code?: string | null
+          custom_fields?: Json | null
+          deal_owner?: string | null
+          deleted_at?: string | null
+          estimated_value?: number | null
+          expected_close_date?: string | null
           id?: string
+          internal_notes?: string | null
+          is_lost?: boolean | null
+          is_won?: boolean | null
+          last_activity_date?: string | null
+          lead_source?: string | null
+          lost_date?: string | null
+          lost_reason?: string | null
           name: string
+          name_template?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
           organization_id: string
           principal_id?: string | null
-          stage?: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          probability_percent?: number | null
           product_id?: string | null
-          context?: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
-          probability_percent?: number
-          expected_close_date?: string | null
-          estimated_value?: number | null
-          actual_value?: number | null
-          currency_code?: string
-          deal_owner?: string | null
-          lead_source?: string | null
-          competitor_info?: string | null
-          is_won?: boolean
-          is_lost?: boolean
-          lost_reason?: string | null
-          won_date?: string | null
-          lost_date?: string | null
-          notes?: string | null
-          internal_notes?: string | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          auto_generated_name?: boolean
-          name_template?: string | null
-          last_activity_date?: string | null
-          next_follow_up_date?: string | null
+          stage?: Database["public"]["Enums"]["opportunity_stage"]
           stage_changed_at?: string | null
           stage_changed_by?: string | null
-          created_at?: string | null
+          tags?: Json | null
           updated_at?: string | null
-          created_by?: string | null
-          deleted_at?: string | null
+          won_date?: string | null
         }
         Update: {
+          actual_value?: number | null
+          auto_generated_name?: boolean | null
+          context?: Database["public"]["Enums"]["opportunity_context"] | null
+          created_at?: string | null
+          created_by?: string | null
+          currency_code?: string | null
+          custom_fields?: Json | null
+          deal_owner?: string | null
+          deleted_at?: string | null
+          estimated_value?: number | null
+          expected_close_date?: string | null
           id?: string
+          internal_notes?: string | null
+          is_lost?: boolean | null
+          is_won?: boolean | null
+          last_activity_date?: string | null
+          lead_source?: string | null
+          lost_date?: string | null
+          lost_reason?: string | null
           name?: string
+          name_template?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
           organization_id?: string
           principal_id?: string | null
-          stage?: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
+          probability_percent?: number | null
           product_id?: string | null
-          context?: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
-          probability_percent?: number
-          expected_close_date?: string | null
-          estimated_value?: number | null
-          actual_value?: number | null
-          currency_code?: string
-          deal_owner?: string | null
-          lead_source?: string | null
-          competitor_info?: string | null
-          is_won?: boolean
-          is_lost?: boolean
-          lost_reason?: string | null
-          won_date?: string | null
-          lost_date?: string | null
-          notes?: string | null
-          internal_notes?: string | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          auto_generated_name?: boolean
-          name_template?: string | null
-          last_activity_date?: string | null
-          next_follow_up_date?: string | null
+          stage?: Database["public"]["Enums"]["opportunity_stage"]
           stage_changed_at?: string | null
           stage_changed_by?: string | null
-          created_at?: string | null
+          tags?: Json | null
           updated_at?: string | null
-          created_by?: string | null
-          deleted_at?: string | null
+          won_date?: string | null
         }
         Relationships: [
           {
@@ -726,174 +253,30 @@ export type Database = {
           }
         ]
       }
-      products: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          category: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
-          sku: string | null
-          unit_size: string | null
-          unit_cost: number | null
-          suggested_retail_price: number | null
-          currency_code: string
-          is_active: boolean
-          launch_date: string | null
-          discontinue_date: string | null
-          ingredients: string | null
-          allergen_info: string | null
-          nutritional_info: Json | null
-          certifications: Json | null
-          tags: Json | null
-          custom_fields: Json | null
-          created_at: string | null
-          updated_at: string | null
-          deleted_at: string | null
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          category?: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
-          sku?: string | null
-          unit_size?: string | null
-          unit_cost?: number | null
-          suggested_retail_price?: number | null
-          currency_code?: string
-          is_active?: boolean
-          launch_date?: string | null
-          discontinue_date?: string | null
-          ingredients?: string | null
-          allergen_info?: string | null
-          nutritional_info?: Json | null
-          certifications?: Json | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          created_at?: string | null
-          updated_at?: string | null
-          deleted_at?: string | null
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          category?: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
-          sku?: string | null
-          unit_size?: string | null
-          unit_cost?: number | null
-          suggested_retail_price?: number | null
-          currency_code?: string
-          is_active?: boolean
-          launch_date?: string | null
-          discontinue_date?: string | null
-          ingredients?: string | null
-          allergen_info?: string | null
-          nutritional_info?: Json | null
-          certifications?: Json | null
-          tags?: Json | null
-          custom_fields?: Json | null
-          created_at?: string | null
-          updated_at?: string | null
-          deleted_at?: string | null
-        }
-        Relationships: []
-      }
-      product_principals: {
-        Row: {
-          id: string
-          product_id: string
-          principal_id: string
-          is_primary_principal: boolean
-          exclusive_rights: boolean
-          territory_restrictions: Json | null
-          wholesale_price: number | null
-          minimum_order_quantity: number | null
-          lead_time_days: number | null
-          contract_start_date: string | null
-          contract_end_date: string | null
-          auto_renewal: boolean
-          is_active: boolean
-          notes: string | null
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          principal_id: string
-          is_primary_principal?: boolean
-          exclusive_rights?: boolean
-          territory_restrictions?: Json | null
-          wholesale_price?: number | null
-          minimum_order_quantity?: number | null
-          lead_time_days?: number | null
-          contract_start_date?: string | null
-          contract_end_date?: string | null
-          auto_renewal?: boolean
-          is_active?: boolean
-          notes?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          principal_id?: string
-          is_primary_principal?: boolean
-          exclusive_rights?: boolean
-          territory_restrictions?: Json | null
-          wholesale_price?: number | null
-          minimum_order_quantity?: number | null
-          lead_time_days?: number | null
-          contract_start_date?: string | null
-          contract_end_date?: string | null
-          auto_renewal?: boolean
-          is_active?: boolean
-          notes?: string | null
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_principals_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_principals_principal_id_fkey"
-            columns: ["principal_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       opportunity_principals: {
         Row: {
-          id: string
-          opportunity_id: string
-          principal_id: string
-          is_primary: boolean
           contribution_percent: number | null
           created_at: string | null
-        }
-        Insert: {
-          id?: string
+          id: string
+          is_primary: boolean | null
           opportunity_id: string
           principal_id: string
-          is_primary?: boolean
+        }
+        Insert: {
           contribution_percent?: number | null
           created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          opportunity_id: string
+          principal_id: string
         }
         Update: {
-          id?: string
-          opportunity_id?: string
-          principal_id?: string
-          is_primary?: boolean
           contribution_percent?: number | null
           created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          opportunity_id?: string
+          principal_id?: string
         }
         Relationships: [
           {
@@ -912,338 +295,493 @@ export type Database = {
           }
         ]
       }
+      organizations: {
+        Row: {
+          address: string | null
+          alias: string | null
+          city: string | null
+          client_company_profile: string | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          is_client: boolean | null
+          is_principal: boolean | null
+          name: string
+          notes: string | null
+          phone: string | null
+          state: string | null
+          type: string | null
+          updated_at: string | null
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          alias?: string | null
+          city?: string | null
+          client_company_profile?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          is_client?: boolean | null
+          is_principal?: boolean | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          type?: string | null
+          updated_at?: string | null
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          alias?: string | null
+          city?: string | null
+          client_company_profile?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          is_client?: boolean | null
+          is_principal?: boolean | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          type?: string | null
+          updated_at?: string | null
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
+      product_principals: {
+        Row: {
+          auto_renewal: boolean | null
+          contract_end_date: string | null
+          contract_start_date: string | null
+          created_at: string | null
+          exclusive_rights: boolean | null
+          id: string
+          is_active: boolean | null
+          is_primary_principal: boolean | null
+          lead_time_days: number | null
+          minimum_order_quantity: number | null
+          notes: string | null
+          principal_id: string
+          product_id: string
+          territory_restrictions: Json | null
+          updated_at: string | null
+          wholesale_price: number | null
+        }
+        Insert: {
+          auto_renewal?: boolean | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          exclusive_rights?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_primary_principal?: boolean | null
+          lead_time_days?: number | null
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          principal_id: string
+          product_id: string
+          territory_restrictions?: Json | null
+          updated_at?: string | null
+          wholesale_price?: number | null
+        }
+        Update: {
+          auto_renewal?: boolean | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          exclusive_rights?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_primary_principal?: boolean | null
+          lead_time_days?: number | null
+          minimum_order_quantity?: number | null
+          notes?: string | null
+          principal_id?: string
+          product_id?: string
+          territory_restrictions?: Json | null
+          updated_at?: string | null
+          wholesale_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_principals_principal_id_fkey"
+            columns: ["principal_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_principals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      products: {
+        Row: {
+          allergen_info: string | null
+          category: Database["public"]["Enums"]["product_category"] | null
+          certifications: Json | null
+          created_at: string | null
+          currency_code: string | null
+          custom_fields: Json | null
+          deleted_at: string | null
+          description: string | null
+          discontinue_date: string | null
+          id: string
+          ingredients: string | null
+          is_active: boolean | null
+          launch_date: string | null
+          name: string
+          nutritional_info: Json | null
+          sku: string | null
+          suggested_retail_price: number | null
+          tags: Json | null
+          unit_cost: number | null
+          unit_size: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          allergen_info?: string | null
+          category?: Database["public"]["Enums"]["product_category"] | null
+          certifications?: Json | null
+          created_at?: string | null
+          currency_code?: string | null
+          custom_fields?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          discontinue_date?: string | null
+          id?: string
+          ingredients?: string | null
+          is_active?: boolean | null
+          launch_date?: string | null
+          name: string
+          nutritional_info?: Json | null
+          sku?: string | null
+          suggested_retail_price?: number | null
+          tags?: Json | null
+          unit_cost?: number | null
+          unit_size?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          allergen_info?: string | null
+          category?: Database["public"]["Enums"]["product_category"] | null
+          certifications?: Json | null
+          created_at?: string | null
+          currency_code?: string | null
+          custom_fields?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          discontinue_date?: string | null
+          id?: string
+          ingredients?: string | null
+          is_active?: boolean | null
+          launch_date?: string | null
+          name?: string
+          nutritional_info?: Json | null
+          sku?: string | null
+          suggested_retail_price?: number | null
+          tags?: Json | null
+          unit_cost?: number | null
+          unit_size?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_submissions: {
+        Row: {
+          address: string | null
+          age: number | null
+          city: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          state: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      dashboard_contact_analytics: {
+      principal_activity_summary: {
         Row: {
-          total_contacts: number | null
-          contacts_this_week: number | null
-          contacts_this_month: number | null
-          unique_organizations: number | null
-          day_of_week: number | null
-          contact_date: string | null
-          daily_contact_count: number | null
-        }
-        Relationships: []
-      }
-      dashboard_organization_analytics: {
-        Row: {
-          organization: string | null
-          contact_count: number | null
-          first_contact_date: string | null
-          latest_contact_date: string | null
-          avg_days_since_contact: number | null
-        }
-        Relationships: []
-      }
-      organization_summary_analytics: {
-        Row: {
-          id: string | null
-          name: string | null
-          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
+          principal_id: string
+          principal_name: string
+          principal_status: Database["public"]["Enums"]["organization_status"] | null
+          organization_type: Database["public"]["Enums"]["organization_type"] | null
           industry: string | null
+          organization_size: Database["public"]["Enums"]["organization_size"] | null
+          is_active: boolean | null
           lead_score: number | null
-          total_interactions: number | null
-          contact_count: number | null
-          document_count: number | null
+          contact_count: number
+          active_contacts: number
+          primary_contact_name: string | null
+          primary_contact_email: string | null
+          last_contact_update: string | null
+          total_interactions: number
+          interactions_last_30_days: number
+          interactions_last_90_days: number
           last_interaction_date: string | null
+          last_interaction_type: string | null
           next_follow_up_date: string | null
-          engagement_status: string | null
-        }
-        Relationships: []
-      }
-      monthly_organization_performance: {
-        Row: {
-          organization_id: string | null
-          organization_name: string | null
-          month: string | null
-          interaction_count: number | null
-          interaction_types: number | null
-          meetings: number | null
-          emails: number | null
-          calls: number | null
-          avg_duration_minutes: number | null
-        }
-        Relationships: []
-      }
-      organization_lead_scoring: {
-        Row: {
-          id: string | null
-          name: string | null
-          lead_score: number | null
-          status: "Active" | "Inactive" | "Prospect" | "Customer" | "Partner" | "Vendor" | null
-          industry: string | null
-          size: "Startup" | "Small" | "Medium" | "Large" | "Enterprise" | null
-          total_interactions: number | null
-          recent_interactions: number | null
-          lead_temperature: string | null
-          last_interaction: string | null
-          document_count: number | null
-        }
-        Relationships: []
-      }
-      dashboard_weekly_interactions: {
-        Row: {
-          week_start: string | null
-          interaction_count: number | null
-          organizations_contacted: number | null
-          unique_emails: number | null
-          organizations_list: string[] | null
-        }
-        Relationships: []
-      }
-      contact_list_view: {
-        Row: {
-          id: string
-          first_name: string
-          last_name: string
-          full_name: string
-          organization_id: string
-          organization_name: string
-          organization_industry: string | null
-          position: string
-          phone: string | null
-          email: string | null
-          is_primary: boolean | null
-          created_at: string | null
-          updated_at: string | null
-          principal_advocacy_count: number | null
-          organization_contact_count: number | null
-        }
-        Relationships: []
-      }
-      contact_detail_view: {
-        Row: {
-          id: string
-          first_name: string
-          last_name: string
-          full_name: string
-          organization_id: string
-          position: string
-          phone: string | null
-          email: string | null
-          address: string | null
-          city: string | null
-          state: string | null
-          zip_code: string | null
-          website: string | null
-          account_manager: string | null
-          notes: string | null
-          is_primary: boolean | null
-          created_at: string | null
-          updated_at: string | null
-          created_by: string | null
-          organization_name: string
-          organization_industry: string | null
-          organization_type: "B2B" | "B2C" | "B2B2C" | "Non-Profit" | "Government" | "Other" | null
-          organization_website: string | null
-          principal_advocacies: Json | null
-        }
-        Relationships: []
-      }
-      opportunity_list_view: {
-        Row: {
-          id: string
-          name: string
-          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
-          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
-          probability_percent: number
-          expected_close_date: string | null
-          estimated_value: number | null
-          actual_value: number | null
-          currency_code: string
-          is_won: boolean
-          is_lost: boolean
-          deal_owner: string | null
-          auto_generated_name: boolean
-          created_at: string | null
-          updated_at: string | null
-          stage_changed_at: string | null
-          last_activity_date: string | null
-          next_follow_up_date: string | null
-          organization_id: string
-          organization_name: string
-          organization_type: string | null
-          organization_status: string | null
-          organization_city: string | null
-          organization_state: string | null
-          organization_country: string | null
-          organization_lead_score: number | null
-          principal_id: string | null
-          principal_name: string | null
-          principal_type: string | null
-          product_id: string | null
-          product_name: string | null
-          product_category: string | null
-          product_sku: string | null
-          days_to_close: number | null
-          days_to_followup: number | null
-          notes_summary: string | null
-          stage_order: number
-          has_activity: boolean
-          overdue_followup: boolean
-          overdue_close: boolean
-        }
-        Relationships: []
-      }
-      opportunity_detail_view: {
-        Row: {
-          id: string
-          name: string
-          organization_id: string
-          principal_id: string | null
-          stage: "New Lead" | "Initial Outreach" | "Sample/Visit Offered" | "Awaiting Response" | "Feedback Logged" | "Demo Scheduled" | "Closed - Won"
-          product_id: string | null
-          context: "Site Visit" | "Food Show" | "New Product Interest" | "Follow-up" | "Demo Request" | "Sampling" | "Custom" | null
-          probability_percent: number
-          expected_close_date: string | null
-          estimated_value: number | null
-          actual_value: number | null
-          currency_code: string
-          deal_owner: string | null
-          lead_source: string | null
-          competitor_info: string | null
-          is_won: boolean
-          is_lost: boolean
-          lost_reason: string | null
-          won_date: string | null
-          lost_date: string | null
-          notes: string | null
-          internal_notes: string | null
-          tags: Json | null
-          custom_fields: Json | null
-          auto_generated_name: boolean
-          name_template: string | null
-          last_activity_date: string | null
-          next_follow_up_date: string | null
-          stage_changed_at: string | null
-          stage_changed_by: string | null
-          created_at: string | null
-          updated_at: string | null
-          created_by: string | null
-          organization_id_check: string | null
-          organization_name: string | null
-          organization_legal_name: string | null
-          organization_type: string | null
-          organization_size: string | null
-          organization_status: string | null
-          organization_industry: string | null
-          organization_website: string | null
-          organization_email: string | null
-          organization_phone: string | null
-          organization_address1: string | null
-          organization_address2: string | null
-          organization_city: string | null
-          organization_state: string | null
-          organization_postal_code: string | null
-          organization_country: string | null
-          organization_employees: number | null
-          organization_revenue: number | null
-          organization_lead_score: number | null
-          organization_tags: Json | null
-          principal_id_check: string | null
-          principal_name: string | null
-          principal_legal_name: string | null
-          principal_type: string | null
-          principal_size: string | null
-          principal_industry: string | null
-          principal_website: string | null
-          principal_email: string | null
-          principal_phone: string | null
-          principal_is_principal_flag: boolean | null
-          product_id_check: string | null
-          product_name: string | null
-          product_description: string | null
-          product_category: string | null
-          product_sku: string | null
-          product_unit_size: string | null
-          product_unit_cost: number | null
-          product_suggested_price: number | null
-          product_is_active: boolean | null
-          product_launch_date: string | null
-          product_ingredients: string | null
-          product_allergen_info: string | null
-          product_nutritional_info: Json | null
-          product_certifications: Json | null
-          product_tags: Json | null
-          principal_wholesale_price: number | null
-          principal_min_order_qty: number | null
-          principal_lead_time: number | null
-          is_primary_principal: boolean | null
-          principal_exclusive_rights: boolean | null
-          territory_restrictions: Json | null
-          principal_contract_start: string | null
-          principal_contract_end: string | null
-          days_to_close: number | null
-          days_to_followup: number | null
-          stage_order: number
-          has_activity: boolean
-          overdue_followup: boolean
-          overdue_close: boolean
-          opportunity_age_days: number
-          days_in_current_stage: number
-          value_variance: number | null
-        }
-        Relationships: []
-      }
-      opportunity_kpi_view: {
-        Row: {
+          avg_interaction_rating: number
+          positive_interactions: number
+          follow_ups_required: number
           total_opportunities: number
           active_opportunities: number
           won_opportunities: number
-          lost_opportunities: number
-          won_this_month: number
-          created_this_month: number
-          total_pipeline_value: number
-          avg_opportunity_value: number
-          total_won_value: number
-          won_value_this_month: number
-          avg_probability: number
-          weighted_pipeline_value: number
-          new_lead_count: number
-          initial_outreach_count: number
-          sample_visit_count: number
-          awaiting_response_count: number
-          feedback_logged_count: number
-          demo_scheduled_count: number
-          closed_won_count: number
-          overdue_opportunities: number
-          overdue_followups: number
-          win_rate_percent: number
-          avg_days_to_close: number
+          opportunities_last_30_days: number
+          latest_opportunity_stage: string | null
+          latest_opportunity_date: string | null
+          avg_probability_percent: number
+          highest_value_opportunity: string | null
+          product_count: number
+          active_product_count: number
+          product_categories: string[] | null
+          primary_product_category: Database["public"]["Enums"]["product_category"] | null
+          is_principal: boolean | null
+          is_distributor: boolean | null
+          distributor_id: string | null
+          distributor_name: string | null
+          last_activity_date: string | null
+          activity_status: string
+          engagement_score: number
+          principal_created_at: string | null
+          principal_updated_at: string | null
+          summary_generated_at: string | null
         }
         Relationships: []
       }
-      product_principal_availability_view: {
+      principal_distributor_relationships: {
         Row: {
-          product_id: string
-          product_name: string
-          product_category: "Protein" | "Sauce" | "Seasoning" | "Beverage" | "Snack" | "Frozen" | "Dairy" | "Bakery" | "Other" | null
-          product_sku: string | null
-          product_is_active: boolean
           principal_id: string
           principal_name: string
+          principal_status: Database["public"]["Enums"]["organization_status"] | null
+          distributor_id: string | null
+          distributor_name: string | null
+          distributor_status: Database["public"]["Enums"]["organization_status"] | null
+          relationship_type: string
+          principal_city: string | null
+          principal_state: string | null
+          principal_country: string | null
+          distributor_city: string | null
+          distributor_state: string | null
+          distributor_country: string | null
+          principal_lead_score: number | null
+          distributor_lead_score: number | null
+          principal_created_at: string | null
+          principal_last_contact: string | null
+          distributor_last_contact: string | null
+        }
+        Relationships: []
+      }
+      principal_product_performance: {
+        Row: {
+          principal_id: string
+          principal_name: string
+          product_id: string
+          product_name: string
+          product_category: Database["public"]["Enums"]["product_category"] | null
+          product_sku: string | null
+          is_primary_principal: boolean | null
+          exclusive_rights: boolean | null
           wholesale_price: number | null
           minimum_order_quantity: number | null
           lead_time_days: number | null
-          is_primary_principal: boolean
-          exclusive_rights: boolean
-          relationship_is_active: boolean
-          is_available: boolean
-          territory_restrictions: Json | null
           contract_start_date: string | null
           contract_end_date: string | null
-          auto_renewal: boolean
-          contract_is_active: boolean
+          territory_restrictions: Json | null
+          opportunities_for_product: number
+          won_opportunities_for_product: number
+          active_opportunities_for_product: number
+          latest_opportunity_date: string | null
+          avg_opportunity_probability: number
+          interactions_for_product: number
+          recent_interactions_for_product: number
+          last_interaction_date: string | null
+          product_is_active: boolean | null
+          launch_date: string | null
+          discontinue_date: string | null
+          unit_cost: number | null
+          suggested_retail_price: number | null
+          contract_status: string
+          product_performance_score: number
+          relationship_created_at: string | null
+          relationship_updated_at: string | null
+        }
+        Relationships: []
+      }
+      principal_timeline_summary: {
+        Row: {
+          principal_id: string
+          principal_name: string
+          activity_date: string | null
+          activity_type: string
+          activity_subject: string
+          activity_details: string
+          source_id: string
+          source_table: string
+          opportunity_name: string | null
+          contact_name: string | null
+          product_name: string | null
+          created_by: string | null
+          activity_status: string
+          follow_up_required: boolean | null
+          follow_up_date: string | null
+          timeline_rank: number
         }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      analyze_interactions_index_performance: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          index_name: string
+          index_size: string
+          index_scans: number
+          rows_read: number
+          rows_fetched: number
+        }[]
+      }
+      can_access_interaction: {
+        Args: {
+          interaction_uuid: string
+        }
+        Returns: boolean
+      }
+      get_user_accessible_interactions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          interaction_id: string
+          opportunity_id: string
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
+          subject: string
+          interaction_date: string
+          status: Database["public"]["Enums"]["interaction_status"]
+        }[]
+      }
+      maintain_interactions_indexes: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      test_interaction_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          test_name: string
+          test_result: boolean
+          details: string
+        }[]
+      }
+      validate_interactions_index_coverage: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          query_pattern: string
+          index_used: string
+          performance_note: string
+        }[]
+      }
+      validate_interaction_security: {
+        Args: {
+          p_interaction_id?: string
+          p_opportunity_id?: string
+        }
+        Returns: boolean
+      }
+      refresh_principal_activity_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: void
+      }
+      get_principal_activity_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_principals: number
+          active_principals: number
+          principals_with_products: number
+          principals_with_opportunities: number
+          average_products_per_principal: number
+          average_engagement_score: number
+          top_performers: Json
+        }[]
+      }
+      schedule_principal_activity_refresh: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
     }
     Enums: {
-      [_ in never]: never
+      interaction_outcome: "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "NEEDS_FOLLOW_UP"
+      interaction_status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW"
+      interaction_type:
+        | "EMAIL"
+        | "CALL"
+        | "IN_PERSON"
+        | "DEMO"
+        | "FOLLOW_UP"
+        | "SAMPLE_DELIVERY"
+      opportunity_context:
+        | "Site Visit"
+        | "Food Show"
+        | "New Product Interest"
+        | "Follow-up"
+        | "Demo Request"
+        | "Sampling"
+        | "Custom"
+      opportunity_stage:
+        | "New Lead"
+        | "Initial Outreach"
+        | "Sample/Visit Offered"
+        | "Awaiting Response"
+        | "Feedback Logged"
+        | "Demo Scheduled"
+        | "Closed - Won"
+      product_category:
+        | "Protein"
+        | "Sauce"
+        | "Seasoning"
+        | "Beverage"
+        | "Snack"
+        | "Frozen"
+        | "Dairy"
+        | "Bakery"
+        | "Other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1251,222 +789,180 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+      PublicSchema["Views"])
+  ? (PublicSchema["Tables"] &
+      PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
     : never
+  : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
     : never
+  : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
     : never
+  : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+  : never
 
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+// Helper types for database operations
+export type UserSubmission = Tables<'user_submissions'>
+export type UserSubmissionInsert = TablesInsert<'user_submissions'>
+export type UserSubmissionUpdate = TablesUpdate<'user_submissions'>
 
-export const Constants = {
-  public: {
-    Enums: {},
-  },
+export type Organization = Tables<'organizations'>
+export type OrganizationInsert = TablesInsert<'organizations'>
+export type OrganizationUpdate = TablesUpdate<'organizations'>
+
+export type Opportunity = Tables<'opportunities'>
+export type OpportunityInsert = TablesInsert<'opportunities'>
+export type OpportunityUpdate = TablesUpdate<'opportunities'>
+
+export type Product = Tables<'products'>
+export type ProductInsert = TablesInsert<'products'>
+export type ProductUpdate = TablesUpdate<'products'>
+
+export type ProductPrincipal = Tables<'product_principals'>
+export type ProductPrincipalInsert = TablesInsert<'product_principals'>
+export type ProductPrincipalUpdate = TablesUpdate<'product_principals'>
+
+export type OpportunityPrincipal = Tables<'opportunity_principals'>
+export type OpportunityPrincipalInsert = TablesInsert<'opportunity_principals'>
+export type OpportunityPrincipalUpdate = TablesUpdate<'opportunity_principals'>
+
+// New interaction types
+export type Interaction = Tables<'interactions'>
+export type InteractionInsert = TablesInsert<'interactions'>
+export type InteractionUpdate = TablesUpdate<'interactions'>
+
+// Enum types for interactions
+export type InteractionType = Database['public']['Enums']['interaction_type']
+export type InteractionStatus = Database['public']['Enums']['interaction_status']  
+export type InteractionOutcome = Database['public']['Enums']['interaction_outcome']
+
+// Existing enum types
+export type OpportunityStage = Database['public']['Enums']['opportunity_stage']
+export type OpportunityContext = Database['public']['Enums']['opportunity_context']
+export type ProductCategory = Database['public']['Enums']['product_category']
+
+// Enum constants for type safety and convenience
+export const INTERACTION_TYPES = {
+  EMAIL: 'EMAIL' as const,
+  CALL: 'CALL' as const,
+  IN_PERSON: 'IN_PERSON' as const,
+  DEMO: 'DEMO' as const,
+  FOLLOW_UP: 'FOLLOW_UP' as const,
+  SAMPLE_DELIVERY: 'SAMPLE_DELIVERY' as const
 } as const
 
-// Helper types for the application
-export type UserSubmission = Database['public']['Tables']['user_submissions']['Row']
-export type UserSubmissionInsert = Database['public']['Tables']['user_submissions']['Insert']
-export type UserSubmissionUpdate = Database['public']['Tables']['user_submissions']['Update']
+export const INTERACTION_STATUSES = {
+  SCHEDULED: 'SCHEDULED' as const,
+  COMPLETED: 'COMPLETED' as const,
+  CANCELLED: 'CANCELLED' as const,
+  NO_SHOW: 'NO_SHOW' as const
+} as const
 
-// Contact entity types
-export type Contact = Database['public']['Tables']['contacts']['Row']
-export type ContactInsert = Database['public']['Tables']['contacts']['Insert']
-export type ContactUpdate = Database['public']['Tables']['contacts']['Update']
+export const INTERACTION_OUTCOMES = {
+  POSITIVE: 'POSITIVE' as const,
+  NEUTRAL: 'NEUTRAL' as const,
+  NEGATIVE: 'NEGATIVE' as const,
+  NEEDS_FOLLOW_UP: 'NEEDS_FOLLOW_UP' as const
+} as const
 
-// Organization entity types
-export type Organization = Database['public']['Tables']['organizations']['Row']
-export type OrganizationInsert = Database['public']['Tables']['organizations']['Insert']
-export type OrganizationUpdate = Database['public']['Tables']['organizations']['Update']
+export const OPPORTUNITY_STAGES = {
+  NEW_LEAD: 'New Lead' as const,
+  INITIAL_OUTREACH: 'Initial Outreach' as const,
+  SAMPLE_VISIT_OFFERED: 'Sample/Visit Offered' as const,
+  AWAITING_RESPONSE: 'Awaiting Response' as const,
+  FEEDBACK_LOGGED: 'Feedback Logged' as const,
+  DEMO_SCHEDULED: 'Demo Scheduled' as const,
+  CLOSED_WON: 'Closed - Won' as const
+} as const
 
-// Organization interaction types
-export type OrganizationInteraction = Database['public']['Tables']['organization_interactions']['Row']
-export type OrganizationInteractionInsert = Database['public']['Tables']['organization_interactions']['Insert']
-export type OrganizationInteractionUpdate = Database['public']['Tables']['organization_interactions']['Update']
+export const OPPORTUNITY_CONTEXTS = {
+  SITE_VISIT: 'Site Visit' as const,
+  FOOD_SHOW: 'Food Show' as const,
+  NEW_PRODUCT_INTEREST: 'New Product Interest' as const,
+  FOLLOW_UP: 'Follow-up' as const,
+  DEMO_REQUEST: 'Demo Request' as const,
+  SAMPLING: 'Sampling' as const,
+  CUSTOM: 'Custom' as const
+} as const
 
-// Organization document types
-export type OrganizationDocument = Database['public']['Tables']['organization_documents']['Row']
-export type OrganizationDocumentInsert = Database['public']['Tables']['organization_documents']['Insert']
-export type OrganizationDocumentUpdate = Database['public']['Tables']['organization_documents']['Update']
-
-// Organization analytics types
-export type OrganizationAnalytics = Database['public']['Tables']['organization_analytics']['Row']
-export type OrganizationAnalyticsInsert = Database['public']['Tables']['organization_analytics']['Insert']
-export type OrganizationAnalyticsUpdate = Database['public']['Tables']['organization_analytics']['Update']
-
-// Organization view types
-export type OrganizationSummaryAnalytics = Database['public']['Views']['organization_summary_analytics']['Row']
-export type MonthlyOrganizationPerformance = Database['public']['Views']['monthly_organization_performance']['Row']
-export type OrganizationLeadScoring = Database['public']['Views']['organization_lead_scoring']['Row']
-
-// Contact Principal types
-export type ContactPrincipal = Database['public']['Tables']['contact_principals']['Row']
-export type ContactPrincipalInsert = Database['public']['Tables']['contact_principals']['Insert']
-export type ContactPrincipalUpdate = Database['public']['Tables']['contact_principals']['Update']
-
-// Contact view types
-export type ContactListView = Database['public']['Views']['contact_list_view']['Row']
-export type ContactDetailView = Database['public']['Views']['contact_detail_view']['Row']
-
-// Contact enum types  
-export type AdvocacyLevel = 'High' | 'Medium' | 'Low'
-
-// Organization enum types
-export type OrganizationType = 'B2B' | 'B2C' | 'B2B2C' | 'Non-Profit' | 'Government' | 'Other'
-export type OrganizationSize = 'Startup' | 'Small' | 'Medium' | 'Large' | 'Enterprise'
-export type OrganizationStatus = 'Active' | 'Inactive' | 'Prospect' | 'Customer' | 'Partner' | 'Vendor'
-export type InteractionType = 'Email' | 'Phone' | 'Meeting' | 'Demo' | 'Proposal' | 'Contract' | 'Note' | 'Task' | 'Event' | 'Social' | 'Website' | 'Other'
-export type InteractionDirection = 'Inbound' | 'Outbound'
-
-// Opportunity entity types
-export type Opportunity = Database['public']['Tables']['opportunities']['Row']
-export type OpportunityInsert = Database['public']['Tables']['opportunities']['Insert']
-export type OpportunityUpdate = Database['public']['Tables']['opportunities']['Update']
-
-// Opportunity principal types
-export type OpportunityPrincipal = Database['public']['Tables']['opportunity_principals']['Row']
-export type OpportunityPrincipalInsert = Database['public']['Tables']['opportunity_principals']['Insert']
-export type OpportunityPrincipalUpdate = Database['public']['Tables']['opportunity_principals']['Update']
-
-// Opportunity view types
-export type OpportunityListView = Database['public']['Views']['opportunity_list_view']['Row']
-export type OpportunityDetailView = Database['public']['Views']['opportunity_detail_view']['Row']
-export type OpportunityKpiView = Database['public']['Views']['opportunity_kpi_view']['Row']
-
-// Product entity types
-export type Product = Database['public']['Tables']['products']['Row']
-export type ProductInsert = Database['public']['Tables']['products']['Insert']
-export type ProductUpdate = Database['public']['Tables']['products']['Update']
-
-// Product-Principal relationship types
-export type ProductPrincipal = Database['public']['Tables']['product_principals']['Row']
-export type ProductPrincipalInsert = Database['public']['Tables']['product_principals']['Insert']
-export type ProductPrincipalUpdate = Database['public']['Tables']['product_principals']['Update']
-
-// Product view types
-export type ProductPrincipalAvailabilityView = Database['public']['Views']['product_principal_availability_view']['Row']
-
-// Opportunity enum types
-export type OpportunityStage = 'New Lead' | 'Initial Outreach' | 'Sample/Visit Offered' | 'Awaiting Response' | 'Feedback Logged' | 'Demo Scheduled' | 'Closed - Won'
-export type OpportunityContext = 'Site Visit' | 'Food Show' | 'New Product Interest' | 'Follow-up' | 'Demo Request' | 'Sampling' | 'Custom'
-
-// Product enum types
-export type ProductCategory = 'Protein' | 'Sauce' | 'Seasoning' | 'Beverage' | 'Snack' | 'Frozen' | 'Dairy' | 'Bakery' | 'Other'
-
-// Interaction entity types
-export type Interaction = Database['public']['Tables']['interactions']['Row']
-export type InteractionInsert = Database['public']['Tables']['interactions']['Insert']
-export type InteractionUpdate = Database['public']['Tables']['interactions']['Update']
-
-// Interaction enum types
-export type InteractionTypeDB = 'EMAIL' | 'CALL' | 'IN_PERSON' | 'DEMO' | 'FOLLOW_UP'
+export const PRODUCT_CATEGORIES = {
+  PROTEIN: 'Protein' as const,
+  SAUCE: 'Sauce' as const,
+  SEASONING: 'Seasoning' as const,
+  BEVERAGE: 'Beverage' as const,
+  SNACK: 'Snack' as const,
+  FROZEN: 'Frozen' as const,
+  DAIRY: 'Dairy' as const,
+  BAKERY: 'Bakery' as const,
+  OTHER: 'Other' as const
+} as const

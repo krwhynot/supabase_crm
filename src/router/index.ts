@@ -135,7 +135,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/interactions/InteractionsListView.vue'),
         meta: {
           title: 'Interactions',
-          description: 'Manage your customer interactions'
+          description: 'Track customer interactions and activities'
         }
       },
       {
@@ -144,7 +144,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/interactions/InteractionCreateView.vue'),
         meta: {
           title: 'New Interaction',
-          description: 'Add a new interaction to your CRM'
+          description: 'Record a new customer interaction'
         }
       },
       {
@@ -167,48 +167,58 @@ const routes: RouteRecordRaw[] = [
           description: 'Modify interaction information'
         }
       },
-      // Contextual interaction creation routes
       {
-        path: 'opportunities/:opportunityId/interactions/new',
-        name: 'InteractionCreateFromOpportunity',
-        component: () => import('@/views/interactions/InteractionCreateView.vue'),
-        props: route => ({ 
-          opportunityId: route.params.opportunityId,
-          fromContext: 'opportunity'
-        }),
+        path: 'principals',
+        name: 'PrincipalsList',
+        component: () => import('@/views/principals/PrincipalsListView.vue'),
         meta: {
-          title: 'New Interaction',
-          description: 'Add interaction for this opportunity'
+          title: 'Principals',
+          description: 'Manage principal relationships and activities'
         }
       },
       {
-        path: 'contacts/:contactId/interactions/new',
-        name: 'InteractionCreateFromContact',
-        component: () => import('@/views/interactions/InteractionCreateView.vue'),
-        props: route => ({ 
-          contactId: route.params.contactId,
-          fromContext: 'contact'
-        }),
+        path: 'principals/:id',
+        name: 'PrincipalDetail',
+        component: () => import('@/views/principals/PrincipalDetailView.vue'),
+        props: true,
         meta: {
-          title: 'New Interaction',
-          description: 'Add interaction for this contact'
+          title: 'Principal Details',
+          description: 'View principal activity and performance'
+        }
+      },
+      {
+        path: 'principals/:id/analytics',
+        name: 'PrincipalAnalytics',
+        component: () => import('@/views/principals/PrincipalAnalyticsView.vue'),
+        props: true,
+        meta: {
+          title: 'Principal Analytics',
+          description: 'Comprehensive analytics and performance insights'
+        }
+      },
+      {
+        path: 'principals/:id/products',
+        name: 'PrincipalProducts',
+        component: () => import('@/views/principals/PrincipalProductsView.vue'),
+        props: true,
+        meta: {
+          title: 'Principal Products',
+          description: 'Product portfolio and performance management'
+        }
+      },
+      {
+        path: 'principals/:id/distributors',
+        name: 'PrincipalDistributors',
+        component: () => import('@/views/principals/PrincipalDistributorsView.vue'),
+        props: true,
+        meta: {
+          title: 'Principal Distributors',
+          description: 'Distributor network and relationship management'
         }
       }
     ]
   },
-  {
-    // Mobile-optimized routes (full-screen, no sidebar)
-    path: '/interactions/quick',
-    name: 'QuickInteraction',
-    component: () => import('@/views/interactions/QuickInteractionView.vue'),
-    meta: {
-      title: 'Quick Interaction',
-      description: 'Mobile-optimized interaction creation',
-      fullscreen: true,
-      mobile: true,
-      requiresPWA: true
-    }
-  }
+  // Mobile interaction routes will be added during Stage 5 implementation
 ]
 
 const router = createRouter({
@@ -232,8 +242,8 @@ router.beforeEach((to, from, next) => {
     const isPWA = window.matchMedia('(display-mode: standalone)').matches
     
     if (!isMobile && !isPWA) {
-      // Redirect mobile-only routes to desktop equivalent
-      next('/interactions/new')
+      // Redirect mobile-only routes to desktop equivalent (will be implemented in Stage 5)
+      next('/')
       return
     }
   }

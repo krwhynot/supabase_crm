@@ -1,357 +1,385 @@
 /**
  * Interactions API Service
- * Centralized Supabase operations for interaction management
- * Includes KPI calculations, follow-up tracking, and template management
+ * Handles all API interactions for the interaction management system
+ * Follows established patterns from opportunitiesApi for consistency
+ * Provides full CRUD operations with proper error handling and fallbacks
  */
 
 import { supabase } from '@/config/supabaseClient'
-import type { 
+import type {
   Interaction,
-  InteractionInsert,
-  InteractionUpdate,
   InteractionListView,
   InteractionDetailView,
   InteractionFormData,
   InteractionKPIs,
   InteractionFilters,
   InteractionPagination,
-  InteractionListResponse,
+  InteractionListResponse
+} from '@/types/interactions'
+import type {
+  InteractionInsert,
+  InteractionUpdate,
   InteractionType,
   InteractionStatus,
-  InteractionOutcome,
-  InteractionTemplate
-} from '@/types/interactions'
+  InteractionOutcome
+} from '@/types/database.types'
 
 /**
  * API Response wrapper for consistent error handling
  */
 export interface ApiResponse<T> {
-  data: T | null
-  error: string | null
   success: boolean
+  data?: T
+  error?: string
+  metadata?: {
+    total_count?: number
+    page?: number
+    limit?: number
+    has_next?: boolean
+    has_previous?: boolean
+  }
 }
 
 /**
- * Search and pagination options
+ * Interactions API class with comprehensive CRUD operations
  */
-export interface InteractionSearchOptions {
-  search?: string
-  limit?: number
-  offset?: number
-  sortBy?: 'title' | 'type' | 'status' | 'interaction_date' | 'created_at'
-  sortOrder?: 'asc' | 'desc'
-  type?: InteractionType
-  status?: InteractionStatus
-  outcome?: InteractionOutcome
-  organization_id?: string
-  opportunity_id?: string
-  principal_id?: string
-  conducted_by?: string
-  follow_up_required?: boolean
-  follow_up_overdue?: boolean
-}
-
-/**
- * Follow-up tracking result interface
- */
-export interface FollowUpTrackingResult {
-  pending: InteractionListView[]
-  overdue: InteractionListView[]
-  upcoming: InteractionListView[]
-}
-
 class InteractionsApiService {
+  
+  /**
+   * Check if Supabase is available
+   */
+  private async isSupabaseAvailable(): Promise<boolean> {
+    try {
+      if (!supabase) return false
+      
+      // Test connection with a simple query
+      const { error } = await supabase
+        .from('interactions')
+        .select('count')
+        .limit(1)
+      
+      return !error
+    } catch {
+      return false
+    }
+  }
 
   /**
-   * Get all interactions with optional search, filtering, and pagination
+   * Get interactions with filtering and pagination
    */
-  async getInteractions(options: InteractionSearchOptions = {}): Promise<ApiResponse<InteractionListView[]>> {
+  async getInteractionsWithFilters(
+    filters: InteractionFilters = {},
+    pagination: InteractionPagination = { page: 1, limit: 20, sort_by: 'interaction_date', sort_order: 'desc' }
+  ): Promise<ApiResponse<InteractionListResponse>> {
+    console.log('API Call: getInteractionsWithFilters', { filters, pagination })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
-      // Get interactions from the main table with related data
       let query = supabase
         .from('interactions')
         .select(`
-          *,
-          organizations:organization_id(name, type),
-          opportunities:opportunity_id(name, stage),
-          principals:principal_id(name)
+          id,
+          type,
+          subject,
+          interaction_date,
+          opportunity_id,
+          status,
+          outcome,
+          duration_minutes,
+          rating,
+          follow_up_required,
+          follow_up_date,
+          created_at,
+          updated_at,
+          opportunities (
+            id,
+            name,
+            organization_id,
+            organizations (
+              name
+            )
+          )
         `)
-
-      // Apply search filter
-      if (options.search) {
-        query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`)
-      }
+        .is('deleted_at', null)
 
       // Apply filters
-      if (options.type) {
-        query = query.eq('type', options.type)
+      if (filters.opportunity_id) {
+        query = query.eq('opportunity_id', filters.opportunity_id)
       }
-      if (options.status) {
-        query = query.eq('status', options.status)
+      
+      if (filters.type) {
+        query = query.eq('type', filters.type)
       }
-      if (options.outcome) {
-        query = query.eq('outcome', options.outcome)
+      
+      if (filters.status) {
+        query = query.eq('status', filters.status)
       }
-      if (options.organization_id) {
-        query = query.eq('organization_id', options.organization_id)  
+      
+      if (filters.outcome) {
+        query = query.eq('outcome', filters.outcome)
       }
-      if (options.opportunity_id) {
-        query = query.eq('opportunity_id', options.opportunity_id)
+      
+      if (filters.date_from) {
+        query = query.gte('interaction_date', filters.date_from)
       }
-      if (options.principal_id) {
-        query = query.eq('principal_id', options.principal_id)
+      
+      if (filters.date_to) {
+        query = query.lte('interaction_date', filters.date_to)
       }
-      if (options.conducted_by) {
-        query = query.eq('conducted_by', options.conducted_by)
+      
+      if (filters.search) {
+        query = query.or(`subject.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`)
       }
-      if (options.follow_up_required !== undefined) {
-        query = query.eq('follow_up_required', options.follow_up_required)
-      }
-
-      // Handle overdue follow-up filter
-      if (options.follow_up_overdue) {
-        const today = new Date().toISOString().split('T')[0]
-        query = query
-          .eq('follow_up_required', true)
-          .lt('follow_up_date', today)
+      
+      if (filters.follow_up_required !== undefined) {
+        query = query.eq('follow_up_required', filters.follow_up_required)
       }
 
       // Apply sorting
-      const sortBy = options.sortBy || 'interaction_date'
-      const sortOrder = options.sortOrder || 'desc'
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' })
+      const sortColumn = pagination.sort_by || 'interaction_date'
+      const sortOrder = pagination.sort_order === 'asc' ? { ascending: true } : { ascending: false }
+      query = query.order(sortColumn, sortOrder)
 
       // Apply pagination
-      if (options.limit) {
-        query = query.limit(options.limit)
-      }
-      if (options.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1)
-      }
+      const from = ((pagination.page || 1) - 1) * (pagination.limit || 20)
+      const to = from + (pagination.limit || 20) - 1
+      query = query.range(from, to)
 
-      const { data, error } = await query
+      const { data, error, count } = await query
 
       if (error) {
-        console.error('Database error:', error)
-        return { data: null, error: error.message, success: false }
+        console.error('Error in getInteractionsWithFilters:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      // Transform data to match InteractionListView interface
-      const transformedData: InteractionListView[] = data?.map(interaction => ({
+      // Transform data to InteractionListView format
+      const interactions: InteractionListView[] = data?.map(interaction => ({
         id: interaction.id,
-        type: interaction.type,
-        status: interaction.status,
-        title: interaction.title,
+        type: interaction.type as InteractionType,
+        subject: interaction.subject,
         interaction_date: interaction.interaction_date,
+        opportunity_id: interaction.opportunity_id,
+        status: interaction.status as InteractionStatus,
+        outcome: interaction.outcome as InteractionOutcome | null,
         duration_minutes: interaction.duration_minutes,
-        outcome: interaction.outcome,
-        follow_up_required: interaction.follow_up_required,
+        rating: interaction.rating,
+        follow_up_required: interaction.follow_up_required || false,
         follow_up_date: interaction.follow_up_date,
-        conducted_by: interaction.conducted_by,
         created_at: interaction.created_at,
         updated_at: interaction.updated_at,
-        organization_name: interaction.organizations?.name || '',
-        organization_type: interaction.organizations?.type || '',
-        opportunity_name: interaction.opportunities?.name || null,
-        opportunity_stage: interaction.opportunities?.stage || null,
-        principal_name: interaction.principals?.name || null,
-        principal_id: interaction.principal_id,
-        days_since_interaction: this.calculateDaysSinceInteraction(interaction.interaction_date),
-        days_until_follow_up: this.calculateDaysUntilFollowUp(interaction.follow_up_date),
-        is_overdue_follow_up: this.isFollowUpOverdue(interaction.follow_up_date, interaction.follow_up_required)
+        opportunity_name: interaction.opportunities?.name || '',
+        organization_name: interaction.opportunities?.organizations?.name || '',
+        days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
+        days_until_followup: interaction.follow_up_date ? 
+          this.calculateDaysUntil(interaction.follow_up_date) : null
       })) || []
 
-      return { data: transformedData, error: null, success: true }
-
-    } catch (error) {
-      console.error('API error:', error)
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
-      }
-    }
-  }
-
-  /**
-   * Get interactions with advanced filtering and pagination
-   */
-  async getInteractionsWithFilters(
-    filters: InteractionFilters, 
-    pagination: InteractionPagination
-  ): Promise<ApiResponse<InteractionListResponse>> {
-    try {
-      const options: InteractionSearchOptions = {
-        search: filters.search,
-        type: filters.type?.[0], // Take first type if array provided
-        status: filters.status?.[0], // Take first status if array provided
-        outcome: filters.outcome?.[0], // Take first outcome if array provided
-        organization_id: filters.organization_id,
-        opportunity_id: filters.opportunity_id,
-        principal_id: filters.principal_id,
-        conducted_by: filters.conducted_by,
-        follow_up_required: filters.follow_up_required,
-        follow_up_overdue: filters.follow_up_overdue,
-        limit: pagination.limit,
-        offset: (pagination.page - 1) * pagination.limit,
-        sortBy: pagination.sort_by as any,
-        sortOrder: pagination.sort_order
-      }
-
-      const response = await this.getInteractions(options)
+      const totalCount = count || 0
+      const currentPage = pagination.page || 1
+      const limit = pagination.limit || 20
       
-      if (!response.success || !response.data) {
-        return response as ApiResponse<InteractionListResponse>
+      return {
+        success: true,
+        data: {
+          interactions,
+          total_count: totalCount,
+          page: currentPage,
+          limit,
+          has_next: (currentPage * limit) < totalCount,
+          has_previous: currentPage > 1
+        }
       }
-
-      // Get total count for pagination
-      const countResponse = await this.getInteractionCount(filters)
-      const totalCount = countResponse.data || 0
-
-      const listResponse: InteractionListResponse = {
-        interactions: response.data,
-        total_count: totalCount,
-        page: pagination.page,
-        limit: pagination.limit,
-        has_next: (pagination.page * pagination.limit) < totalCount,
-        has_previous: pagination.page > 1
-      }
-
-      return { data: listResponse, error: null, success: true }
 
     } catch (error) {
-      console.error('API error:', error)
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getInteractionsWithFilters:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
 
   /**
-   * Get total count of interactions matching filters
+   * Get interactions for a specific opportunity
    */
-  async getInteractionCount(filters: InteractionFilters): Promise<ApiResponse<number>> {
+  async getInteractionsByOpportunity(opportunityId: string): Promise<ApiResponse<InteractionListView[]>> {
+    console.log('API Call: getInteractionsByOpportunity', { opportunityId })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('interactions')
-        .select('id', { count: 'exact', head: true })
-
-      // Apply same filters as main query
-      if (filters.search) {
-        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-      }
-      if (filters.type?.[0]) {
-        query = query.eq('type', filters.type[0])
-      }
-      if (filters.status?.[0]) {
-        query = query.eq('status', filters.status[0])
-      }
-      if (filters.organization_id) {
-        query = query.eq('organization_id', filters.organization_id)
-      }
-
-      const { count, error } = await query
+        .select(`
+          id,
+          type,
+          subject,
+          interaction_date,
+          opportunity_id,
+          status,
+          outcome,
+          duration_minutes,
+          rating,
+          follow_up_required,
+          follow_up_date,
+          created_at,
+          updated_at,
+          opportunities (
+            name,
+            organizations (
+              name
+            )
+          )
+        `)
+        .eq('opportunity_id', opportunityId)
+        .is('deleted_at', null)
+        .order('interaction_date', { ascending: false })
 
       if (error) {
-        return { data: null, error: error.message, success: false }
+        console.error('Error in getInteractionsByOpportunity:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      return { data: count || 0, error: null, success: true }
+      const interactions: InteractionListView[] = data?.map(interaction => ({
+        id: interaction.id,
+        type: interaction.type as InteractionType,
+        subject: interaction.subject,
+        interaction_date: interaction.interaction_date,
+        opportunity_id: interaction.opportunity_id,
+        status: interaction.status as InteractionStatus,
+        outcome: interaction.outcome as InteractionOutcome | null,
+        duration_minutes: interaction.duration_minutes,
+        rating: interaction.rating,
+        follow_up_required: interaction.follow_up_required || false,
+        follow_up_date: interaction.follow_up_date,
+        created_at: interaction.created_at,
+        updated_at: interaction.updated_at,
+        opportunity_name: interaction.opportunities?.name || '',
+        organization_name: interaction.opportunities?.organizations?.name || '',
+        days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
+        days_until_followup: interaction.follow_up_date ? 
+          this.calculateDaysUntil(interaction.follow_up_date) : null
+      })) || []
+
+      return {
+        success: true,
+        data: interactions
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getInteractionsByOpportunity:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
 
   /**
-   * Get a single interaction by ID with full details
+   * Get a single interaction by ID
    */
   async getInteractionById(id: string): Promise<ApiResponse<InteractionDetailView>> {
+    console.log('API Call: getInteractionById', { id })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
       const { data, error } = await supabase
         .from('interactions')
         .select(`
           *,
-          organizations:organization_id(name, type, address, phone, email),
-          opportunities:opportunity_id(name, stage, probability_percent, expected_close_date),
-          principals:principal_id(name, address, phone, email)
+          opportunities (
+            id,
+            name,
+            stage,
+            organization_id,
+            organizations (
+              id,
+              name,
+              type
+            )
+          )
         `)
         .eq('id', id)
+        .is('deleted_at', null)
         .single()
 
       if (error) {
-        return { data: null, error: error.message, success: false }
+        console.error('Error in getInteractionById:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      if (!data) {
-        return { data: null, error: 'Interaction not found', success: false }
-      }
-
-      // Transform to InteractionDetailView
-      const detailView: InteractionDetailView = {
-        // Base fields
+      const interaction: InteractionDetailView = {
         id: data.id,
-        type: data.type,
-        status: data.status,
-        title: data.title,
-        description: data.description,
+        type: data.type as InteractionType,
+        subject: data.subject,
         interaction_date: data.interaction_date,
+        opportunity_id: data.opportunity_id,
+        status: data.status as InteractionStatus,
+        outcome: data.outcome as InteractionOutcome | null,
+        notes: data.notes,
         duration_minutes: data.duration_minutes,
-        outcome: data.outcome,
-        follow_up_required: data.follow_up_required,
+        location: data.location,
+        follow_up_required: data.follow_up_required || false,
         follow_up_date: data.follow_up_date,
         follow_up_notes: data.follow_up_notes,
-        conducted_by: data.conducted_by,
-        location: data.location,
-        meeting_url: data.meeting_url,
+        rating: data.rating,
+        next_action: data.next_action,
+        contact_method: data.contact_method,
+        participants: data.participants || [],
+        attachments: data.attachments || [],
+        tags: data.tags || [],
+        custom_fields: data.custom_fields || {},
         created_at: data.created_at,
         updated_at: data.updated_at,
         created_by: data.created_by,
-        deleted_at: data.deleted_at,
-        
-        // Organization data
-        organization_name: data.organizations?.name || '',
-        organization_type: data.organizations?.type || '',
-        organization_id: data.organization_id,
-        organization_address: data.organizations?.address || null,
-        organization_phone: data.organizations?.phone || null,
-        organization_email: data.organizations?.email || null,
-        
-        // Opportunity data
-        opportunity_name: data.opportunities?.name || null,
-        opportunity_stage: data.opportunities?.stage || null,
-        opportunity_id: data.opportunity_id,
-        opportunity_probability: data.opportunities?.probability_percent || null,
-        opportunity_expected_close: data.opportunities?.expected_close_date || null,
-        
-        // Principal data
-        principal_name: data.principals?.name || null,
-        principal_id: data.principal_id,
-        principal_address: data.principals?.address || null,
-        principal_phone: data.principals?.phone || null,
-        principal_email: data.principals?.email || null,
-        
-        // Calculated fields
-        days_since_interaction: this.calculateDaysSinceInteraction(data.interaction_date),
-        days_until_follow_up: this.calculateDaysUntilFollowUp(data.follow_up_date),
-        is_overdue_follow_up: this.isFollowUpOverdue(data.follow_up_date, data.follow_up_required),
-        related_interactions_count: 0, // Would need separate query
-        recent_opportunity_interactions: 0 // Would need separate query
+        opportunity: data.opportunities ? {
+          id: data.opportunities.id,
+          name: data.opportunities.name,
+          stage: data.opportunities.stage,
+          organization: data.opportunities.organizations ? {
+            id: data.opportunities.organizations.id,
+            name: data.opportunities.organizations.name,
+            type: data.opportunities.organizations.type
+          } : null
+        } : null
       }
 
-      return { data: detailView, error: null, success: true }
+      return {
+        success: true,
+        data: interaction
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getInteractionById:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
@@ -360,24 +388,37 @@ class InteractionsApiService {
    * Create a new interaction
    */
   async createInteraction(interactionData: InteractionFormData): Promise<ApiResponse<Interaction>> {
+    console.log('API Call: createInteraction', { interactionData })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
       const insertData: InteractionInsert = {
         type: interactionData.type,
-        status: interactionData.status,
-        title: interactionData.title,
-        description: interactionData.description,
+        subject: interactionData.subject,
         interaction_date: interactionData.interaction_date,
-        duration_minutes: interactionData.duration_minutes,
-        outcome: interactionData.outcome,
-        follow_up_required: interactionData.follow_up_required,
-        follow_up_date: interactionData.follow_up_date,
-        follow_up_notes: interactionData.follow_up_notes,
-        organization_id: interactionData.organization_id,
         opportunity_id: interactionData.opportunity_id,
-        principal_id: interactionData.principal_id,
-        conducted_by: interactionData.conducted_by,
-        location: interactionData.location,
-        meeting_url: interactionData.meeting_url
+        status: interactionData.status || 'SCHEDULED',
+        outcome: interactionData.outcome || null,
+        notes: interactionData.notes || null,
+        duration_minutes: interactionData.duration_minutes || null,
+        location: interactionData.location || null,
+        follow_up_required: interactionData.follow_up_required || false,
+        follow_up_date: interactionData.follow_up_date || null,
+        follow_up_notes: interactionData.follow_up_notes || null,
+        rating: interactionData.rating || null,
+        next_action: interactionData.next_action || null,
+        contact_method: interactionData.contact_method || null,
+        participants: interactionData.participants || [],
+        attachments: interactionData.attachments || [],
+        tags: interactionData.tags || [],
+        custom_fields: interactionData.custom_fields || {},
+        created_by: interactionData.created_by || null
       }
 
       const { data, error } = await supabase
@@ -387,16 +428,23 @@ class InteractionsApiService {
         .single()
 
       if (error) {
-        return { data: null, error: error.message, success: false }
+        console.error('Error in createInteraction:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      return { data, error: null, success: true }
+      return {
+        success: true,
+        data: data as Interaction
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in createInteraction:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
@@ -404,45 +452,43 @@ class InteractionsApiService {
   /**
    * Update an existing interaction
    */
-  async updateInteraction(id: string, updates: Partial<InteractionFormData>): Promise<ApiResponse<Interaction>> {
-    try {
-      const updateData: InteractionUpdate = {
-        ...(updates.type && { type: updates.type }),
-        ...(updates.status && { status: updates.status }),
-        ...(updates.title && { title: updates.title }),
-        ...(updates.description !== undefined && { description: updates.description }),
-        ...(updates.interaction_date && { interaction_date: updates.interaction_date }),
-        ...(updates.duration_minutes !== undefined && { duration_minutes: updates.duration_minutes }),
-        ...(updates.outcome !== undefined && { outcome: updates.outcome }),
-        ...(updates.follow_up_required !== undefined && { follow_up_required: updates.follow_up_required }),
-        ...(updates.follow_up_date !== undefined && { follow_up_date: updates.follow_up_date }),
-        ...(updates.follow_up_notes !== undefined && { follow_up_notes: updates.follow_up_notes }),
-        ...(updates.organization_id && { organization_id: updates.organization_id }),
-        ...(updates.opportunity_id !== undefined && { opportunity_id: updates.opportunity_id }),
-        ...(updates.principal_id !== undefined && { principal_id: updates.principal_id }),
-        ...(updates.conducted_by !== undefined && { conducted_by: updates.conducted_by }),
-        ...(updates.location !== undefined && { location: updates.location }),
-        ...(updates.meeting_url !== undefined && { meeting_url: updates.meeting_url })
+  async updateInteraction(id: string, updates: Partial<InteractionUpdate>): Promise<ApiResponse<Interaction>> {
+    console.log('API Call: updateInteraction', { id, updates })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
       }
+    }
 
+    try {
       const { data, error } = await supabase
         .from('interactions')
-        .update(updateData)
+        .update(updates)
         .eq('id', id)
+        .is('deleted_at', null)
         .select()
         .single()
 
       if (error) {
-        return { data: null, error: error.message, success: false }
+        console.error('Error in updateInteraction:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      return { data, error: null, success: true }
+      return {
+        success: true,
+        data: data as Interaction
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in updateInteraction:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
@@ -450,7 +496,16 @@ class InteractionsApiService {
   /**
    * Delete an interaction (soft delete)
    */
-  async deleteInteraction(id: string): Promise<ApiResponse<boolean>> {
+  async deleteInteraction(id: string): Promise<ApiResponse<void>> {
+    console.log('API Call: deleteInteraction', { id })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
       const { error } = await supabase
         .from('interactions')
@@ -458,16 +513,22 @@ class InteractionsApiService {
         .eq('id', id)
 
       if (error) {
-        return { data: null, error: error.message, success: false }
+        console.error('Error in deleteInteraction:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      return { data: true, error: null, success: true }
+      return {
+        success: true
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in deleteInteraction:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
@@ -476,93 +537,309 @@ class InteractionsApiService {
    * Get interaction KPIs for dashboard
    */
   async getInteractionKPIs(): Promise<ApiResponse<InteractionKPIs>> {
+    console.log('API Call: getInteractionKPIs')
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
-      // This would involve multiple queries to calculate KPIs
-      // For now, return mock data structure
-      
-      const mockKPIs: InteractionKPIs = {
-        total_interactions: 0,
-        this_week_interactions: 0,
-        this_month_interactions: 0,
-        pending_follow_ups: 0,
-        overdue_follow_ups: 0,
-        average_duration_minutes: 0,
-        positive_outcomes_percentage: 0,
-        follow_up_completion_rate: 0,
-        type_distribution: {} as any,
-        outcome_distribution: {} as any,
-        interactions_this_week: 0,
-        interactions_last_week: 0,
-        week_over_week_change: 0
+      // Get basic counts
+      const { data: totalData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .is('deleted_at', null)
+
+      const { data: completedData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .eq('status', 'COMPLETED')
+        .is('deleted_at', null)
+
+      const { data: scheduledData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .eq('status', 'SCHEDULED')
+        .is('deleted_at', null)
+
+      const { data: positiveData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .eq('outcome', 'POSITIVE')
+        .is('deleted_at', null)
+
+      // Get follow-up counts
+      const { data: pendingFollowUps } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .eq('follow_up_required', true)
+        .gte('follow_up_date', new Date().toISOString())
+        .is('deleted_at', null)
+
+      const { data: overdueFollowUps } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .eq('follow_up_required', true)
+        .lt('follow_up_date', new Date().toISOString())
+        .is('deleted_at', null)
+
+      // Get this month's interactions
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+
+      const { data: thisMonthData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .gte('created_at', startOfMonth.toISOString())
+        .is('deleted_at', null)
+
+      // Get last month's interactions
+      const startOfLastMonth = new Date(startOfMonth)
+      startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1)
+      const endOfLastMonth = new Date(startOfMonth)
+      endOfLastMonth.setTime(endOfLastMonth.getTime() - 1)
+
+      const { data: lastMonthData } = await supabase
+        .from('interactions')
+        .select('id', { count: 'exact' })
+        .gte('created_at', startOfLastMonth.toISOString())
+        .lte('created_at', endOfLastMonth.toISOString())
+        .is('deleted_at', null)
+
+      // Get average rating and duration
+      const { data: ratingData } = await supabase
+        .from('interactions')
+        .select('rating, duration_minutes')
+        .not('rating', 'is', null)
+        .is('deleted_at', null)
+
+      const ratings = ratingData?.map(r => r.rating).filter(r => r !== null) || []
+      const durations = ratingData?.map(r => r.duration_minutes).filter(d => d !== null) || []
+
+      const averageRating = ratings.length > 0 ? 
+        ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0
+
+      const averageDuration = durations.length > 0 ? 
+        durations.reduce((sum, duration) => sum + duration, 0) / durations.length : 0
+
+      // Get most common type
+      const { data: typeData } = await supabase
+        .from('interactions')
+        .select('type')
+        .is('deleted_at', null)
+
+      const typeCounts: { [key: string]: number } = {}
+      typeData?.forEach(item => {
+        typeCounts[item.type] = (typeCounts[item.type] || 0) + 1
+      })
+
+      const mostCommonType = Object.keys(typeCounts).reduce((a, b) => 
+        typeCounts[a] > typeCounts[b] ? a : b, 'CALL'
+      ) as InteractionType
+
+      const totalInteractions = totalData?.length || 0
+      const completedInteractions = completedData?.length || 0
+      const positiveOutcomes = positiveData?.length || 0
+
+      const kpis: InteractionKPIs = {
+        total_interactions: totalInteractions,
+        completed_interactions: completedInteractions,
+        scheduled_interactions: scheduledData?.length || 0,
+        positive_outcomes: positiveOutcomes,
+        success_rate: completedInteractions > 0 ? 
+          Math.round((positiveOutcomes / completedInteractions) * 100) : 0,
+        average_rating: Math.round(averageRating * 10) / 10,
+        pending_follow_ups: pendingFollowUps?.length || 0,
+        overdue_follow_ups: overdueFollowUps?.length || 0,
+        interactions_this_month: thisMonthData?.length || 0,
+        interactions_last_month: lastMonthData?.length || 0,
+        average_duration_minutes: Math.round(averageDuration),
+        most_common_type: mostCommonType
       }
 
-      return { data: mockKPIs, error: null, success: true }
+      return {
+        success: true,
+        data: kpis
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getInteractionKPIs:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
 
   /**
-   * Get follow-up tracking data
+   * Get upcoming follow-ups
    */
-  async getFollowUpTracking(): Promise<ApiResponse<FollowUpTrackingResult>> {
+  async getUpcomingFollowUps(): Promise<ApiResponse<InteractionListView[]>> {
+    console.log('API Call: getUpcomingFollowUps')
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
-      const today = new Date().toISOString().split('T')[0]
-      const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      const { data, error } = await supabase
+        .from('interactions')
+        .select(`
+          id,
+          type,
+          subject,
+          interaction_date,
+          opportunity_id,
+          status,
+          outcome,
+          duration_minutes,
+          rating,
+          follow_up_required,
+          follow_up_date,
+          created_at,
+          updated_at,
+          opportunities (
+            name,
+            organizations (
+              name
+            )
+          )
+        `)
+        .eq('follow_up_required', true)
+        .not('follow_up_date', 'is', null)
+        .is('deleted_at', null)
+        .order('follow_up_date', { ascending: true })
 
-      // Get overdue follow-ups
-      const overdueResponse = await this.getInteractions({
-        follow_up_required: true,
-        follow_up_overdue: true,
-        limit: 50
-      })
-
-      // Get upcoming follow-ups
-      const upcomingResponse = await this.getInteractions({
-        follow_up_required: true,
-        limit: 50
-      })
-
-      const result: FollowUpTrackingResult = {
-        pending: upcomingResponse.data?.filter(i => 
-          i.follow_up_date && i.follow_up_date >= today
-        ) || [],
-        overdue: overdueResponse.data || [],
-        upcoming: upcomingResponse.data?.filter(i => 
-          i.follow_up_date && i.follow_up_date >= today && i.follow_up_date <= nextWeek
-        ) || []
+      if (error) {
+        console.error('Error in getUpcomingFollowUps:', error)
+        return {
+          success: false,
+          error: error.message
+        }
       }
 
-      return { data: result, error: null, success: true }
+      const interactions: InteractionListView[] = data?.map(interaction => ({
+        id: interaction.id,
+        type: interaction.type as InteractionType,
+        subject: interaction.subject,
+        interaction_date: interaction.interaction_date,
+        opportunity_id: interaction.opportunity_id,
+        status: interaction.status as InteractionStatus,
+        outcome: interaction.outcome as InteractionOutcome | null,
+        duration_minutes: interaction.duration_minutes,
+        rating: interaction.rating,
+        follow_up_required: interaction.follow_up_required || false,
+        follow_up_date: interaction.follow_up_date,
+        created_at: interaction.created_at,
+        updated_at: interaction.updated_at,
+        opportunity_name: interaction.opportunities?.name || '',
+        organization_name: interaction.opportunities?.organizations?.name || '',
+        days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
+        days_until_followup: interaction.follow_up_date ? 
+          this.calculateDaysUntil(interaction.follow_up_date) : null
+      })) || []
+
+      return {
+        success: true,
+        data: interactions
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getUpcomingFollowUps:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
 
   /**
-   * Get interaction templates
+   * Get recent interactions
    */
-  async getInteractionTemplates(): Promise<ApiResponse<InteractionTemplate[]>> {
+  async getRecentInteractions(limit: number = 10): Promise<ApiResponse<InteractionListView[]>> {
+    console.log('API Call: getRecentInteractions', { limit })
+    
+    if (!await this.isSupabaseAvailable()) {
+      return {
+        success: false,
+        error: 'Database connection not available'
+      }
+    }
+
     try {
-      // This would query a templates table
-      // For now, return empty array to trigger fallback to defaults
-      return { data: [], error: 'Templates not implemented', success: false }
+      const { data, error } = await supabase
+        .from('interactions')
+        .select(`
+          id,
+          type,
+          subject,
+          interaction_date,
+          opportunity_id,
+          status,
+          outcome,
+          duration_minutes,
+          rating,
+          follow_up_required,
+          follow_up_date,
+          created_at,
+          updated_at,
+          opportunities (
+            name,
+            organizations (
+              name
+            )
+          )
+        `)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('Error in getRecentInteractions:', error)
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+
+      const interactions: InteractionListView[] = data?.map(interaction => ({
+        id: interaction.id,
+        type: interaction.type as InteractionType,
+        subject: interaction.subject,
+        interaction_date: interaction.interaction_date,
+        opportunity_id: interaction.opportunity_id,
+        status: interaction.status as InteractionStatus,
+        outcome: interaction.outcome as InteractionOutcome | null,
+        duration_minutes: interaction.duration_minutes,
+        rating: interaction.rating,
+        follow_up_required: interaction.follow_up_required || false,
+        follow_up_date: interaction.follow_up_date,
+        created_at: interaction.created_at,
+        updated_at: interaction.updated_at,
+        opportunity_name: interaction.opportunities?.name || '',
+        organization_name: interaction.opportunities?.organizations?.name || '',
+        days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
+        days_until_followup: interaction.follow_up_date ? 
+          this.calculateDaysUntil(interaction.follow_up_date) : null
+      })) || []
+
+      return {
+        success: true,
+        data: interactions
+      }
 
     } catch (error) {
-      return { 
-        data: null, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred', 
-        success: false 
+      console.error('Error in getRecentInteractions:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unexpected error occurred'
       }
     }
   }
@@ -572,38 +849,23 @@ class InteractionsApiService {
   // ===============================
 
   /**
-   * Calculate days since interaction date
+   * Calculate days since a given date
    */
-  private calculateDaysSinceInteraction(interactionDate: string): number {
-    const interaction = new Date(interactionDate)
-    const today = new Date()
-    const diffTime = today.getTime() - interaction.getTime()
+  private calculateDaysSince(dateString: string): number {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = now.getTime() - date.getTime()
     return Math.floor(diffTime / (1000 * 60 * 60 * 24))
   }
 
   /**
-   * Calculate days until follow-up date
+   * Calculate days until a given date
    */
-  private calculateDaysUntilFollowUp(followUpDate: string | null): number | null {
-    if (!followUpDate) return null
-    
-    const followUp = new Date(followUpDate)
-    const today = new Date()
-    const diffTime = followUp.getTime() - today.getTime()
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  }
-
-  /**
-   * Check if follow-up is overdue
-   */
-  private isFollowUpOverdue(followUpDate: string | null, followUpRequired: boolean): boolean {
-    if (!followUpRequired || !followUpDate) return false
-    
-    const followUp = new Date(followUpDate)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    return followUp < today
+  private calculateDaysUntil(dateString: string): number {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = date.getTime() - now.getTime()
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   }
 }
 

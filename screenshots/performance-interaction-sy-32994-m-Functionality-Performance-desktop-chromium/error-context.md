@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- img
+- text: CRM
+- button "Collapse sidebar":
+  - img
+- navigation:
+  - text: Main
+  - link "Dashboard":
+    - /url: /
+    - img
+    - text: Dashboard
+  - text: CRM
+  - link "Organizations":
+    - /url: /organizations
+    - img
+    - text: Organizations
+  - link "Contacts":
+    - /url: /contacts
+    - img
+    - text: Contacts
+  - link "Opportunities":
+    - /url: /opportunities
+    - img
+    - text: Opportunities
+  - link "Interactions":
+    - /url: /interactions
+    - img
+    - text: Interactions
+  - heading "Filters" [level=3]
+  - button "Current Week":
+    - img
+    - text: Current Week
+- img
+- paragraph: User
+- paragraph: Dashboard v1.0
+- main:
+  - button "Back"
+  - heading "New Interaction" [level=1]
+  - paragraph: Record a new customer interaction or activity
+  - heading "New Interaction" [level=2]
+  - paragraph: Record a new customer interaction
+  - navigation "Progress":
+    - list:
+      - listitem: 1 Basic Info
+      - listitem: 2 Details
+      - listitem: Outcome
+  - text: Interaction Type *
+  - combobox "Interaction Type *":
+    - option "Email"
+    - option "Phone Call" [selected]
+    - option "In-Person Meeting"
+    - option "Product Demo"
+    - option "Follow-up"
+    - option "Sample Delivery"
+  - paragraph: Phone call or voice conversation
+  - text: Date & Time *
+  - textbox "Date & Time *"
+  - text: Subject *
+  - textbox "Subject *"
+  - paragraph: 0/255 characters
+  - text: Related Opportunity *
+  - combobox "Related Opportunity *":
+    - option "Select an opportunity..." [selected]
+  - heading "Quick Templates" [level=4]
+  - button "📞 Quick Call"
+  - button "Next" [disabled]
+```

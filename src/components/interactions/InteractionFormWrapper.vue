@@ -1,681 +1,307 @@
+<!--
+  InteractionFormWrapper.vue
+  Multi-step interaction creation form with validation and smart defaults
+  Follows OpportunityFormWrapper patterns for consistency
+-->
 <template>
   <div class="interaction-form-wrapper">
-    <!-- Form Progress Indicator -->
+    <!-- Form Header -->
     <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <h2 class="text-xl font-semibold text-gray-900">
-            {{ isEditing ? 'Edit Interaction' : 'New Interaction' }}
-          </h2>
-          <div v-if="!isEditing" class="text-sm text-gray-500">
-            Step {{ currentStep }} of {{ totalSteps }}
-          </div>
-        </div>
-        
-        <!-- Quick Template Indicator -->
-        <div v-if="formData.useTemplate && formData.selectedTemplate" class="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
-          <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-          </svg>
-          <span class="text-sm font-medium text-blue-700">
-            Using Template: {{ formData.selectedTemplate.name }}
-          </span>
-        </div>
-      </div>
-      
-      <!-- Progress Bar (only for creation) -->
-      <div v-if="!isEditing" class="mt-4">
-        <div class="flex items-center">
-          <div
-            v-for="step in totalSteps"
-            :key="step"
-            class="flex items-center"
-          >
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        {{ isEditing ? 'Edit Interaction' : 'New Interaction' }}
+      </h2>
+      <p class="text-gray-600">
+        {{ isEditing ? 'Update interaction details' : 'Record a new customer interaction' }}
+      </p>
+    </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="mb-8">
+      <nav aria-label="Progress">
+        <ol class="flex items-center">
+          <li v-for="(step, index) in steps" :key="step.id" class="relative">
             <!-- Step Circle -->
-            <div
-              :class="[
-                'flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium',
-                step < currentStep 
-                  ? 'bg-primary-600 border-primary-600 text-white' 
-                  : step === currentStep
-                    ? 'bg-white border-primary-600 text-primary-600'
-                    : 'bg-white border-gray-300 text-gray-400'
-              ]"
-            >
-              <svg v-if="step < currentStep" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <span v-else>{{ step }}</span>
+            <div class="flex items-center">
+              <div
+                :class="[
+                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
+                  getStepClasses(index + 1)
+                ]"
+              >
+                <CheckIcon v-if="isStepCompleted(index + 1)" class="h-5 w-5" />
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              
+              <!-- Step Label -->
+              <span
+                :class="[
+                  'ml-3 text-sm font-medium',
+                  currentStep === index + 1 ? 'text-blue-600' : 'text-gray-500'
+                ]"
+              >
+                {{ step.name }}
+              </span>
             </div>
-            
+
             <!-- Step Connector -->
             <div
-              v-if="step < totalSteps"
+              v-if="index < steps.length - 1"
               :class="[
-                'w-16 h-0.5 mx-2',
-                step < currentStep ? 'bg-primary-600' : 'bg-gray-300'
+                'absolute left-4 top-8 h-6 w-0.5',
+                isStepCompleted(index + 1) ? 'bg-blue-600' : 'bg-gray-300'
               ]"
             />
-          </div>
-        </div>
-        
-        <!-- Step Labels -->
-        <div class="flex mt-2">
-          <div
-            v-for="(stepInfo, index) in stepLabels"
-            :key="index"
-            class="flex-1 text-center"
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Form Content -->
+    <form @submit.prevent="handleSubmit" class="space-y-6">
+      <!-- Step 1: Basic Information -->
+      <div v-show="currentStep === 1" class="space-y-6">
+        <InteractionStepOne
+          v-model:form-data="formData.step1"
+          :validation="validation"
+          :opportunities="availableOpportunities"
+          :loading="loadingOpportunities"
+          @opportunity-selected="handleOpportunitySelected"
+          @update:form-data="updateStep1Data"
+        />
+      </div>
+
+      <!-- Step 2: Details -->
+      <div v-show="currentStep === 2" class="space-y-6">
+        <InteractionStepTwo
+          v-model:form-data="formData.step2"
+          :validation="validation"
+          :interaction-type="formData.step1.type"
+          @update:form-data="updateStep2Data"
+        />
+      </div>
+
+      <!-- Step 3: Outcome & Follow-up -->
+      <div v-show="currentStep === 3" class="space-y-6">
+        <InteractionStepThree
+          v-model:form-data="formData.step3"
+          :validation="validation"
+          :status="formData.step2.status"
+          @update:form-data="updateStep3Data"
+        />
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-between pt-6 border-t border-gray-200">
+        <!-- Previous Button -->
+        <button
+          v-if="currentStep > 1"
+          type="button"
+          @click="previousStep"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <ChevronLeftIcon class="h-4 w-4 mr-2" />
+          Previous
+        </button>
+        <div v-else></div>
+
+        <!-- Next/Submit Button -->
+        <div class="flex space-x-3">
+          <!-- Save Draft (if applicable) -->
+          <button
+            v-if="!isEditing && currentStep === 3"
+            type="button"
+            @click="saveDraft"
+            :disabled="creating"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            <div
-              :class="[
-                'text-xs font-medium',
-                (index + 1) <= currentStep ? 'text-primary-600' : 'text-gray-400'
-              ]"
-            >
-              {{ stepInfo.label }}
-            </div>
+            <DocumentIcon class="h-4 w-4 mr-2" />
+            Save Draft
+          </button>
+
+          <!-- Next/Submit -->
+          <button
+            v-if="currentStep < 3"
+            type="button"
+            @click="nextStep"
+            :disabled="!isCurrentStepValid"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            Next
+            <ChevronRightIcon class="h-4 w-4 ml-2" />
+          </button>
+
+          <button
+            v-else
+            type="submit"
+            :disabled="!canSubmit || creating"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <span v-if="creating" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isEditing ? 'Updating...' : 'Creating...' }}
+            </span>
+            <span v-else>
+              {{ isEditing ? 'Update Interaction' : 'Create Interaction' }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Error Display -->
+    <div v-if="error" class="mt-6 rounded-md bg-red-50 p-4">
+      <div class="flex">
+        <ExclamationTriangleIcon class="h-5 w-5 text-red-400" />
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <div class="mt-2 text-sm text-red-700">
+            {{ error }}
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Form Content -->
-    <form @submit.prevent="handleSubmit" class="space-y-8">
-      <!-- Step 1: Type & Context -->
-      <div v-if="currentStep === 1 || isEditing" class="step-section">
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-6">
-            <span class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
-              <span>Interaction Type & Context</span>
-            </span>
-          </h3>
-          
-          <div class="space-y-6">
-            <!-- Template Selection -->
-            <div v-if="!isEditing">
-              <InteractionTemplateSelect
-                name="template"
-                label="Quick Start Template (Optional)"
-                v-model="formData.selectedTemplate"
-                v-model:use-template="formData.useTemplate"
-                :error="validationErrors.template"
-                @template-selected="handleTemplateSelected"
-              />
-            </div>
-
-            <!-- Interaction Type -->
-            <div>
-              <InteractionTypeSelect
-                name="interaction-type"
-                label="Interaction Type"
-                v-model="formData.interactionType"
-                :error="validationErrors.interactionType"
-                :required="true"
-                :disabled="formData.useTemplate"
-                @type-selected="handleTypeSelected"
-              />
-            </div>
-
-            <!-- Title -->
-            <div>
-              <label for="interaction-title" class="block text-sm font-medium text-gray-700 mb-1">
-                Title
-                <span class="text-red-500 ml-1">*</span>
-              </label>
-              <input
-                id="interaction-title"
-                v-model="formData.title"
-                type="text"
-                required
-                placeholder="Enter interaction title..."
-                :class="inputClasses"
-                :aria-invalid="!!validationErrors.title"
-                :aria-describedby="validationErrors.title ? 'title-error' : undefined"
-              />
-              <p
-                v-if="validationErrors.title"
-                id="title-error"
-                class="mt-1 text-sm text-red-600"
-              >
-                {{ validationErrors.title }}
-              </p>
-            </div>
-
-            <!-- Organization Lookup -->
-            <div>
-              <OrganizationLookup
-                name="organization"
-                label="Organization"
-                v-model="formData.organizationId"
-                :error="validationErrors.organizationId"
-                :required="true"
-                :initial-organization-id="initialData?.organizationId"
-                @organization-selected="handleOrganizationSelected"
-              />
-            </div>
-
-            <!-- Opportunity Lookup (Optional) -->
-            <div>
-              <OpportunityLookup
-                name="opportunity"
-                label="Related Opportunity (Optional)"
-                v-model="formData.opportunityId"
-                :organization-id="formData.organizationId"
-                :error="validationErrors.opportunityId"
-                @opportunity-selected="handleOpportunitySelected"
-              />
-            </div>
-
-            <!-- Principal Selection (Optional) -->
-            <div v-if="formData.organizationId">
-              <PrincipalSelect
-                name="principal"
-                label="Principal Contact (Optional)"
-                v-model="formData.principalId"
-                :organization-id="formData.organizationId"
-                :error="validationErrors.principalId"
-                @principal-selected="handlePrincipalSelected"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Details & Scheduling -->
-      <div v-if="currentStep === 2 || isEditing" class="step-section">
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-6">
-            <span class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
-              <span>Details & Scheduling</span>
-            </span>
-          </h3>
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Status -->
-            <div>
-              <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
-                Status
-                <span class="text-red-500 ml-1">*</span>
-              </label>
-              <select
-                id="status"
-                v-model="formData.status"
-                required
-                :class="selectClasses"
-              >
-                <option value="">Select status...</option>
-                <option value="PLANNED">Planned</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="RESCHEDULED">Rescheduled</option>
-              </select>
-            </div>
-
-            <!-- Interaction Date -->
-            <div>
-              <label for="interaction-date" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ formData.status === 'PLANNED' ? 'Scheduled Date' : 'Interaction Date' }}
-                <span class="text-red-500 ml-1">*</span>
-              </label>
-              <input
-                id="interaction-date"
-                v-model="formData.interactionDate"
-                type="datetime-local"
-                required
-                :class="inputClasses"
-              />
-            </div>
-
-            <!-- Duration -->
-            <div>
-              <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">
-                Duration (minutes)
-              </label>
-              <input
-                id="duration"
-                v-model.number="formData.duration"
-                type="number"
-                min="1"
-                max="1440"
-                placeholder="30"
-                :class="inputClasses"
-              />
-            </div>
-
-            <!-- Conducted By -->
-            <div>
-              <label for="conducted-by" class="block text-sm font-medium text-gray-700 mb-1">
-                Conducted By
-              </label>
-              <input
-                id="conducted-by"
-                v-model="formData.conductedBy"
-                type="text"
-                placeholder="Enter your name..."
-                :class="inputClasses"
-              />
-            </div>
-
-            <!-- Location (for in-person meetings) -->
-            <div v-if="shouldShowLocation">
-              <label for="location" class="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                id="location"
-                v-model="formData.location"
-                type="text"
-                placeholder="Enter meeting location..."
-                :class="inputClasses"
-              />
-            </div>
-
-            <!-- Meeting URL (for virtual meetings) -->
-            <div v-if="shouldShowMeetingUrl">
-              <label for="meeting-url" class="block text-sm font-medium text-gray-700 mb-1">
-                Meeting URL
-              </label>
-              <input
-                id="meeting-url"
-                v-model="formData.meetingUrl"
-                type="url"
-                placeholder="https://zoom.us/j/..."
-                :class="inputClasses"
-              />
-            </div>
-
-            <!-- Outcome (for completed interactions) -->
-            <div v-if="formData.status === 'COMPLETED'" class="lg:col-span-2">
-              <label for="outcome" class="block text-sm font-medium text-gray-700 mb-1">
-                Outcome
-              </label>
-              <select
-                id="outcome"
-                v-model="formData.outcome"
-                :class="selectClasses"
-              >
-                <option value="">Select outcome...</option>
-                <option value="POSITIVE">Positive</option>
-                <option value="NEUTRAL">Neutral</option>
-                <option value="NEGATIVE">Negative</option>
-                <option value="FOLLOW_UP_NEEDED">Follow-up Needed</option>
-                <option value="OPPORTUNITY_CREATED">Opportunity Created</option>
-                <option value="DEAL_ADVANCED">Deal Advanced</option>
-                <option value="DEAL_STALLED">Deal Stalled</option>
-                <option value="LOST_OPPORTUNITY">Lost Opportunity</option>
-              </select>
-            </div>
-
-            <!-- Description -->
-            <div class="lg:col-span-2">
-              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                id="description"
-                v-model="formData.description"
-                rows="4"
-                placeholder="Add notes about the interaction..."
-                :class="textareaClasses"
-              />
-            </div>
-
-            <!-- Follow-up Scheduler -->
-            <div class="lg:col-span-2">
-              <FollowUpScheduler
-                name="follow-up"
-                v-model:required="formData.followUpRequired"
-                v-model:date="formData.followUpDate"
-                v-model:notes="formData.followUpNotes"
-                :interaction-outcome="formData.outcome"
-                :auto-suggest="formData.status === 'COMPLETED'"
-                @follow-up-configured="handleFollowUpConfigured"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Error Summary -->
-      <div v-if="submitError" class="bg-red-50 border border-red-200 rounded-md p-4">
-        <div class="flex">
-          <svg class="h-5 w-5 text-red-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <h3 class="text-sm font-medium text-red-800">Error submitting form</h3>
-            <p class="mt-1 text-sm text-red-700">{{ submitError }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Actions -->
-      <div class="bg-gray-50 rounded-lg p-6">
-        <div class="flex items-center justify-between">
-          <!-- Left Side Actions -->
-          <div class="flex items-center space-x-3">
-            <button
-              v-if="!isEditing && currentStep > 1"
-              type="button"
-              @click="previousStep"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-              Previous
-            </button>
-            
-            <button
-              type="button"
-              @click="handleCancel"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Cancel
-            </button>
-          </div>
-
-          <!-- Right Side Actions -->
-          <div class="flex items-center space-x-3">
-            <!-- Save Draft (creation only) -->
-            <button
-              v-if="!isEditing"
-              type="button"
-              @click="saveDraft"
-              :disabled="isSaving"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-            >
-              <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              {{ isSaving ? 'Saving...' : 'Save Draft' }}
-            </button>
-
-            <!-- Next/Submit Button -->
-            <button
-              v-if="!isEditing && currentStep < totalSteps"
-              type="button"
-              @click="nextStep"
-              :disabled="!canProceedToNext"
-              class="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-              <svg class="ml-2 -mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            <button
-              v-else
-              type="submit"
-              :disabled="isSubmitting || !isFormValid"
-              class="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ isSubmitting ? 'Saving...' : isEditing ? 'Update Interaction' : 'Create Interaction' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
   </div>
 </template>
 
-<!--
-  InteractionFormWrapper - Comprehensive interaction creation and editing form
-  
-  Features:
-  - 2-step wizard for new interaction creation
-  - Single-page editing mode for existing interactions
-  - Template-based quick creation with auto-population
-  - Real-time validation with accessible error handling
-  - Auto-save functionality with draft recovery
-  - Follow-up scheduling with outcome-based suggestions
-  - Contextual creation from opportunities/organizations
-  - Responsive design optimized for mobile
-  - WCAG 2.1 AA accessibility compliance
-  
-  Form Steps:
-  1. Type & Context - Select interaction type, organization, and opportunity
-  2. Details & Scheduling - Configure timing, outcome, and follow-up
-  
-  Template System:
-  - Quick start templates for common interaction types
-  - Auto-population of fields based on template selection
-  - Customization options while maintaining template base
--->
-
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useInteractionStore } from '@/stores/interactionStore'
-import InteractionTemplateSelect from './InteractionTemplateSelect.vue'
-import InteractionTypeSelect from './InteractionTypeSelect.vue'
-import OrganizationLookup from './OrganizationLookup.vue'
-import OpportunityLookup from './OpportunityLookup.vue'
-import PrincipalSelect from './PrincipalSelect.vue'
-import FollowUpScheduler from './FollowUpScheduler.vue'
-import type { 
-  InteractionType, 
-  InteractionStatus, 
-  InteractionOutcome,
-  InteractionTemplate 
+import { useOpportunityStore } from '@/stores/opportunityStore'
+import type {
+  InteractionFormData,
+  InteractionFormStep1,
+  InteractionFormStep2,
+  InteractionFormStep3,
+  InteractionFormValidation,
+  InteractionType
 } from '@/types/interactions'
-import type { 
-  InteractionFormWrapperData,
-  InteractionContextData,
-  InteractionFormErrors
-} from '@/types/interactionForm'
+import {
+  INTERACTION_FORM_DEFAULTS
+} from '@/types/interactions'
+import type { OpportunityListView } from '@/types/opportunities'
+import InteractionStepOne from './InteractionStepOne.vue'
+import InteractionStepTwo from './InteractionStepTwo.vue'
+import InteractionStepThree from './InteractionStepThree.vue'
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DocumentIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/vue/24/outline'
 
-/**
- * Props interface for InteractionFormWrapper
- */
+// Props
 interface Props {
-  /** Whether this is an edit form */
+  interactionId?: string
+  opportunityId?: string
   isEditing?: boolean
-  /** Initial data for editing or context from other pages */
-  initialData?: Partial<InteractionFormWrapperData> & InteractionContextData
-  /** Auto-save interval in milliseconds */
-  autoSaveInterval?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isEditing: false,
-  autoSaveInterval: 30000 // 30 seconds
+  isEditing: false
 })
 
-/**
- * Component emits
- */
-interface Emits {
-  /** Emitted when form is successfully submitted */
-  success: [data: { interactionId: string }]
-  /** Emitted when form is cancelled */
-  cancel: []
-  /** Emitted when form submission error occurs */
-  error: [error: string | Error]
-  /** Emitted when draft is saved */
-  draftSaved: [formData: InteractionFormWrapperData]
-  /** Emitted when form data changes */
-  dataChanged: [formData: InteractionFormWrapperData]
-}
-
-const emit = defineEmits<Emits>()
-
-// Dependencies
-const router = useRouter()
+// Stores
 const interactionStore = useInteractionStore()
+const opportunityStore = useOpportunityStore()
+const router = useRouter()
 
-// ===============================
-// FORM STATE MANAGEMENT
-// ===============================
-
+// Reactive state
 const currentStep = ref(1)
-const totalSteps = 2
-const isSubmitting = ref(false)
-const isSaving = ref(false)
-const submitError = ref<string | null>(null)
+const availableOpportunities = ref<OpportunityListView[]>([])
+const loadingOpportunities = ref(false)
 
-const stepLabels = [
-  { label: 'Type & Context', key: 'type' },
-  { label: 'Details', key: 'details' }
+// Form data structure
+const formData = reactive({
+  step1: {
+    type: 'CALL' as InteractionType,
+    subject: '',
+    opportunity_id: props.opportunityId || '',
+    interaction_date: new Date().toISOString().slice(0, 16) // datetime-local format
+  } as InteractionFormStep1,
+  step2: {
+    status: 'SCHEDULED' as const,
+    duration_minutes: null,
+    location: null,
+    contact_method: null,
+    participants: []
+  } as InteractionFormStep2,
+  step3: {
+    outcome: null,
+    rating: null,
+    notes: '',
+    follow_up_required: false,
+    follow_up_date: null,
+    follow_up_notes: '',
+    next_action: '',
+    tags: [],
+    attachments: [],
+    custom_fields: null
+  } as InteractionFormStep3
+})
+
+// Validation state
+const validation = reactive<InteractionFormValidation>({
+  isValid: false,
+  errors: {},
+  warnings: {},
+  touched: {},
+  step1Valid: false,
+  step2Valid: false,
+  step3Valid: false
+})
+
+// Step configuration
+const steps = [
+  { id: 'basic', name: 'Basic Info' },
+  { id: 'details', name: 'Details' },
+  { id: 'outcome', name: 'Outcome' }
 ]
 
-// Form data reactive object
-const formData = reactive<InteractionFormWrapperData>({
-  // Step 1: Type & Context
-  interactionType: null,
-  title: '',
-  organizationId: '',
-  opportunityId: null,
-  principalId: null,
-  
-  // Step 2: Details & Scheduling
-  status: 'PLANNED' as InteractionStatus,
-  interactionDate: '',
-  duration: null,
-  description: '',
-  conductedBy: '',
-  location: '',
-  meetingUrl: '',
-  
-  // Follow-up
-  followUpRequired: false,
-  followUpDate: null,
-  followUpNotes: '',
-  
-  // Outcome
-  outcome: null,
-  
-  // Template
-  selectedTemplate: null,
-  useTemplate: false
-})
+// Computed properties
+const creating = computed(() => interactionStore.creating)
+const error = computed(() => interactionStore.error)
 
-// Validation errors
-const validationErrors = ref<InteractionFormErrors>({})
-
-// ===============================
-// COMPUTED PROPERTIES
-// ===============================
-
-const inputClasses = computed(() => 
-  'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200'
-)
-
-const selectClasses = computed(() => 
-  'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200'
-)
-
-const textareaClasses = computed(() => 
-  'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 resize-vertical'
-)
-
-const shouldShowLocation = computed(() => {
-  return formData.interactionType === 'IN_PERSON_MEETING' || 
-         formData.interactionType === 'SITE_VISIT' ||
-         formData.interactionType === 'TRADE_SHOW'
-})
-
-const shouldShowMeetingUrl = computed(() => {
-  return formData.interactionType === 'VIRTUAL_MEETING' || 
-         formData.interactionType === 'PRODUCT_DEMO'
-})
-
-const canProceedToNext = computed(() => {
+const isCurrentStepValid = computed(() => {
   switch (currentStep.value) {
-    case 1:
-      return !!(formData.interactionType && formData.title && formData.organizationId)
-    case 2:
-      return !!(formData.status && formData.interactionDate)
-    default:
-      return false
+    case 1: return validation.step1Valid
+    case 2: return validation.step2Valid
+    case 3: return validation.step3Valid
+    default: return false
   }
 })
 
-const isFormValid = computed(() => {
-  return !!(
-    formData.interactionType &&
-    formData.title &&
-    formData.organizationId &&
-    formData.status &&
-    formData.interactionDate
-  )
+const canSubmit = computed(() => {
+  return validation.step1Valid && validation.step2Valid && validation.step3Valid
 })
 
-// ===============================
-// FORM VALIDATION
-// ===============================
-
-const validateCurrentStep = (): boolean => {
-  const errors: InteractionFormErrors = {}
-  
-  // Step 1 validation
-  if (currentStep.value >= 1) {
-    if (!formData.interactionType) {
-      errors.interactionType = 'Interaction type is required'
-    }
-    
-    if (!formData.title.trim()) {
-      errors.title = 'Title is required'
-    }
-    
-    if (!formData.organizationId) {
-      errors.organizationId = 'Organization is required'
-    }
-  }
-  
-  // Step 2 validation
-  if (currentStep.value >= 2) {
-    if (!formData.status) {
-      errors.status = 'Status is required'
-    }
-    
-    if (!formData.interactionDate) {
-      errors.interactionDate = 'Interaction date is required'
-    }
-    
-    if (formData.followUpRequired && !formData.followUpDate) {
-      errors.followUpDate = 'Follow-up date is required when follow-up is needed'
-    }
-    
-    if (formData.meetingUrl && !isValidUrl(formData.meetingUrl)) {
-      errors.meetingUrl = 'Please enter a valid URL'
-    }
-  }
-  
-  validationErrors.value = errors
-  return Object.keys(errors).length === 0
-}
-
-const validateForm = (): boolean => {
-  const tempStep = currentStep.value
-  currentStep.value = totalSteps // Validate all steps
-  const isValid = validateCurrentStep()
-  currentStep.value = tempStep
-  return isValid
-}
-
-const isValidUrl = (url: string): boolean => {
-  try {
-    new URL(url)
-    return true
-  } catch {
-    return false
+// Step styling
+const getStepClasses = (stepNumber: number) => {
+  if (isStepCompleted(stepNumber)) {
+    return 'bg-blue-600 text-white'
+  } else if (currentStep.value === stepNumber) {
+    return 'bg-blue-600 text-white'
+  } else {
+    return 'bg-gray-300 text-gray-500'
   }
 }
 
-// ===============================
-// STEP NAVIGATION
-// ===============================
+const isStepCompleted = (stepNumber: number) => {
+  switch (stepNumber) {
+    case 1: return validation.step1Valid && currentStep.value > 1
+    case 2: return validation.step2Valid && currentStep.value > 2
+    case 3: return validation.step3Valid
+    default: return false
+  }
+}
 
+// Form navigation
 const nextStep = () => {
-  if (validateCurrentStep() && currentStep.value < totalSteps) {
+  if (currentStep.value < 3 && isCurrentStepValid.value) {
     currentStep.value++
   }
 }
@@ -686,284 +312,204 @@ const previousStep = () => {
   }
 }
 
-// ===============================
-// EVENT HANDLERS
-// ===============================
-
-const handleTemplateSelected = (template: InteractionTemplate | null) => {
-  if (template && formData.useTemplate) {
-    // Auto-populate form fields from template
-    formData.interactionType = template.type
-    formData.title = template.title_template.replace('{organization}', 'New Organization')
-    formData.description = template.description_template || ''
-    formData.duration = template.default_duration
-    
-    if (template.auto_follow_up && template.follow_up_days) {
-      formData.followUpRequired = true
-      const followUpDate = new Date()
-      followUpDate.setDate(followUpDate.getDate() + template.follow_up_days)
-      formData.followUpDate = followUpDate.toISOString().split('T')[0]
-    }
-  }
+// Form handlers
+const updateStep1Data = (data: Partial<InteractionFormStep1>) => {
+  Object.assign(formData.step1, data)
+  validateStep1()
 }
 
-const handleTypeSelected = (type: InteractionType) => {
-  // Update title if using template format
-  if (formData.title.includes('New Organization') && formData.organizationId) {
-    // Would need organization name lookup to update title
-  }
+const updateStep2Data = (data: Partial<InteractionFormStep2>) => {
+  Object.assign(formData.step2, data)
+  validateStep2()
 }
 
-const handleOrganizationSelected = (organizationId: string, organizationData: any) => {
-  formData.organizationId = organizationId
+const updateStep3Data = (data: Partial<InteractionFormStep3>) => {
+  Object.assign(formData.step3, data)
+  validateStep3()
+}
+
+const handleOpportunitySelected = (opportunityId: string) => {
+  formData.step1.opportunity_id = opportunityId
+  validateStep1()
+}
+
+// Validation functions
+const validateStep1 = () => {
+  const errors: string[] = []
   
-  // Update title if using template
-  if (formData.selectedTemplate && formData.useTemplate) {
-    formData.title = formData.selectedTemplate.title_template.replace(
-      '{organization}', 
-      organizationData.name || 'Selected Organization'
-    )
-  }
-}
-
-const handleOpportunitySelected = (opportunityId: string | null, opportunityData: any) => {
-  formData.opportunityId = opportunityId
-}
-
-const handlePrincipalSelected = (principalId: string | null, principalData: any) => {
-  formData.principalId = principalId
-}
-
-const handleFollowUpConfigured = (config: any) => {
-  // Handle follow-up configuration changes
-  console.log('Follow-up configured:', config)
-}
-
-const handleSubmit = async () => {
-  if (!validateForm()) {
-    return
+  if (!formData.step1.subject || formData.step1.subject.length < 3) {
+    errors.push('Subject must be at least 3 characters')
   }
   
-  isSubmitting.value = true
-  submitError.value = null
+  if (!formData.step1.opportunity_id) {
+    errors.push('Opportunity must be selected')
+  }
   
+  if (!formData.step1.interaction_date) {
+    errors.push('Interaction date is required')
+  }
+  
+  validation.step1Valid = errors.length === 0
+  validation.errors.step1 = errors
+}
+
+const validateStep2 = () => {
+  const errors: string[] = []
+  
+  if (!formData.step2.status) {
+    errors.push('Status is required')
+  }
+  
+  // Conditional validation based on interaction type
+  if (formData.step1.type === 'IN_PERSON' && !formData.step2.location) {
+    errors.push('Location is required for in-person meetings')
+  }
+  
+  if (formData.step2.duration_minutes && (formData.step2.duration_minutes < 1 || formData.step2.duration_minutes > 480)) {
+    errors.push('Duration must be between 1 and 480 minutes')
+  }
+  
+  validation.step2Valid = errors.length === 0
+  validation.errors.step2 = errors
+}
+
+const validateStep3 = () => {
+  const errors: string[] = []
+  
+  // Conditional validation for completed interactions
+  if (formData.step2.status === 'COMPLETED' && !formData.step3.outcome) {
+    errors.push('Outcome is required for completed interactions')
+  }
+  
+  if (formData.step3.follow_up_required && !formData.step3.follow_up_date) {
+    errors.push('Follow-up date is required when follow-up is needed')
+  }
+  
+  if (formData.step3.rating && (formData.step3.rating < 1 || formData.step3.rating > 5)) {
+    errors.push('Rating must be between 1 and 5')
+  }
+  
+  validation.step3Valid = errors.length === 0
+  validation.errors.step3 = errors
+}
+
+// Apply smart defaults when interaction type changes
+watch(() => formData.step1.type, (newType: InteractionType) => {
+  const defaults = INTERACTION_FORM_DEFAULTS[newType]
+  if (defaults) {
+    Object.assign(formData.step2, defaults)
+    validateStep2()
+  }
+})
+
+// Load opportunities on mount
+onMounted(async () => {
+  loadingOpportunities.value = true
   try {
-    const interactionData = {
-      type: formData.interactionType!,
-      status: formData.status,
-      title: formData.title,
-      description: formData.description || null,
-      interaction_date: formData.interactionDate,
-      duration_minutes: formData.duration,
-      outcome: formData.outcome,
-      follow_up_required: formData.followUpRequired,
-      follow_up_date: formData.followUpDate,
-      follow_up_notes: formData.followUpNotes || null,
-      organization_id: formData.organizationId,
-      opportunity_id: formData.opportunityId,
-      principal_id: formData.principalId,
-      conducted_by: formData.conductedBy || null,
-      location: formData.location || null,
-      meeting_url: formData.meetingUrl || null
-    }
-
-    if (props.isEditing) {
-      // Handle update logic
-      const success = await interactionStore.updateInteraction('', interactionData)
-      if (success) {
-        emit('success', { interactionId: 'updated' })
-      } else {
-        const error = interactionStore.error || 'Failed to update interaction'
-        submitError.value = error
-        emit('error', error)
-      }
-    } else {
-      // Handle creation
-      const success = await interactionStore.createInteraction(interactionData)
-      if (success) {
-        emit('success', { interactionId: 'created' })
-      } else {
-        const error = interactionStore.error || 'Failed to create interaction'
-        submitError.value = error
-        emit('error', error)
-      }
-    }
+    await opportunityStore.fetchOpportunities({}, { page: 1, limit: 100, sort_by: 'created_at', sort_order: 'desc' })
+    availableOpportunities.value = opportunityStore.opportunities
   } catch (error) {
-    console.error('Form submission error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
-    submitError.value = errorMessage
-    emit('error', errorMessage)
+    console.error('Failed to load opportunities:', error)
   } finally {
-    isSubmitting.value = false
+    loadingOpportunities.value = false
   }
-}
+  
+  // Load existing interaction if editing
+  if (props.isEditing && props.interactionId) {
+    await loadExistingInteraction()
+  }
+  
+  // Initial validation
+  validateStep1()
+  validateStep2()
+  validateStep3()
+})
 
-const handleCancel = () => {
-  emit('cancel')
-}
-
-const saveDraft = async () => {
-  isSaving.value = true
+// Load existing interaction for editing
+const loadExistingInteraction = async () => {
+  if (!props.interactionId) return
   
   try {
-    // Here you would implement draft saving logic
-    emit('draftSaved', { ...formData })
+    await interactionStore.fetchInteractionById(props.interactionId)
+    const interaction = interactionStore.selectedInteraction
     
-    // Show success feedback
-    setTimeout(() => {
-      isSaving.value = false
-    }, 500)
+    if (interaction) {
+      // Populate form data from existing interaction
+      formData.step1 = {
+        type: interaction.type,
+        subject: interaction.subject,
+        opportunity_id: interaction.opportunity_id,
+        interaction_date: interaction.interaction_date.slice(0, 16)
+      }
+      
+      formData.step2 = {
+        status: interaction.status || 'SCHEDULED',
+        duration_minutes: interaction.duration_minutes,
+        location: interaction.location,
+        contact_method: interaction.contact_method,
+        participants: interaction.participants as string[] || []
+      }
+      
+      formData.step3 = {
+        outcome: interaction.outcome,
+        rating: interaction.rating,
+        notes: interaction.notes || '',
+        follow_up_required: interaction.follow_up_required || false,
+        follow_up_date: interaction.follow_up_date,
+        follow_up_notes: interaction.follow_up_notes || '',
+        next_action: interaction.next_action || '',
+        tags: interaction.tags as string[] || [],
+        attachments: interaction.attachments as string[] || [],
+        custom_fields: interaction.custom_fields
+      }
+    }
   } catch (error) {
-    console.error('Draft save error:', error)
-    isSaving.value = false
+    console.error('Failed to load interaction:', error)
   }
 }
 
-// ===============================
-// LIFECYCLE & INITIALIZATION
-// ===============================
-
-const initializeForm = () => {
-  if (props.initialData) {
-    // Merge initial data with form data
-    Object.assign(formData, props.initialData)
-    
-    // Set default interaction date to now if not provided
-    if (!formData.interactionDate) {
-      const now = new Date()
-      formData.interactionDate = now.toISOString().slice(0, 16) // Format for datetime-local
-    }
+// Form submission
+const handleSubmit = async () => {
+  if (!canSubmit.value) return
+  
+  // Combine all form data
+  const interactionData: InteractionFormData = {
+    ...formData.step1,
+    ...formData.step2,
+    ...formData.step3
   }
   
-  if (props.isEditing) {
-    // For editing, show all steps at once
-    currentStep.value = totalSteps
-  }
-}
-
-// Watch for form data changes
-watch(
-  () => ({ ...formData }),
-  (newData) => {
-    emit('dataChanged', newData)
-  },
-  { deep: true }
-)
-
-// Auto-save functionality (for creation only)
-let autoSaveTimer: ReturnType<typeof setInterval>
-
-const startAutoSave = () => {
-  if (!props.isEditing && props.autoSaveInterval > 0) {
-    autoSaveTimer = setInterval(() => {
-      if (isFormValid.value) {
-        saveDraft()
-      }
-    }, props.autoSaveInterval)
-  }
-}
-
-const stopAutoSave = () => {
-  if (autoSaveTimer) {
-    clearInterval(autoSaveTimer)
-  }
-}
-
-onMounted(() => {
-  initializeForm()
-  startAutoSave()
-})
-
-// Cleanup on unmount
-import { onUnmounted } from 'vue'
-onUnmounted(() => {
-  stopAutoSave()
-})
-
-/**
- * Public methods for parent components
- */
-defineExpose({
-  validateForm,
-  resetForm: () => {
-    Object.assign(formData, {
-      interactionType: null,
-      title: '',
-      organizationId: '',
-      opportunityId: null,
-      principalId: null,
-      status: 'PLANNED' as InteractionStatus,
-      interactionDate: '',
-      duration: null,
-      description: '',
-      conductedBy: '',
-      location: '',
-      meetingUrl: '',
-      followUpRequired: false,
-      followUpDate: null,
-      followUpNotes: '',
-      outcome: null,
-      selectedTemplate: null,
-      useTemplate: false
-    })
-    currentStep.value = 1
-    validationErrors.value = {}
-    submitError.value = null
-  },
-  goToStep: (step: number) => {
-    if (step >= 1 && step <= totalSteps) {
-      currentStep.value = step
+  try {
+    let success = false
+    
+    if (props.isEditing && props.interactionId) {
+      success = await interactionStore.updateInteraction(props.interactionId, interactionData)
+    } else {
+      success = await interactionStore.createInteraction(interactionData)
     }
-  },
-  getFormData: (): InteractionFormWrapperData => ({ ...formData })
-})
+    
+    if (success) {
+      // Navigate back to interaction list or detail view
+      if (props.opportunityId) {
+        router.push(`/opportunities/${props.opportunityId}`)
+      } else {
+        router.push('/interactions')
+      }
+    }
+  } catch (error) {
+    console.error('Form submission failed:', error)
+  }
+}
+
+// Save draft functionality
+const saveDraft = async () => {
+  // Implementation for saving draft - could store in localStorage or send to API
+  console.log('Saving draft...', formData)
+}
 </script>
 
 <style scoped>
 .interaction-form-wrapper {
   @apply max-w-4xl mx-auto;
-}
-
-.step-section {
-  @apply transition-all duration-300;
-}
-
-/* Step transition animations */
-.step-section:not(.active) {
-  @apply opacity-60;
-}
-
-/* Form focus styles */
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  @apply ring-2 ring-primary-500 border-primary-500;
-}
-
-/* Progress indicator styles */
-.progress-step {
-  @apply transition-all duration-200;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .interaction-form-wrapper {
-    @apply max-w-full mx-4;
-  }
-  
-  .step-section .grid {
-    @apply grid-cols-1;
-  }
-}
-
-/* Print styles */
-@media print {
-  .interaction-form-wrapper {
-    @apply shadow-none;
-  }
-  
-  .form-actions {
-    @apply hidden;
-  }
 }
 </style>

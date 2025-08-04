@@ -1,0 +1,99 @@
+# Page snapshot
+
+```yaml
+- img
+- text: CRM
+- button "Collapse sidebar":
+  - img
+- navigation:
+  - text: Main
+  - link "Dashboard":
+    - /url: /
+    - img
+    - text: Dashboard
+  - text: CRM
+  - link "Organizations":
+    - /url: /organizations
+    - img
+    - text: Organizations
+  - link "Contacts":
+    - /url: /contacts
+    - img
+    - text: Contacts
+  - link "Opportunities":
+    - /url: /opportunities
+    - img
+    - text: Opportunities
+  - link "Interactions":
+    - /url: /interactions
+    - img
+    - text: Interactions
+  - heading "Filters" [level=3]
+  - button "Current Week":
+    - img
+    - text: Current Week
+- img
+- paragraph: User
+- paragraph: Dashboard v1.0
+- main:
+  - heading "Interactions" [level=1]
+  - paragraph: Track and manage customer interactions across all opportunities
+  - link "New Interaction":
+    - /url: /interactions/new
+  - term: Total Interactions
+  - definition: "4"
+  - term: Completed
+  - definition: "3"
+  - term: Average Rating
+  - definition: "4.0"
+  - term: Pending Follow-ups
+  - definition: "0"
+  - heading "Filters" [level=3]
+  - text: Search
+  - textbox "Search"
+  - text: Type
+  - combobox "Type":
+    - option "All Types"
+    - option "Email"
+    - option "Phone Call"
+    - option "In-Person Meeting"
+    - option "Product Demo"
+    - option "Follow-up"
+    - option "Sample Delivery"
+  - text: Status
+  - combobox "Status":
+    - option "All Statuses"
+    - option "Scheduled"
+    - option "Completed"
+    - option "Cancelled"
+    - option "No Show"
+  - text: Outcome
+  - combobox "Outcome":
+    - option "All Outcomes"
+    - option "Positive"
+    - option "Neutral"
+    - option "Negative"
+    - option "Needs Follow-up"
+  - text: From Date
+  - textbox "From Date"
+  - text: To Date
+  - textbox "To Date"
+  - text: Follow-up
+  - combobox:
+    - option "All"
+    - option "Required"
+    - option "Not Required"
+  - button "Clear"
+  - button "Apply"
+  - heading "Interactions (0)" [level=3]
+  - combobox:
+    - option "Date" [selected]
+    - option "Created"
+    - option "Subject"
+    - option "Rating"
+  - button
+  - heading "No interactions found" [level=3]
+  - paragraph: Get started by creating your first interaction
+  - link "New Interaction":
+    - /url: /interactions/new
+```
