@@ -3,7 +3,7 @@
   Features: Real-time analytics, responsive design, comprehensive CRM integration
 -->
 <template>
-  <div class="principal-dashboard bg-gray-50 min-h-screen">
+  <div class="principal-dashboard bg-gray-50 min-h-screen" role="main" aria-label="Principal Activity Dashboard">
     <!-- Dashboard Header -->
     <div class="bg-white shadow-sm border-b border-gray-200">
       <div class="px-4 sm:px-6 lg:px-8">
