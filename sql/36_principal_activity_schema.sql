@@ -36,7 +36,7 @@ SELECT
     org.type AS organization_type,
     org.industry,
     org.size AS organization_size,
-    org.is_active,
+    (org.deleted_at IS NULL) AS is_active,
     org.lead_score,
     
     -- Contact metrics
@@ -138,7 +138,6 @@ LEFT JOIN (
         ) AS primary_contact_email,
         MAX(c.updated_at) AS last_contact_update
     FROM public.contacts c
-    WHERE c.deleted_at IS NULL
     GROUP BY c.organization_id
 ) contact_stats ON contact_stats.organization_id = org.id
 
@@ -205,7 +204,7 @@ LEFT JOIN (
     FROM public.product_principals pp
     JOIN public.products p ON p.id = pp.product_id 
         AND p.deleted_at IS NULL
-    WHERE pp.deleted_at IS NULL
+    WHERE pp.is_active = TRUE
     GROUP BY pp.principal_id
 ) product_stats ON product_stats.principal_id = org.id
 
@@ -358,7 +357,7 @@ LEFT JOIN (
     GROUP BY opp.principal_id, opp.product_id
 ) perf ON perf.principal_id = pp.principal_id AND perf.product_id = pp.product_id
 
-WHERE pp.deleted_at IS NULL
+WHERE pp.is_active = TRUE
 ORDER BY p.name, prod.name;
 
 -- =============================================================================
@@ -412,7 +411,6 @@ FROM (
         FALSE AS follow_up_required,
         NULL AS follow_up_date
     FROM public.contacts c
-    WHERE c.deleted_at IS NULL
     
     UNION ALL
     
@@ -484,7 +482,7 @@ FROM (
         pp.contract_end_date AS follow_up_date
     FROM public.product_principals pp
     JOIN public.products prod ON prod.id = pp.product_id
-    WHERE pp.deleted_at IS NULL 
+    WHERE pp.is_active = TRUE 
       AND prod.deleted_at IS NULL
       
 ) activities
@@ -505,8 +503,7 @@ ON public.principal_activity_summary (principal_id);
 
 -- Composite index for activity status and engagement filtering
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_principal_activity_summary_status_engagement 
-ON public.principal_activity_summary (activity_status, engagement_score DESC, last_activity_date DESC)
-WHERE is_active = TRUE;
+ON public.principal_activity_summary (activity_status, engagement_score DESC, last_activity_date DESC);
 
 -- Index for distributor relationship queries
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_principal_activity_summary_distributor 
@@ -602,14 +599,12 @@ BEGIN
             FROM (
                 SELECT principal_id, principal_name, engagement_score, total_opportunities, won_opportunities
                 FROM public.principal_activity_summary
-                WHERE is_active = TRUE
                 ORDER BY engagement_score DESC, total_opportunities DESC
                 LIMIT 5
             ) pas
         ) AS top_performers
         
-    FROM public.principal_activity_summary
-    WHERE is_active = TRUE;
+    FROM public.principal_activity_summary;
 END;
 $$ LANGUAGE plpgsql;
 
