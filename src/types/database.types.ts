@@ -2290,3 +2290,199 @@ export const PRODUCT_CATEGORIES = {
   BAKERY: 'Bakery' as const,
   OTHER: 'Other' as const
 } as const
+
+// =============================================================================
+// PRINCIPAL ACTIVITY TRACKING TYPES
+// =============================================================================
+
+// Principal Activity Summary materialized view type
+export interface PrincipalActivitySummary {
+  principal_id: string
+  principal_name: string
+  principal_status: string | null
+  organization_type: string | null
+  industry: string | null
+  organization_size: string | null
+  is_active: boolean
+  lead_score: number | null
+  
+  // Contact metrics
+  contact_count: number
+  active_contacts: number
+  primary_contact_name: string | null
+  primary_contact_email: string | null
+  last_contact_update: string | null
+  
+  // Interaction metrics
+  total_interactions: number
+  interactions_last_30_days: number
+  interactions_last_90_days: number
+  last_interaction_date: string | null
+  last_interaction_type: string | null
+  next_follow_up_date: string | null
+  avg_interaction_rating: number
+  positive_interactions: number
+  follow_ups_required: number
+  
+  // Opportunity metrics
+  total_opportunities: number
+  active_opportunities: number
+  won_opportunities: number
+  opportunities_last_30_days: number
+  latest_opportunity_stage: string | null
+  latest_opportunity_date: string | null
+  avg_probability_percent: number
+  highest_value_opportunity: string | null
+  
+  // Product metrics
+  product_count: number
+  active_product_count: number
+  product_categories: string[] | null
+  primary_product_category: string | null
+  
+  // Business context
+  is_principal: boolean
+  is_distributor: boolean
+  distributor_id: string | null
+  distributor_name: string | null
+  
+  // Activity status
+  last_activity_date: string | null
+  activity_status: 'NO_ACTIVITY' | 'STALE' | 'MODERATE' | 'ACTIVE'
+  engagement_score: number
+  
+  // Metadata
+  principal_created_at: string | null
+  principal_updated_at: string | null
+  summary_generated_at: string
+}
+
+// Principal Distributor Relationships view type
+export interface PrincipalDistributorRelationship {
+  principal_id: string
+  principal_name: string
+  principal_status: string | null
+  distributor_id: string | null
+  distributor_name: string | null
+  distributor_status: string | null
+  relationship_type: 'HAS_DISTRIBUTOR' | 'DIRECT'
+  
+  // Geographic context
+  principal_city: string | null
+  principal_state: string | null
+  principal_country: string | null
+  distributor_city: string | null
+  distributor_state: string | null
+  distributor_country: string | null
+  
+  // Performance context
+  principal_lead_score: number | null
+  distributor_lead_score: number | null
+  
+  // Temporal context
+  principal_created_at: string | null
+  principal_last_contact: string | null
+  distributor_last_contact: string | null
+}
+
+// Principal Product Performance view type
+export interface PrincipalProductPerformance {
+  principal_id: string
+  principal_name: string
+  product_id: string
+  product_name: string
+  product_category: string | null
+  product_sku: string | null
+  
+  // Relationship details
+  is_primary_principal: boolean | null
+  exclusive_rights: boolean | null
+  wholesale_price: number | null
+  minimum_order_quantity: number | null
+  lead_time_days: number | null
+  
+  // Contract info
+  contract_start_date: string | null
+  contract_end_date: string | null
+  territory_restrictions: any | null
+  
+  // Performance metrics
+  opportunities_for_product: number
+  won_opportunities_for_product: number
+  active_opportunities_for_product: number
+  latest_opportunity_date: string | null
+  avg_opportunity_probability: number
+  
+  // Interaction metrics
+  interactions_for_product: number
+  recent_interactions_for_product: number
+  last_interaction_date: string | null
+  
+  // Product status
+  product_is_active: boolean | null
+  launch_date: string | null
+  discontinue_date: string | null
+  unit_cost: number | null
+  suggested_retail_price: number | null
+  
+  // Calculated metrics
+  contract_status: 'EXPIRED' | 'EXPIRING_SOON' | 'PENDING' | 'ACTIVE'
+  product_performance_score: number
+  
+  // Metadata
+  relationship_created_at: string | null
+  relationship_updated_at: string | null
+}
+
+// Principal Timeline Summary view type
+export interface PrincipalTimelineSummary {
+  principal_id: string
+  principal_name: string
+  activity_date: string
+  activity_type: 'CONTACT_UPDATE' | 'INTERACTION' | 'OPPORTUNITY_CREATED' | 'PRODUCT_ASSOCIATION'
+  activity_subject: string
+  activity_details: string
+  source_id: string
+  source_table: string
+  
+  // Context information
+  opportunity_name: string | null
+  contact_name: string | null
+  product_name: string | null
+  
+  // Metadata
+  created_by: string | null
+  activity_status: string
+  follow_up_required: boolean | null
+  follow_up_date: string | null
+  timeline_rank: number
+}
+
+// Dashboard statistics type from helper function
+export interface PrincipalActivityStats {
+  total_principals: number
+  active_principals: number
+  principals_with_products: number
+  principals_with_opportunities: number
+  average_products_per_principal: number
+  average_engagement_score: number
+  top_performers: Array<{
+    principal_id: string
+    principal_name: string
+    engagement_score: number
+    total_opportunities: number
+    won_opportunities: number
+  }> | null
+}
+
+// Activity status enum
+export type PrincipalActivityStatus = 'NO_ACTIVITY' | 'STALE' | 'MODERATE' | 'ACTIVE'
+
+// Contract status enum  
+export type ContractStatus = 'EXPIRED' | 'EXPIRING_SOON' | 'PENDING' | 'ACTIVE'
+
+// Relationship type enum
+export type RelationshipType = 'HAS_DISTRIBUTOR' | 'DIRECT'
+
+// Timeline activity types
+export type TimelineActivityType = 'CONTACT_UPDATE' | 'INTERACTION' | 'OPPORTUNITY_CREATED' | 'PRODUCT_ASSOCIATION'
