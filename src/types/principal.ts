@@ -159,6 +159,11 @@ export interface PrincipalProductPerformance {
   latest_opportunity_date: string | null
   avg_opportunity_probability: number
   
+  // Component-expected properties (aliases/computed values)
+  total_opportunities: number  // Maps to opportunities_for_product
+  win_rate: number            // Win percentage (0-100), calculated from won/total opportunities
+  total_value: number         // Total monetary value of opportunities for this product
+  
   // Interaction metrics
   interactions_for_product: number
   recent_interactions_for_product: number
