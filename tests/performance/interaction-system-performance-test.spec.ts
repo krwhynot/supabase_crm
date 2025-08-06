@@ -29,7 +29,7 @@ const TEST_INTERACTION = {
 }
 
 test.describe('Interaction System Performance Validation', () => {
-  let performanceMetrics: any = {}
+  const performanceMetrics: any = {}
   
   test.beforeEach(async ({ page }) => {
     // Enable performance monitoring

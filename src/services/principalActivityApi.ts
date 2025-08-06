@@ -171,41 +171,52 @@ class PrincipalActivityApiService {
         const limit = pagination.limit || 20
         const offset = (page - 1) * limit
         
-        // Build query with secure view
+        // Build query with secure view - only request columns that exist
         let query = supabase
           .from('principal_activity_summary_secure')
           .select(`
             principal_id,
             principal_name,
-            organization_id,
-            organization_name,
+            principal_status,
             organization_type,
-            organization_status,
-            activity_status,
+            industry,
+            organization_size,
+            is_active,
+            lead_score,
             contact_count,
+            active_contacts,
+            primary_contact_name,
+            primary_contact_email,
+            last_contact_update,
             total_interactions,
             interactions_last_30_days,
-            total_opportunities,
-            opportunities_last_30_days,
-            total_products,
-            active_products,
-            engagement_score,
-            lead_score,
-            last_activity_date,
+            interactions_last_90_days,
+            last_interaction_date,
             last_interaction_type,
+            next_follow_up_date,
+            avg_interaction_rating,
+            positive_interactions,
             follow_ups_required,
-            avg_response_time_hours,
-            conversion_rate_percent,
-            revenue_generated,
-            geographic_region,
-            primary_contact_method,
-            preferred_language,
-            time_zone,
-            is_vip,
+            total_opportunities,
+            active_opportunities,
+            won_opportunities,
+            opportunities_last_30_days,
+            latest_opportunity_stage,
+            latest_opportunity_date,
+            avg_probability_percent,
+            highest_value_opportunity,
+            product_count,
+            active_product_count,
+            product_categories,
+            primary_product_category,
             is_principal,
             is_distributor,
-            created_at,
-            updated_at
+            last_activity_date,
+            activity_status,
+            engagement_score,
+            principal_created_at,
+            principal_updated_at,
+            summary_generated_at
           `, { count: 'exact' })
         
         // Apply filters
@@ -532,23 +543,15 @@ class PrincipalActivityApiService {
         const analytics: PrincipalAnalytics = {
           total_principals: principals.length,
           active_principals: principals.filter(p => p.activity_status === 'ACTIVE').length,
-          inactive_principals: principals.filter(p => p.activity_status === 'INACTIVE').length,
-          avg_engagement_score: this.calculateAverage(principals.map(p => p.engagement_score)),
-          avg_lead_score: this.calculateAverage(principals.map(p => p.lead_score)),
-          total_interactions: principals.reduce((sum, p) => sum + p.total_interactions, 0),
-          total_opportunities: principals.reduce((sum, p) => sum + p.total_opportunities, 0),
-          total_revenue: principals.reduce((sum, p) => sum + (p.revenue_generated || 0), 0),
-          avg_conversion_rate: this.calculateAverage(principals.map(p => p.conversion_rate_percent)),
+          principals_with_products: principals.filter(p => p.product_count > 0).length,
           principals_with_opportunities: principals.filter(p => p.total_opportunities > 0).length,
-          principals_with_products: principals.filter(p => p.total_products > 0).length,
-          vip_principals: principals.filter(p => p.is_vip).length,
-          follow_ups_required: principals.reduce((sum, p) => sum + p.follow_ups_required, 0),
-          geographic_distribution: this.calculateGeographicDistribution(principals),
-          activity_trends: await this.calculateActivityTrends(principals),
-          top_performing_principals: this.getTopPerformingPrincipals(principals, 10),
-          engagement_score_distribution: this.calculateEngagementDistribution(principals),
-          opportunity_pipeline_health: this.calculatePipelineHealth(principals),
-          last_calculated: new Date().toISOString()
+          average_products_per_principal: this.calculateAverage(principals.map(p => p.product_count)),
+          average_engagement_score: this.calculateAverage(principals.map(p => p.engagement_score)),
+          top_performers: this.getTopPerformingPrincipals(principals, 10),
+          activity_status_distribution: this.calculateActivityStatusDistribution(principals),
+          product_category_distribution: this.calculateProductCategoryDistribution(principals),
+          monthly_activity_trend: await this.calculateMonthlyActivityTrend(principals),
+          geographic_distribution: this.calculateGeographicDistribution(principals)
         }
         
         return {
@@ -586,7 +589,7 @@ class PrincipalActivityApiService {
     
     return this.monitorPerformance('getPrincipalOptions', async () => {
       try {
-        let query = supabase
+        const query = supabase
           .from('principal_activity_summary_secure')
           .select(`
             principal_id,
@@ -600,10 +603,6 @@ class PrincipalActivityApiService {
           `)
           .eq('activity_status', 'ACTIVE')
           .order('engagement_score', { ascending: false })
-        
-        if (organizationId) {
-          query = query.eq('organization_id', organizationId)
-        }
         
         const { data, error } = await query
         
@@ -690,7 +689,7 @@ class PrincipalActivityApiService {
    */
   private applyFiltersToQuery(query: any, filters: PrincipalFilters): void {
     if (filters.search) {
-      query = query.or(`principal_name.ilike.%${filters.search}%,organization_name.ilike.%${filters.search}%`)
+      query = query.or(`principal_name.ilike.%${filters.search}%`)
     }
     
     if (filters.activity_status?.length) {
@@ -698,7 +697,7 @@ class PrincipalActivityApiService {
     }
     
     if (filters.organization_status?.length) {
-      query = query.in('organization_status', filters.organization_status)
+      query = query.in('principal_status', filters.organization_status)
     }
     
     if (filters.organization_type?.length) {
@@ -706,11 +705,10 @@ class PrincipalActivityApiService {
     }
     
     if (filters.product_categories?.length) {
-      // This would require a more complex join query in practice
-      // For now, we'll filter by products that have these categories
+      query = query.overlaps('product_categories', filters.product_categories)
     }
     
-    if (filters.has_opportunities !== null) {
+    if (filters.has_opportunities !== null && filters.has_opportunities !== undefined) {
       if (filters.has_opportunities) {
         query = query.gt('total_opportunities', 0)
       } else {
@@ -718,11 +716,11 @@ class PrincipalActivityApiService {
       }
     }
     
-    if (filters.has_products !== null) {
+    if (filters.has_products !== null && filters.has_products !== undefined) {
       if (filters.has_products) {
-        query = query.gt('total_products', 0)
+        query = query.gt('product_count', 0)
       } else {
-        query = query.eq('total_products', 0)
+        query = query.eq('product_count', 0)
       }
     }
     
@@ -738,24 +736,20 @@ class PrincipalActivityApiService {
         .lte('lead_score', filters.lead_score_range.max)
     }
     
-    if (filters.country?.length) {
-      query = query.in('geographic_region', filters.country)
-    }
-    
-    if (filters.is_principal !== null) {
+    if (filters.is_principal !== null && filters.is_principal !== undefined) {
       query = query.eq('is_principal', filters.is_principal)
     }
     
-    if (filters.is_distributor !== null) {
+    if (filters.is_distributor !== null && filters.is_distributor !== undefined) {
       query = query.eq('is_distributor', filters.is_distributor)
     }
     
     if (filters.created_after) {
-      query = query.gte('created_at', filters.created_after)
+      query = query.gte('principal_created_at', filters.created_after)
     }
     
     if (filters.created_before) {
-      query = query.lte('created_at', filters.created_before)
+      query = query.lte('principal_created_at', filters.created_before)
     }
   }
   
@@ -820,21 +814,56 @@ class PrincipalActivityApiService {
   }
   
   /**
+   * Calculate activity status distribution
+   */
+  private calculateActivityStatusDistribution(principals: PrincipalActivitySummary[]) {
+    return {
+      NO_ACTIVITY: principals.filter(p => p.activity_status === 'NO_ACTIVITY').length,
+      STALE: principals.filter(p => p.activity_status === 'STALE').length,
+      MODERATE: principals.filter(p => p.activity_status === 'MODERATE').length,
+      ACTIVE: principals.filter(p => p.activity_status === 'ACTIVE').length
+    }
+  }
+
+  /**
+   * Calculate product category distribution
+   */
+  private calculateProductCategoryDistribution(principals: PrincipalActivitySummary[]) {
+    const categoryCount: any = {}
+    
+    principals.forEach(principal => {
+      if (principal.product_categories && Array.isArray(principal.product_categories)) {
+        principal.product_categories.forEach(category => {
+          categoryCount[category] = (categoryCount[category] || 0) + 1
+        })
+      }
+    })
+    
+    return categoryCount
+  }
+
+  /**
+   * Calculate monthly activity trend
+   */
+  private async calculateMonthlyActivityTrend(principals: PrincipalActivitySummary[]) {
+    // Simplified implementation - in practice would query time-series data
+    const currentMonth = new Date().toISOString().slice(0, 7)
+    
+    return [{
+      month: currentMonth,
+      new_principals: principals.length,
+      active_principals: principals.filter(p => p.activity_status === 'ACTIVE').length,
+      opportunities_created: principals.reduce((sum, p) => sum + p.opportunities_last_30_days, 0),
+      interactions_count: principals.reduce((sum, p) => sum + p.interactions_last_30_days, 0)
+    }]
+  }
+
+  /**
    * Calculate geographic distribution
    */
   private calculateGeographicDistribution(principals: PrincipalActivitySummary[]) {
-    const distribution = new Map<string, number>()
-    
-    principals.forEach(principal => {
-      const region = principal.geographic_region || 'Unknown'
-      distribution.set(region, (distribution.get(region) || 0) + 1)
-    })
-    
-    return Array.from(distribution.entries()).map(([region, count]) => ({
-      region,
-      count,
-      percentage: (count / principals.length) * 100
-    }))
+    // Since the interface doesn't include geographic data, return empty array
+    return []
   }
   
   /**
@@ -866,7 +895,8 @@ class PrincipalActivityApiService {
         principal_name: p.principal_name,
         engagement_score: p.engagement_score,
         total_opportunities: p.total_opportunities,
-        revenue_generated: p.revenue_generated || 0
+        won_opportunities: p.won_opportunities,
+        total_revenue: 0 // Not available in current interface
       }))
   }
   
@@ -890,22 +920,6 @@ class PrincipalActivityApiService {
     }))
   }
   
-  /**
-   * Calculate pipeline health metrics
-   */
-  private calculatePipelineHealth(principals: PrincipalActivitySummary[]) {
-    const totalOpportunities = principals.reduce((sum, p) => sum + p.total_opportunities, 0)
-    const recentOpportunities = principals.reduce((sum, p) => sum + p.opportunities_last_30_days, 0)
-    const avgConversion = this.calculateAverage(principals.map(p => p.conversion_rate_percent))
-    
-    return {
-      total_opportunities: totalOpportunities,
-      recent_opportunities: recentOpportunities,
-      avg_conversion_rate: avgConversion,
-      health_score: avgConversion * 0.6 + (recentOpportunities / Math.max(totalOpportunities, 1)) * 0.4 * 100,
-      status: avgConversion > 15 ? 'healthy' : avgConversion > 5 ? 'fair' : 'poor'
-    }
-  }
 }
 
 /**

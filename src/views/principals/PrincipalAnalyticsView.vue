@@ -73,7 +73,7 @@
           <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <TrendingUpIcon class="h-6 w-6 text-blue-500" />
+                <ArrowTrendingUpIcon class="h-6 w-6 text-blue-500" />
               </div>
               <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500">Current Score</p>
@@ -286,7 +286,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   ChartBarIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   CalendarDaysIcon,
   CurrencyDollarIcon,
   TrophyIcon,

@@ -106,7 +106,7 @@ class UserManagementMockAPI {
   }
 
   async setupRateLimitingMocks() {
-    let requestCounts = new Map()
+    const requestCounts = new Map()
     
     await this.page.route('**/api/rate-limit/check', route => {
       const { user_id, endpoint } = route.request().postDataJSON()

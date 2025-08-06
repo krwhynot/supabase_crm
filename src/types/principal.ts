@@ -2,9 +2,7 @@ import * as yup from 'yup'
 import type { 
   Database, 
   Tables, 
-  Enums,
-  PrincipalActivitySummary as DatabasePrincipalActivitySummary,
-  PrincipalActivityStats as DatabasePrincipalActivityStats
+  Enums
 } from './database.types'
 
 /**
@@ -639,7 +637,9 @@ export const DEFAULT_PRINCIPAL_FILTERS: PrincipalFilters = {
   activity_status: [],
   organization_status: [],
   has_opportunities: null,
-  has_products: null
+  has_products: null,
+  is_principal: null,
+  is_distributor: null
 }
 
 /**

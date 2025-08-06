@@ -23,7 +23,9 @@ import type {
   PrincipalListResponse,
   PrincipalSelectionItem,
   PrincipalMetricsSummary,
-  PrincipalActivityStatus,
+  PrincipalActivityStatus
+} from '@/types/principal'
+import {
   DEFAULT_PRINCIPAL_FILTERS,
   DEFAULT_PRINCIPAL_SORT
 } from '@/types/principal'
@@ -804,6 +806,27 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   }
   
   /**
+   * Load activity summaries - Main method for component compatibility
+   */
+  const loadActivitySummaries = async (
+    filters: Partial<PrincipalFilters> = {},
+    forceRefresh = false
+  ): Promise<void> => {
+    // Clear cache if force refresh requested
+    if (forceRefresh) {
+      state.lastFetched = null
+    }
+    
+    // Use existing fetchPrincipals method with proper error handling
+    await fetchPrincipals(filters)
+    
+    // Calculate analytics after loading principals
+    if (state.principals.length > 0) {
+      await calculateAnalytics()
+    }
+  }
+  
+  /**
    * Get principal options for forms
    */
   const getPrincipalOptions = async (organizationId?: string): Promise<PrincipalSelectionItem[]> => {
@@ -959,6 +982,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     clearErrors,
     selectPrincipal,
     clearSelectedPrincipal,
+    loadActivitySummaries,
     getPrincipalOptions,
     
     // Real-time updates

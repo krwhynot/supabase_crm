@@ -296,7 +296,7 @@ const badgeClasses = computed(() => {
 @media print {
   .product-performance-indicator {
     -webkit-print-color-adjust: exact;
-    color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 </style>

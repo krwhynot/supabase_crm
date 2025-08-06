@@ -258,7 +258,7 @@ const tooltipText = computed(() => {
 @media print {
   .engagement-score-ring {
     -webkit-print-color-adjust: exact;
-    color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 </style>

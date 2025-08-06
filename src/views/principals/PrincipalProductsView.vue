@@ -102,7 +102,7 @@
           <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <TrendingUpIcon class="h-6 w-6 text-green-500" />
+                <ArrowTrendingUpIcon class="h-6 w-6 text-green-500" />
               </div>
               <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500">Avg Performance</p>
@@ -363,7 +363,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   CubeIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
   CogIcon,
@@ -384,7 +384,7 @@ import { ProductPerformanceChart } from '@/components/principal'
 
 // Services and Types
 import { usePrincipalStore } from '@/stores/principalStore'
-import type { PrincipalProductPerformance } from '@/services/principalActivityApi'
+import type { PrincipalProductPerformance } from '@/types/principal'
 
 // ===============================
 // REACTIVE STATE

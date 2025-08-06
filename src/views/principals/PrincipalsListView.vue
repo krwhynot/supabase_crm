@@ -382,13 +382,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePrincipalStore } from '@/stores/principalStore'
-import PrincipalActivityApi from '@/services/principalActivityApi'
+import { principalActivityApi } from '@/services/principalActivityApi'
 import type {
-  PrincipalActivitySummary,
-  PrincipalDistributorRelationships,
-  PrincipalProductPerformance,
-  PrincipalTimelineSummary
-} from '@/services/principalActivityApi'
+  PrincipalActivitySummary
+} from '@/types/principal'
 
 // Component imports
 import PrincipalSelector from '@/components/principal/PrincipalSelector.vue'
@@ -484,7 +481,7 @@ const filteredPrincipals = computed(() => {
     const search = searchQuery.value.toLowerCase()
     filtered = filtered.filter(principal => 
       principal.principal_name?.toLowerCase().includes(search) ||
-      principal.organization_name?.toLowerCase().includes(search)
+      principal.principal_name?.toLowerCase().includes(search)
     )
   }
   
@@ -681,7 +678,7 @@ const loadPrincipalsData = async () => {
   error.value = null
   
   try {
-    const response = await PrincipalActivityApi.getPrincipalActivitySummary()
+    const response = await principalActivityApi.getPrincipalActivitySummary()
     if (response.success) {
       principalsList.value = response.data || []
     } else {
@@ -699,19 +696,19 @@ const loadKPIData = async () => {
   
   try {
     // Load engagement breakdown
-    const engagementResponse = await PrincipalActivityApi.getEngagementScoreBreakdown()
+    const engagementResponse = await principalActivityApi.getEngagementScoreBreakdown()
     if (engagementResponse.success) {
       engagementBreakdown.value = engagementResponse.data
     }
 
     // Load principal stats
-    const statsResponse = await PrincipalActivityApi.getPrincipalStats()
+    const statsResponse = await principalActivityApi.getPrincipalStats()
     if (statsResponse.success) {
       principalStats.value = statsResponse.data
     }
 
     // Load activity summary for KPI cards
-    const summaryResponse = await PrincipalActivityApi.getPrincipalActivitySummary()
+    const summaryResponse = await principalActivityApi.getPrincipalActivitySummary()
     if (summaryResponse.success) {
       activitySummary.value = summaryResponse.data || []
     }

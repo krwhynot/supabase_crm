@@ -47,7 +47,7 @@ class OptimizedAPIImplementation {
 
   async setupOptimizedJWTValidation() {
     // Mock JWT validation with caching
-    let jwtCache = new Map()
+    const jwtCache = new Map()
     
     await this.page.route('**/auth/validate-jwt-optimized', route => {
       const token = route.request().headers()['authorization']
@@ -95,7 +95,7 @@ class OptimizedAPIImplementation {
 
   async setupOptimizedDatabaseQueries() {
     // Mock optimized contact list with indexes and caching
-    let queryCache = new Map()
+    const queryCache = new Map()
     
     await this.page.route('**/api/contacts/optimized', route => {
       const queryParams = new URL(route.request().url()).searchParams
@@ -149,7 +149,7 @@ class OptimizedAPIImplementation {
 
   async setupOptimizedRateLimiting() {
     // Mock Redis-based rate limiting with Lua scripts
-    let redisRateLimits = new Map()
+    const redisRateLimits = new Map()
     
     await this.page.route('**/api/rate-limit/optimized', route => {
       const { user_id, endpoint } = route.request().postDataJSON()
@@ -203,7 +203,7 @@ class OptimizedAPIImplementation {
 
   async setupOptimizedInputValidation() {
     // Mock pre-compiled validation patterns
-    let validationCache = new Map()
+    const validationCache = new Map()
     
     await this.page.route('**/api/validate/optimized', route => {
       const { input, type } = route.request().postDataJSON()
@@ -257,7 +257,7 @@ class OptimizedAPIImplementation {
 
   async setupOptimizedRLSPolicies() {
     // Mock optimized RLS with policy caching
-    let rlsCache = new Map()
+    const rlsCache = new Map()
     
     await this.page.route('**/api/users/optimized/**', route => {
       const url = route.request().url()

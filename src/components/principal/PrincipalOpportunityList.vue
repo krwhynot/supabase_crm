@@ -318,11 +318,11 @@ const formatDate = (dateString: string): string => {
   }
   
   .opportunity-card h4 {
-    @apply text-xs;
+    font-size: 0.75rem;
   }
   
   .opportunity-card .text-xs {
-    @apply text-[10px];
+    font-size: 10px;
   }
 }
 

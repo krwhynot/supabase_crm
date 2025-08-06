@@ -456,11 +456,11 @@ const formatDateTime = (dateString: string): string => {
   }
   
   .interaction-card h4 {
-    @apply text-xs;
+    font-size: 0.75rem;
   }
   
   .interaction-card .text-xs {
-    @apply text-[10px];
+    font-size: 10px;
   }
   
   /* Simplify timeline on mobile */

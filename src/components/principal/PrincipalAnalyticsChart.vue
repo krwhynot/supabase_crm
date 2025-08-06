@@ -152,14 +152,14 @@ import { ref, computed, watch, onMounted } from 'vue'
 import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   CalendarIcon,
   ChartBarIcon
 } from '@heroicons/vue/24/outline'
 import type {
-  PrincipalTimelineSummary,
+  PrincipalTimelineEntry,
   PrincipalProductPerformance
-} from '@/services/principalActivityApi'
+} from '@/types/principal'
 
 // Chart component imports (these would be separate components)
 import EngagementTrendChart from './charts/EngagementTrendChart.vue'
@@ -173,7 +173,7 @@ import OpportunityPipelineChart from './charts/OpportunityPipelineChart.vue'
 
 interface Props {
   principalId: string
-  activityData?: PrincipalTimelineSummary[]
+  activityData?: PrincipalTimelineEntry[]
   productPerformanceData?: PrincipalProductPerformance[]
   loading?: boolean
   principalName?: string
@@ -275,7 +275,7 @@ const keyInsights = computed(() => {
     label: 'Avg Engagement',
     value: avgEngagement.toFixed(1),
     description: 'Average engagement score',
-    icon: TrendingUpIcon,
+    icon: ArrowTrendingUpIcon,
     iconColor: avgEngagement >= 70 ? 'text-green-500' : avgEngagement >= 40 ? 'text-yellow-500' : 'text-red-500'
   })
   
