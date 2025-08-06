@@ -337,11 +337,18 @@ class PrincipalActivityApiService {
         
         const dashboardData: PrincipalDashboardData = {
           summary: summaryData as PrincipalActivitySummary,
-          distributor_relationships: distributorRelationships,
+          relationships: distributorRelationships,     // Fix: use correct property name
           product_performance: productPerformance,
           recent_timeline: timelineEntries,
           analytics: analytics,
-          last_updated: new Date().toISOString()
+          // Add missing KPI metrics
+          kpi_metrics: {
+            total_revenue_potential: productPerformance.reduce((sum, p) => sum + (p.total_value || 0), 0),
+            active_opportunity_count: summaryData.active_opportunities,
+            pending_follow_ups: summaryData.follow_ups_required,
+            overdue_activities: 0, // Calculate from timeline if needed
+            engagement_trend: 'stable' as const // Calculate based on historical data
+          }
         }
         
         // Cache the result with shorter TTL for dashboard data
@@ -801,8 +808,22 @@ class PrincipalActivityApiService {
     return {
       avg_engagement_score: this.calculateAverage(principals.map(p => p.engagement_score)),
       total_opportunities: principals.reduce((sum, p) => sum + p.total_opportunities, 0),
-      total_interactions: principals.reduce((sum, p) => sum + p.total_interactions, 0)
+      total_interactions: principals.reduce((sum, p) => sum + p.total_interactions, 0),
+      // Add missing property that analytics summary expects
+      top_activity_status: this.getMostCommonActivityStatus(principals)
     }
+  }
+
+  /**
+   * Get the most common activity status among principals
+   */
+  private getMostCommonActivityStatus(principals: PrincipalActivitySummary[]): 'NO_ACTIVITY' | 'STALE' | 'MODERATE' | 'ACTIVE' {
+    const statusCounts = this.calculateActivityStatusDistribution(principals)
+    const maxStatus = Object.entries(statusCounts).reduce((max, [status, count]) => 
+      count > max.count ? { status: status as 'NO_ACTIVITY' | 'STALE' | 'MODERATE' | 'ACTIVE', count } : max
+    , { status: 'NO_ACTIVITY' as const, count: 0 })
+    
+    return maxStatus.status
   }
   
   /**
