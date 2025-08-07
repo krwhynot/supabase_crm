@@ -55,7 +55,7 @@
     <!-- Location (conditional) -->
     <div v-if="requiresLocation">
       <label for="location" class="block text-sm font-medium text-gray-700 mb-2">
-        Location <span v-if="interactionType === 'IN_PERSON'" class="text-red-500">*</span>
+        Location <span v-if="interactionType === 'Meeting'" class="text-red-500">*</span>
       </label>
       <input
         id="location"
@@ -138,7 +138,7 @@
     </div>
 
     <!-- Interaction Type Specific Fields -->
-    <div v-if="interactionType === 'EMAIL'" class="border-t pt-6">
+    <div v-if="interactionType === 'Email'" class="border-t pt-6">
       <h4 class="text-sm font-medium text-gray-700 mb-3">Email Details</h4>
       <div class="text-sm text-gray-500">
         <p>• Duration is typically not applicable for emails</p>
@@ -146,7 +146,7 @@
       </div>
     </div>
 
-    <div v-else-if="interactionType === 'DEMO'" class="border-t pt-6">
+    <div v-else-if="interactionType === 'Demo'" class="border-t pt-6">
       <h4 class="text-sm font-medium text-gray-700 mb-3">Demo Details</h4>
       <div class="text-sm text-gray-500">
         <p>• Consider setting duration to 45-60 minutes for product demos</p>
@@ -155,7 +155,7 @@
       </div>
     </div>
 
-    <div v-else-if="interactionType === 'SAMPLE_DELIVERY'" class="border-t pt-6">
+    <div v-else-if="interactionType === 'Event'" class="border-t pt-6">
       <h4 class="text-sm font-medium text-gray-700 mb-3">Sample Delivery Details</h4>
       <div class="text-sm text-gray-500">
         <p>• Duration is typically short (10-15 minutes)</p>
@@ -220,7 +220,7 @@ const contactMethods = [
 
 // Computed properties
 const requiresLocation = computed(() => {
-  return ['IN_PERSON', 'DEMO', 'SAMPLE_DELIVERY'].includes(props.interactionType)
+  return ['Meeting', 'Demo', 'Event'].includes(props.interactionType)
 })
 
 const showSuggestions = computed(() => {
@@ -233,12 +233,18 @@ const suggestions = computed(() => {
   // Duration suggestions based on type
   if (!localFormData.value.duration_minutes) {
     const durationSuggestions = {
-      EMAIL: null,
-      CALL: 15,
-      IN_PERSON: 60,
-      DEMO: 45,
-      FOLLOW_UP: 20,
-      SAMPLE_DELIVERY: 15
+      Email: null,
+      Phone: 15,
+      Meeting: 60,
+      Demo: 45,
+      Proposal: 30,
+      Contract: 45,
+      Note: null,
+      Task: 15,
+      Event: 15,
+      Social: null,
+      Website: null,
+      Other: 20
     }
     
     const suggestedDuration = durationSuggestions[props.interactionType]
@@ -254,12 +260,18 @@ const suggestions = computed(() => {
   // Contact method suggestions
   if (!localFormData.value.contact_method) {
     const methodSuggestions = {
-      EMAIL: 'Email',
-      CALL: 'Phone',
-      IN_PERSON: 'In Person',
-      DEMO: 'In Person',
-      FOLLOW_UP: 'Phone',
-      SAMPLE_DELIVERY: 'In Person'
+      Email: 'Email',
+      Phone: 'Phone',
+      Meeting: 'In Person',
+      Demo: 'In Person',
+      Proposal: 'Email',
+      Contract: 'In Person',
+      Note: 'Other',
+      Task: 'Phone',
+      Event: 'In Person',
+      Social: 'Social Media',
+      Website: 'Other',
+      Other: 'Phone'
     }
     
     const suggestedMethod = methodSuggestions[props.interactionType]

@@ -721,15 +721,5 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 })
 
-// ===============================
-// TYPE EXPORTS
-// ===============================
-
-export type {
-  DashboardKPIs,
-  DashboardActivity,
-  DashboardPerformance,
-  DashboardFilters,
-  DashboardPreferences,
-  DashboardTimeFilter
-}
+// Export types are already declared in the interface definitions above
+// No need for duplicate export declarations

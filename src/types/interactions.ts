@@ -311,12 +311,12 @@ export interface InteractionQuickTemplate {
 
 // Constants for interaction management
 export const INTERACTION_TYPES: { value: InteractionType; label: string }[] = [
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'CALL', label: 'Phone Call' },
-  { value: 'IN_PERSON', label: 'In-Person Meeting' },
-  { value: 'DEMO', label: 'Product Demo' },
-  { value: 'FOLLOW_UP', label: 'Follow-up' },
-  { value: 'SAMPLE_DELIVERY', label: 'Sample Delivery' }
+  { value: 'Email', label: 'Email' },
+  { value: 'Phone', label: 'Phone Call' },
+  { value: 'Meeting', label: 'In-Person Meeting' },
+  { value: 'Demo', label: 'Product Demo' },
+  { value: 'Other', label: 'Follow-up' }, // Map FOLLOW_UP to Other
+  { value: 'Event', label: 'Sample Delivery' } // Map SAMPLE_DELIVERY to Event
 ]
 
 export const INTERACTION_STATUSES: { value: InteractionStatus; label: string }[] = [
@@ -338,7 +338,7 @@ export const QUICK_TEMPLATES: InteractionQuickTemplate[] = [
   {
     id: 'sample-drop',
     label: 'Dropped Samples',
-    type: 'SAMPLE_DELIVERY',
+    type: 'Event',
     subject_template: 'Product samples delivered',
     notes_template: 'Product samples delivered for evaluation',
     default_duration: 15,
@@ -347,7 +347,7 @@ export const QUICK_TEMPLATES: InteractionQuickTemplate[] = [
   {
     id: 'quick-call',
     label: 'Quick Call',
-    type: 'CALL',  
+    type: 'Phone',  
     subject_template: 'Brief phone conversation',
     notes_template: 'Brief phone conversation',
     default_duration: 10,
@@ -356,7 +356,7 @@ export const QUICK_TEMPLATES: InteractionQuickTemplate[] = [
   {
     id: 'product-demo',
     label: 'Product Demo',
-    type: 'DEMO',
+    type: 'Demo',
     subject_template: 'Product demonstration',
     notes_template: 'Product demonstration session',
     default_duration: 60,
@@ -365,7 +365,7 @@ export const QUICK_TEMPLATES: InteractionQuickTemplate[] = [
   {
     id: 'follow-up',
     label: 'Follow-up',
-    type: 'FOLLOW_UP',
+    type: 'Other',
     subject_template: 'Follow-up contact',
     notes_template: 'Follow-up on previous interaction',
     default_duration: 20,
@@ -402,7 +402,7 @@ export const isInteractionOutcome = (value: string): value is InteractionOutcome
 // Default values for new interactions
 export const getDefaultInteractionFormData = (opportunityId?: string): Partial<InteractionFormData> => ({
   opportunity_id: opportunityId || '',
-  type: 'CALL',
+  type: 'Phone',
   subject: '',
   interaction_date: new Date().toISOString(),
   status: 'SCHEDULED',
@@ -452,7 +452,7 @@ export const INTERACTION_VALIDATION_RULES = {
   },
   type: {
     required: true,
-    enum: ['EMAIL', 'CALL', 'IN_PERSON', 'DEMO', 'FOLLOW_UP', 'SAMPLE_DELIVERY'],
+    enum: ['Email', 'Phone', 'Meeting', 'Demo', 'Other', 'Event'],
     message: 'Valid interaction type must be selected'
   },
   status: {
@@ -508,7 +508,7 @@ export const INTERACTION_VALIDATION_RULES = {
     maxLength: 255,
     conditional: {
       dependsOn: 'type',
-      value: 'IN_PERSON',
+      value: 'Meeting',
       message: 'Location should be provided for in-person meetings'
     }
   },
@@ -524,41 +524,77 @@ export const INTERACTION_VALIDATION_RULES = {
  * Default form values for different interaction types
  */
 export const INTERACTION_FORM_DEFAULTS = {
-  EMAIL: {
+  Email: {
     duration_minutes: null,
     location: null,
     contact_method: 'Email',
     follow_up_required: false
   },
-  CALL: {
+  Phone: {
     duration_minutes: 15,
     location: null,
     contact_method: 'Phone',
     follow_up_required: false
   },
-  IN_PERSON: {
+  Meeting: {
     duration_minutes: 60,
     location: '',
     contact_method: 'In Person',
     follow_up_required: true
   },
-  DEMO: {
+  Demo: {
     duration_minutes: 45,
     location: '',
     contact_method: 'In Person',
     follow_up_required: true
   },
-  FOLLOW_UP: {
-    duration_minutes: 20,
+  Proposal: {
+    duration_minutes: 30,
     location: null,
-    contact_method: 'Phone',
+    contact_method: 'Email',
+    follow_up_required: true
+  },
+  Contract: {
+    duration_minutes: 45,
+    location: '',
+    contact_method: 'In Person',
+    follow_up_required: true
+  },
+  Note: {
+    duration_minutes: null,
+    location: null,
+    contact_method: 'Other',
     follow_up_required: false
   },
-  SAMPLE_DELIVERY: {
+  Task: {
+    duration_minutes: 15,
+    location: null,
+    contact_method: 'Phone',
+    follow_up_required: true
+  },
+  Event: {
     duration_minutes: 15,
     location: '',
     contact_method: 'In Person',
     follow_up_required: true
+  },
+  Social: {
+    duration_minutes: null,
+    location: null,
+    contact_method: 'Social Media',
+    follow_up_required: false
+  },
+  Website: {
+    duration_minutes: null,
+    location: null,
+    contact_method: 'Other',
+    follow_up_required: false
+  },
+  Other: {
+    duration_minutes: 20,
+    location: null,
+    contact_method: 'Phone',
+    follow_up_required: false
   }
 } as const
 

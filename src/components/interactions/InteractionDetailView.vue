@@ -434,12 +434,18 @@ const isFollowUpOverdue = computed(() => {
 // Icon mapping
 const getTypeIcon = (type: InteractionType) => {
   const iconMap = {
-    EMAIL: EnvelopeIcon,
-    CALL: PhoneIcon,
-    IN_PERSON: UserGroupIcon,
-    DEMO: PresentationChartLineIcon,
-    FOLLOW_UP: ArrowPathIcon,
-    SAMPLE_DELIVERY: TruckIcon
+    Email: EnvelopeIcon,
+    Phone: PhoneIcon,
+    Meeting: UserGroupIcon,
+    Demo: PresentationChartLineIcon,
+    Proposal: PresentationChartLineIcon,
+    Contract: PresentationChartLineIcon,
+    Note: ChatBubbleLeftRightIcon,
+    Task: ArrowPathIcon,
+    Event: TruckIcon,
+    Social: ChatBubbleLeftRightIcon,
+    Website: ChatBubbleLeftRightIcon,
+    Other: ArrowPathIcon
   }
   return iconMap[type] || ChatBubbleLeftRightIcon
 }

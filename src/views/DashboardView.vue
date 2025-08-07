@@ -197,7 +197,7 @@
                 </div>
                 <div class="ml-4 flex-1">
                   <p class="text-sm font-medium text-gray-900">{{ opportunity.name }}</p>
-                  <p class="text-sm text-gray-500">{{ opportunity.organization }} • {{ formatOpportunityStage(opportunity.stage) }}</p>
+                  <p class="text-sm text-gray-500">{{ opportunity.organization_name }} • {{ formatOpportunityStage(opportunity.stage) }}</p>
                   <p class="text-xs text-gray-400 mt-1">{{ formatRelativeDate(opportunity.created_at) }}</p>
                 </div>
                 <div class="text-right">
@@ -261,14 +261,12 @@ const refreshDashboard = async () => {
       opportunityStore.fetchKPIs(),
       opportunityStore.fetchOpportunities({
         search: '',
-        stages: [],
-        organizations: [],
-        products: [],
+        stage: [],
         probability_min: 0,
         probability_max: 100,
-        date_from: '',
-        date_to: '',
-        context: '',
+        created_after: '',
+        created_before: '',
+        context: [],
         principal_id: ''
       }, {
         page: 1,

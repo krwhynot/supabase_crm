@@ -587,10 +587,10 @@ export const validateInteractionTypeCompatibility = (
 ): { isValid: boolean; warning?: string } => {
   // Define type-context compatibility rules
   const compatibilityRules: Record<string, InteractionType[]> = {
-    'Food Show': ['EMAIL', 'CALL', 'IN_PERSON', 'SAMPLE_DELIVERY'],
-    'Site Visit': ['IN_PERSON', 'DEMO', 'FOLLOW_UP'],
-    'Demo Request': ['DEMO', 'CALL', 'EMAIL', 'FOLLOW_UP'],
-    'Sampling': ['SAMPLE_DELIVERY', 'CALL', 'EMAIL', 'FOLLOW_UP']
+    'Food Show': ['Email', 'Phone', 'Meeting', 'Event'],
+    'Site Visit': ['Meeting', 'Demo', 'Other'],
+    'Demo Request': ['Demo', 'Phone', 'Email', 'Other'],
+    'Sampling': ['Event', 'Phone', 'Email', 'Other']
   }
 
   if (!opportunityContext || !compatibilityRules[opportunityContext]) {
@@ -618,7 +618,7 @@ export const validateInteractionTypeCompatibility = (
 export const getDefaultInteractionFormValues = (
   opportunityId?: string,
   contactId?: string,
-  interactionType: InteractionType = 'CALL'
+  interactionType: InteractionType = 'Phone'
 ): Partial<InteractionFormData> => ({
   interaction_type: interactionType,
   subject: '',
@@ -648,7 +648,7 @@ export const getQuickInteractionDefaults = (
   opportunityId?: string
 ): Partial<QuickInteractionForm> => {
   const baseDefaults = {
-    interaction_type: 'CALL' as InteractionType,
+    interaction_type: 'Phone' as InteractionType,
     subject: '',
     date: new Date().toISOString().slice(0, 16),
     opportunity_id: opportunityId || '',
@@ -660,22 +660,22 @@ export const getQuickInteractionDefaults = (
   // Apply template-specific defaults if available
   const templateDefaults: Record<string, Partial<QuickInteractionForm>> = {
     'sample-drop': {
-      interaction_type: 'SAMPLE_DELIVERY',
+      interaction_type: 'Event',
       subject: 'Product samples delivered',
       notes: 'Product samples delivered for evaluation'
     },
     'quick-call': {
-      interaction_type: 'CALL',
+      interaction_type: 'Phone',
       subject: 'Brief phone conversation',
       notes: 'Brief phone conversation'
     },
     'product-demo': {
-      interaction_type: 'DEMO',
+      interaction_type: 'Demo',
       subject: 'Product demonstration',
       notes: 'Product demonstration session'
     },
     'follow-up': {
-      interaction_type: 'FOLLOW_UP',
+      interaction_type: 'Other',
       subject: 'Follow-up contact',
       notes: 'Follow-up on previous interaction'
     }

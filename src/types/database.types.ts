@@ -2486,3 +2486,15 @@ export type RelationshipType = 'HAS_DISTRIBUTOR' | 'DIRECT'
 
 // Timeline activity types
 export type TimelineActivityType = 'CONTACT_UPDATE' | 'INTERACTION' | 'OPPORTUNITY_CREATED' | 'PRODUCT_ASSOCIATION'
+
+// ===================================
+// BATCH 3: MISSING TYPE EXPORTS
+// ===================================
+
+// Add missing Contact type export for form components
+export type Contact = Tables<'contacts'>
+export type ContactInsert = TablesInsert<'contacts'>
+export type ContactUpdate = TablesUpdate<'contacts'>
+
+// Add missing OrganizationStatus type export
+export type OrganizationStatus = Enums<'organization_status'>

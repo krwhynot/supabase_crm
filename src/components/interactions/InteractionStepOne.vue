@@ -211,12 +211,18 @@ const getError = (field: string) => {
 // Type descriptions
 const getTypeDescription = (type: InteractionType) => {
   const descriptions = {
-    EMAIL: 'Email communication or email campaign',
-    CALL: 'Phone call or voice conversation',
-    IN_PERSON: 'Face-to-face meeting or site visit',
-    DEMO: 'Product demonstration or presentation',
-    FOLLOW_UP: 'Follow-up contact or check-in',
-    SAMPLE_DELIVERY: 'Sample drop-off or delivery'
+    Email: 'Email communication or email campaign',
+    Phone: 'Phone call or voice conversation',
+    Meeting: 'Face-to-face meeting or site visit',
+    Demo: 'Product demonstration or presentation',
+    Proposal: 'Business proposal or quote',
+    Contract: 'Contract discussion or signing',
+    Note: 'Internal note or documentation',
+    Task: 'Task or follow-up action',
+    Event: 'Sample drop-off or delivery',
+    Social: 'Social media interaction',
+    Website: 'Website or online interaction',
+    Other: 'Follow-up contact or check-in'
   }
   return descriptions[type] || ''
 }

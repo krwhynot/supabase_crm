@@ -218,7 +218,7 @@ const loadingOpportunities = ref(false)
 // Form data structure
 const formData = reactive({
   step1: {
-    type: 'CALL' as InteractionType,
+    type: 'Phone' as InteractionType,
     subject: '',
     opportunity_id: props.opportunityId || '',
     interaction_date: new Date().toISOString().slice(0, 16) // datetime-local format
@@ -361,7 +361,7 @@ const validateStep2 = () => {
   }
   
   // Conditional validation based on interaction type
-  if (formData.step1.type === 'IN_PERSON' && !formData.step2.location) {
+  if (formData.step1.type === 'Meeting' && !formData.step2.location) {
     errors.push('Location is required for in-person meetings')
   }
   

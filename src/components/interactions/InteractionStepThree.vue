@@ -181,7 +181,7 @@
         <input
           v-model="newTag"
           @keyup.enter="addTag"
-          @keyup.comma="addTag"
+          @keydown="handleTagKeydown"
           type="text"
           placeholder="Add tag and press Enter"
           class="flex-1 rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -383,6 +383,13 @@ const addTag = () => {
     emit('update:formData', { tags })
   }
   newTag.value = ''
+}
+
+const handleTagKeydown = (event: KeyboardEvent) => {
+  if (event.key === ',') {
+    event.preventDefault()
+    addTag()
+  }
 }
 
 const removeTag = (tagToRemove: string) => {
