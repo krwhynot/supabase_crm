@@ -1,0 +1,2 @@
+import{a as e,b as o,j as r}from"./index-Br7bM97V.js";function s(t,n){return r(),e("svg",{xmlns:"http://www.w3.org/2000/svg",fill:"none",viewBox:"0 0 24 24","stroke-width":"1.5",stroke:"currentColor","aria-hidden":"true","data-slot":"icon"},[o("path",{"stroke-linecap":"round","stroke-linejoin":"round",d:"m4.5 12.75 6 6 9-13.5"})])}export{s as r};
+//# sourceMappingURL=CheckIcon-0UoNe-IG.js.map

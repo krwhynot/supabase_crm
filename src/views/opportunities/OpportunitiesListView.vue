@@ -286,10 +286,9 @@ const filters = ref<OpportunityFilters>({
   organization_id: '',
   product_id: '',
   deal_owner: '',
-  probability_min: undefined,
-  probability_max: undefined,
   expected_close_after: '',
   expected_close_before: ''
+  // probability_min and probability_max omitted (optional properties)
 })
 
 // ===============================

@@ -1,8 +1,8 @@
 <template>
   <button
-    :type="type"
-    :disabled="disabled || loading"
-    :aria-label="ariaLabel"
+    :type="type || 'button'"
+    :disabled="disabled || loading || undefined"
+    v-bind="ariaLabel ? { 'aria-label': ariaLabel } : {}"
     :class="buttonClasses"
     @click="$emit('click', $event)"
   >

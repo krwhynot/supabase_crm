@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="152" height="152" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+  <rect width="152" height="152" fill="#ffffff" rx="22.8"/>
+  
+  <!-- Main CRM Icon - Contact/Network representation -->
+  <g fill="none" stroke="#2563eb" stroke-width="7.6000000000000005">
+    <!-- Central contact -->
+    <circle cx="76" cy="76" r="18.240000000000002" fill="#2563eb"/>
+    
+    <!-- Connected contacts -->
+    <circle cx="39.519999999999996" cy="48.64" r="11.4" fill="#ffffff"/>
+    <circle cx="112.48" cy="48.64" r="11.4" fill="#ffffff"/>
+    <circle cx="39.519999999999996" cy="103.36" r="11.4" fill="#ffffff"/>
+    <circle cx="112.48" cy="103.36" r="11.4" fill="#ffffff"/>
+    
+    <!-- Connection lines -->
+    <line x1="76" y1="76" x2="48.64" y2="57.76"/>
+    <line x1="76" y1="76" x2="103.36" y2="57.76"/>
+    <line x1="76" y1="76" x2="48.64" y2="94.24000000000001"/>
+    <line x1="76" y1="76" x2="103.36" y2="94.24000000000001"/>
+  </g>
+  
+  <!-- CRM label for larger icons -->
+  <text x="76" y="129.2" text-anchor="middle" fill="#2563eb" font-family="Arial, sans-serif" font-size="12.16" font-weight="bold">CRM</text>
+
+</svg>

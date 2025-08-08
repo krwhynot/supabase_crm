@@ -2,45 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
-
-**Start development server:**
-```bash
-npm run dev
-```
-
-**Build for production:**
-```bash
-npm run build
-```
-
-**Preview production build:**
-```bash
-npm run preview
-```
-
-**Run linting:**
-```bash
-npm run lint
-```
-
-**Run type checking:**
-```bash
-npm run type-check
-```
-
-**Install dependencies after cloning:**
-```bash
-npm install
-```
-
-**Quick development workflow commands:**
-```bash
-npm run dev                      # Start development server (localhost:5173)
-npm run lint && npm run type-check  # Code quality validation before commits
-npm run build && npm run preview    # Test production build locally
-```
-
 ## Project Architecture
 
 This is a Vue 3 TypeScript CRM application with a modern dashboard interface, comprehensive contact management, and MCP (Model Context Protocol) integration.
@@ -331,7 +292,6 @@ CREATE TABLE product_principals (
     ├── /contacts/:id (Pre-populated organization)
     └── /organizations/:id (Pre-selected organization)
 ```
-
 **Auto-Naming System:**
 - **Pattern**: `[Organization] - [Principal] - [Context] - [Month Year]`
 - **Template System**: Tracks naming templates for consistency
@@ -345,12 +305,6 @@ CREATE TABLE product_principals (
 3. Preview generated opportunity names
 4. Configure shared product and stage settings
 5. Submit batch with progress feedback
-
-**KPI Calculations:**
-- **Total Opportunities**: All non-deleted opportunities
-- **Active Opportunities**: Opportunities not in CLOSED_WON stage
-- **Average Probability**: Mean probability across active opportunities
-- **Won This Month**: Opportunities marked as won in current month
 
 **Integration Points:**
 - **Contacts**: Create opportunities from contact detail pages
@@ -393,40 +347,6 @@ CREATE TABLE product_principals (
 - Performance - 15 tests for page load and response times
 - UI Healing - Automated component validation system
 
-**Test Commands:**
-```bash
-# Unit Testing
-npm run test:unit                        # Vitest unit tests
-npm run test:unit:watch                  # Watch mode for development
-npm run test:unit:ui                     # Vitest UI mode
-
-# End-to-End Testing
-npm test                                 # All Playwright tests
-npm run test:ui                          # Playwright UI debugging mode
-npm run test:e2e                         # Core opportunity management tests
-npm run test:comprehensive               # Full opportunity test suite
-npm run test:opportunity                 # All opportunity-related tests
-
-# Specialized Testing
-npm run test:accessibility               # WCAG 2.1 AA compliance tests
-npm run test:performance                 # Performance benchmark tests
-npm run test:performance:api             # API performance testing
-npm run test:performance:load            # Load testing scenarios
-npm run test:components                  # Component integration tests
-
-# Multi-Environment Testing
-npm run test:chrome                      # Desktop Chrome testing
-npm run test:ipad                        # iPad viewport testing (768x1024)
-npm run test:mobile                      # Mobile viewport testing
-
-# Development Testing
-npm run test:headed                      # Run tests with browser UI
-npm run test:debug                       # Debug mode with breakpoints
-npm run test:report                      # Generate and view HTML reports
-
-# Production Testing
-npm run test:smoke-production            # Basic integration validation
-```
 
 ## Live Deployment
 
@@ -468,3 +388,4 @@ For comprehensive implementation details and architectural patterns, see the ref
 - **Production Deployment** - Real-world deployment patterns and optimization strategies
 
 These reference documents provide deep implementation insights complementing the high-level overview in this CLAUDE.md file.
+- No revenue, deal value, or financial metrics allowed in design. Focus on progress in building relationships with potential buyer

@@ -122,6 +122,21 @@
             <span v-if="!sidebarCollapsed" class="ml-3">Interactions</span>
           </router-link>
 
+          <router-link
+            to="/products"
+            :class="[
+              'nav-item',
+              $route.path.startsWith('/products')
+                ? 'nav-item-active'
+                : 'nav-item-inactive'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <span v-if="!sidebarCollapsed" class="ml-3">Products</span>
+          </router-link>
+
           <!-- Principals Section with Submenu -->
           <div class="space-y-1">
             <!-- Main Principals Link -->

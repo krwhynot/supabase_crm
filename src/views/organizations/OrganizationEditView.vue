@@ -485,7 +485,12 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    await organizationStore.updateOrganization(props.id, formData)
+    // Convert undefined to null for database compatibility
+    const sanitizedFormData = {
+      ...formData,
+      employees_count: formData.employees_count ?? null
+    }
+    await organizationStore.updateOrganization(props.id, sanitizedFormData)
     
     // Navigate back to the organization detail page
     router.push(`/organizations/${props.id}`)

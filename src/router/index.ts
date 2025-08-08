@@ -224,6 +224,44 @@ const routes: RouteRecordRaw[] = [
           title: 'Principal Distributors',
           description: 'Distributor network and relationship management'
         }
+      },
+      {
+        path: 'products',
+        name: 'ProductsList',
+        component: () => import('@/views/products/ProductsListView.vue'),
+        meta: {
+          title: 'Products',
+          description: 'Manage your product catalog and principal assignments'
+        }
+      },
+      {
+        path: 'products/new',
+        name: 'ProductCreate',
+        component: () => import('@/views/products/ProductCreateView.vue'),
+        meta: {
+          title: 'New Product',
+          description: 'Add a new product to your catalog'
+        }
+      },
+      {
+        path: 'products/:id',
+        name: 'ProductDetail',
+        component: () => import('@/views/products/ProductDetailView.vue'),
+        props: true,
+        meta: {
+          title: 'Product Details',
+          description: 'View product information and assignments'
+        }
+      },
+      {
+        path: 'products/:id/edit',
+        name: 'ProductEdit',
+        component: () => import('@/views/products/ProductEditView.vue'),
+        props: true,
+        meta: {
+          title: 'Edit Product',
+          description: 'Modify product information and assignments'
+        }
       }
     ]
   },
@@ -306,8 +344,8 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
 
-  // Organization/Contact ID validation
-  if ((to.path.startsWith('/organizations/') || to.path.startsWith('/contacts/') || to.path.startsWith('/opportunities/')) && to.params.id) {
+  // Organization/Contact/Opportunity/Product ID validation
+  if ((to.path.startsWith('/organizations/') || to.path.startsWith('/contacts/') || to.path.startsWith('/opportunities/') || to.path.startsWith('/products/')) && to.params.id) {
     const id = to.params.id as string
     
     // Skip validation for 'new' routes
@@ -325,6 +363,8 @@ router.beforeEach(async (to, _from, next) => {
         next('/contacts')
       } else if (to.path.startsWith('/opportunities/')) {
         next('/opportunities')
+      } else if (to.path.startsWith('/products/')) {
+        next('/products')
       } else {
         next('/')
       }

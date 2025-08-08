@@ -96,7 +96,7 @@ const breadcrumbs = computed(() => {
 
     crumbs.push({
       label,
-      to: isLast ? undefined : path
+      ...(isLast ? {} : { to: path })
     })
   }
 
