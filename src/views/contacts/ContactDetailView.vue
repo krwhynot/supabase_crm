@@ -92,7 +92,7 @@
             <div class="flex-1">
               <h2 class="text-2xl font-bold text-gray-900">{{ contact ? `${contact.first_name} ${contact.last_name}` : '' }}</h2>
               <p v-if="contact.position" class="text-lg text-gray-600 mt-1">{{ contact.position }}</p>
-              <p class="text-lg text-gray-600 mt-1">{{ contact.organization_name }}</p>
+              <p v-if="organization" class="text-lg text-gray-600 mt-1">{{ organization.name }}</p>
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@
               </svg>
               <div>
                 <p class="text-sm font-medium text-gray-500">Organization</p>
-                <p class="text-gray-900">{{ contact.organization_name }}</p>
+                <p class="text-gray-900">{{ organization?.name || 'No organization' }}</p>
               </div>
             </div>
 
@@ -207,8 +207,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { contactsApi } from '@/services/contactsApi'
+import { organizationsApi } from '@/services/organizationsApi'
 import { contactUtils } from '@/types/contacts'
 import type { ContactDetailView } from '@/types/database.types'
+import type { Organization } from '@/types/organizations'
 
 // Layout Components
 
@@ -220,6 +222,7 @@ const contactId = route.params.id as string
 
 // Reactive state
 const contact = ref<ContactDetailView | null>(null)
+const organization = ref<Organization | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
@@ -227,13 +230,13 @@ const deleting = ref(false)
 
 // Computed properties
 const createOpportunityRoute = computed(() => {
-  if (!contact.value) return '/opportunities/new'
+  if (!contact.value || !contact.value.id) return '/opportunities/new'
   
   const queryParams = new URLSearchParams({
     contextType: 'contact',
     contactId: contact.value.id,
-    organizationName: contact.value.organization_name || '',
-    contactName: `${contact.value.first_name} ${contact.value.last_name}`.trim()
+    organizationName: organization.value?.name || '',
+    contactName: `${contact.value.first_name || ''} ${contact.value.last_name || ''}`.trim()
   })
   
   return `/opportunities/new?${queryParams.toString()}`
@@ -249,6 +252,19 @@ const loadContact = async () => {
 
     if (response.success && response.data) {
       contact.value = response.data
+      
+      // Fetch organization data if organization_id exists
+      if (response.data.organization_id) {
+        try {
+          const orgResponse = await organizationsApi.getOrganization(response.data.organization_id)
+          if (orgResponse.success && orgResponse.data) {
+            organization.value = orgResponse.data
+          }
+        } catch (orgErr) {
+          console.error('Error loading organization:', orgErr)
+          // Don't fail the entire load if organization fetch fails
+        }
+      }
     } else {
       error.value = response.error || 'Contact not found'
     }
@@ -266,7 +282,7 @@ const confirmDelete = () => {
 }
 
 const deleteContact = async () => {
-  if (!contact.value) return
+  if (!contact.value || !contact.value.id) return
   
   try {
     deleting.value = true

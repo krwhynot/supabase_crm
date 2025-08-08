@@ -54,7 +54,7 @@
             </p>
             <div class="flex items-center space-x-4 mt-2">
               <StageTag 
-                :stage="opportunity.stage" 
+                :stage="opportunity.stage as OpportunityStage" 
                 size="sm"
               />
               <div v-if="opportunity.probability_percent" class="text-xs text-gray-600">
@@ -117,6 +117,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { StageTag } from '@/components/opportunities'
+import type { OpportunityStage } from '@/types/opportunities'
 
 // ===============================
 // INTERFACES
@@ -172,7 +173,7 @@ const opportunities = computed<Opportunity[]>(() => {
     {
       id: '1',
       name: 'Q4 Product Line Expansion',
-      stage: 'DEMO_SCHEDULED',
+      stage: 'DEMO_SCHEDULED' as OpportunityStage,
       probability_percent: 75,
       expected_close_date: '2024-12-15',
       product_name: 'Premium Widget Series',
@@ -181,7 +182,7 @@ const opportunities = computed<Opportunity[]>(() => {
     {
       id: '2',
       name: 'Annual Contract Renewal',
-      stage: 'FEEDBACK_LOGGED',
+      stage: 'FEEDBACK_LOGGED' as OpportunityStage,
       probability_percent: 90,
       expected_close_date: '2024-11-30',
       product_name: 'Standard Widget Package',
@@ -190,7 +191,7 @@ const opportunities = computed<Opportunity[]>(() => {
     {
       id: '3',
       name: 'New Territory Pilot Program',
-      stage: 'SAMPLE_VISIT_OFFERED',
+      stage: 'SAMPLE_VISIT_OFFERED' as OpportunityStage,
       probability_percent: 45,
       expected_close_date: '2025-01-31',
       product_name: 'Starter Widget Kit',

@@ -86,7 +86,7 @@
             <div class="px-6 py-4 border-b border-gray-200">
               <h2 class="text-lg font-semibold text-gray-900">Performance Analytics</h2>
               <p class="text-sm text-gray-600 mt-1">
-                Engagement trends and performance metrics for {{ selectedPrincipal.name }}
+                Engagement trends and performance metrics for {{ selectedPrincipal.principal_name }}
               </p>
             </div>
             <div class="p-6">
@@ -159,9 +159,12 @@
               </div>
               <div class="p-6">
                 <PrincipalProductTable
-                  :principal-id="selectedPrincipalId"
-                  :product-data="productPerformanceData"
+                  :products="productPerformanceData"
                   :loading="isLoadingProducts"
+                  :principal-name="selectedPrincipal?.principal_name"
+                  @product-selected="handleProductSelected"
+                  @create-opportunity="(_productId: string) => handleCreateOpportunity(selectedPrincipal)"
+                  @export-data="handleExportData"
                 />
               </div>
             </div>
@@ -176,9 +179,12 @@
               </div>
               <div class="p-6">
                 <DistributorRelationshipTable
-                  :principal-id="selectedPrincipalId"
-                  :relationship-data="distributorData"
+                  :relationships="distributorData"
                   :loading="isLoadingDistributors"
+                  :principal-name="selectedPrincipal?.principal_name"
+                  @export-data="handleExportData"
+                  @distributor-selected="handleDistributorSelected"
+                  @contact-distributor="handleContactDistributor"
                 />
               </div>
             </div>
@@ -223,9 +229,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/vue/24/outline'
-import { usePrincipalStore } from '@/stores/principalStore'
+import { usePrincipalStore, type Principal } from '@/stores/principalStore'
 import { usePrincipalActivityStore } from '@/stores/principalActivityStore'
-import { principalActivityApi } from '@/services/principalActivityApi'
 import type {
   PrincipalActivitySummary,
   PrincipalDistributorRelationship,
@@ -289,32 +294,72 @@ const selectorError = ref<string | null>(null)
 
 const hasError = computed(() => !!error.value || principalActivityStore.hasError)
 
-const selectedPrincipal = computed(() => {
+// Transform Principal to PrincipalActivitySummary
+const transformPrincipalToSummary = (principal: Principal): PrincipalActivitySummary => {
+  return {
+    principal_id: principal.id,
+    principal_name: principal.name,
+    principal_status: null,
+    organization_type: principal.organization_type as any,
+    industry: null,
+    organization_size: null,
+    is_active: principal.is_active,
+    lead_score: null,
+    contact_count: principal.contact_count,
+    active_contacts: 0,
+    primary_contact_name: null,
+    primary_contact_email: null,
+    last_contact_update: null,
+    total_interactions: 0,
+    interactions_last_30_days: 0,
+    interactions_last_90_days: 0,
+    last_interaction_date: null,
+    last_interaction_type: null,
+    next_follow_up_date: null,
+    avg_interaction_rating: 0,
+    positive_interactions: 0,
+    follow_ups_required: 0,
+    total_opportunities: principal.opportunity_count,
+    active_opportunities: 0,
+    won_opportunities: 0,
+    opportunities_last_30_days: 0,
+    latest_opportunity_stage: null,
+    latest_opportunity_date: null,
+    avg_probability_percent: 0,
+    highest_value_opportunity: null,
+    product_count: principal.product_count,
+    active_product_count: 0,
+    product_categories: null,
+    primary_product_category: null,
+    is_principal: true,
+    is_distributor: false,
+    last_activity_date: null,
+    activity_status: 'NO_ACTIVITY' as any,
+    engagement_score: 0,
+    principal_created_at: principal.created_at,
+    principal_updated_at: principal.updated_at,
+    summary_generated_at: new Date().toISOString()
+  }
+}
+
+const selectedPrincipal = computed((): PrincipalActivitySummary | null => {
   if (!selectedPrincipalId.value) return null
-  return principalStore.getPrincipalById(selectedPrincipalId.value)
+  const principal = principalStore.getPrincipalById(selectedPrincipalId.value)
+  return principal ? transformPrincipalToSummary(principal) : null
 })
 
-const isLoadingAnySection = computed(() => {
-  return isLoadingSelector.value ||
-         isLoadingKPIs.value ||
-         isLoadingAnalytics.value ||
-         isLoadingTimeline.value ||
-         isLoadingOpportunities.value ||
-         isLoadingProducts.value ||
-         isLoadingDistributors.value ||
-         isLoadingInteractions.value
-})
+// Removed unused computed property isLoadingAnySection
 
 // ===============================
 // EVENT HANDLERS
 // ===============================
 
-const handlePrincipalChange = async (principalId: string) => {
-  selectedPrincipalId.value = principalId
-  
-  if (principalId) {
-    await loadPrincipalData(principalId)
+const handlePrincipalChange = async (principal: PrincipalActivitySummary | null) => {
+  if (principal) {
+    selectedPrincipalId.value = principal.principal_id
+    await loadPrincipalData(principal.principal_id)
   } else {
+    selectedPrincipalId.value = ''
     clearPrincipalData()
   }
 }
@@ -326,20 +371,21 @@ const handleRefresh = async () => {
   await loadDashboardData()
 }
 
-const handleCreateOpportunity = () => {
+const handleCreateOpportunity = (principal?: PrincipalActivitySummary | null) => {
   // Navigate to opportunity creation with principal pre-selected
   // This would typically use vue-router
-  console.log('Create opportunity for principal:', selectedPrincipal.value?.name)
+  const principalToUse = principal || selectedPrincipal.value
+  console.log('Create opportunity for principal:', principalToUse?.principal_name)
 }
 
 const handleLogInteraction = () => {
   // Navigate to interaction logging with principal pre-selected
-  console.log('Log interaction for principal:', selectedPrincipal.value?.name)
+  console.log('Log interaction for principal:', selectedPrincipal.value?.principal_name)
 }
 
 const handleManageProducts = () => {
   // Open product management modal or navigate to management page
-  console.log('Manage products for principal:', selectedPrincipal.value?.name)
+  console.log('Manage products for principal:', selectedPrincipal.value?.principal_name)
 }
 
 const handleOpportunityCreated = () => {
@@ -347,6 +393,23 @@ const handleOpportunityCreated = () => {
   if (selectedPrincipalId.value) {
     loadOpportunityData(selectedPrincipalId.value)
   }
+}
+
+// Additional event handlers for component interactions
+const handleProductSelected = (_productId: string) => {
+  // Product selection handling logic would go here
+}
+
+const handleExportData = () => {
+  console.log('Export data')
+}
+
+const handleDistributorSelected = (distributorId: string) => {
+  console.log('Distributor selected:', distributorId)
+}
+
+const handleContactDistributor = (distributorId: string) => {
+  console.log('Contact distributor:', distributorId)
 }
 
 const handleInteractionLogged = () => {
@@ -378,9 +441,13 @@ const loadDashboardData = async () => {
     await principalActivityStore.loadPrincipalStats()
     await principalActivityStore.loadActivitySummaries()
     
-    engagementBreakdown.value = principalActivityStore.engagementBreakdown
-    principalStats.value = principalActivityStore.principalStats
-    activitySummary.value = principalActivityStore.activitySummaries
+    // Access analytics data from the store's analytics property
+    // Note: The store sets these as nested properties in the analytics object
+    if (principalActivityStore.analytics) {
+      engagementBreakdown.value = (principalActivityStore.analytics as any).engagement_breakdown || null
+      principalStats.value = (principalActivityStore.analytics as any).principal_stats || null
+    }
+    activitySummary.value = principalActivityStore.principals
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load dashboard data'
   } finally {
@@ -412,8 +479,8 @@ const loadTimelineData = async (principalId: string) => {
   isLoadingTimeline.value = true
   
   try {
-    await principalActivityStore.fetchPrincipalTimeline(principalId)
-    timelineData.value = principalActivityStore.selectedPrincipalTimeline
+    await principalActivityStore.fetchPrincipalTimeline([principalId])
+    timelineData.value = principalActivityStore.timelineEntries
   } catch (err) {
     console.error('Failed to load timeline data:', err)
   } finally {
@@ -425,8 +492,8 @@ const loadProductData = async (principalId: string) => {
   isLoadingProducts.value = true
   
   try {
-    await principalActivityStore.fetchProductPerformance(principalId)
-    productPerformanceData.value = principalActivityStore.productPerformances
+    await principalActivityStore.fetchProductPerformance([principalId])
+    productPerformanceData.value = principalActivityStore.productPerformance
   } catch (err) {
     console.error('Failed to load product data:', err)
   } finally {
@@ -434,11 +501,11 @@ const loadProductData = async (principalId: string) => {
   }
 }
 
-const loadDistributorData = async (principalId: string) => {
+const loadDistributorData = async (_principalId: string) => {
   isLoadingDistributors.value = true
   
   try {
-    await principalActivityStore.fetchDistributorRelationships([principalId])
+    await principalActivityStore.fetchDistributorRelationships()
     distributorData.value = principalActivityStore.distributorRelationships
   } catch (err) {
     console.error('Failed to load distributor data:', err)
@@ -447,7 +514,7 @@ const loadDistributorData = async (principalId: string) => {
   }
 }
 
-const loadOpportunityData = async (principalId: string) => {
+const loadOpportunityData = async (_principalId: string) => {
   isLoadingOpportunities.value = true
   
   try {
@@ -459,7 +526,7 @@ const loadOpportunityData = async (principalId: string) => {
   }
 }
 
-const loadInteractionData = async (principalId: string) => {
+const loadInteractionData = async (_principalId: string) => {
   isLoadingInteractions.value = true
   
   try {

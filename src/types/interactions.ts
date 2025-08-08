@@ -51,7 +51,8 @@ export interface InteractionListView {
   rating: number | null
   follow_up_required: boolean
   follow_up_date: string | null
-  created_at: string
+  notes: string | null
+  created_at: string | null
   updated_at: string | null
   
   // Related entity data
@@ -67,6 +68,17 @@ export interface InteractionListView {
  * Detailed interaction view for individual interaction pages
  */
 export interface InteractionDetailView extends Interaction {
+  // Required for API compatibility
+  deleted_at: string | null
+  
+  // Legacy property compatibility for components
+  interaction_type?: InteractionType
+  summary?: string
+  sample_rating?: number | null
+  organization_name?: string
+  organization_id?: string
+  principal_id?: string
+  
   opportunity?: {
     id: string
     name: string
@@ -79,6 +91,11 @@ export interface InteractionDetailView extends Interaction {
   } | null
 }
 
+/**
+ * Alias for InteractionDetailView for component compatibility
+ */
+export type InteractionWithDetails = InteractionDetailView
+
 // ===============================
 // FORM AND INPUT INTERFACES
 // ===============================
@@ -90,7 +107,7 @@ export interface InteractionFormData {
   type: InteractionType
   subject: string
   interaction_date: string
-  opportunity_id: string
+  opportunity_id: string | null
   status?: InteractionStatus
   outcome?: InteractionOutcome | null
   notes?: string | null

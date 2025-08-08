@@ -64,11 +64,11 @@
                 {{ principal.principal_name }}
               </h1>
               <p class="text-lg text-gray-600 mb-2">
-                {{ principal.organization_name }}
+                {{ principal.organization_type }}
               </p>
               <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
                 <ActivityStatusBadge 
-                  :status="principal.activity_status" 
+                  :status="(principal.activity_status === 'STALE' ? 'LOW' : principal.activity_status) as 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW'"
                   size="md"
                 />
                 <div v-if="principal.organization_type" class="text-sm text-gray-500 uppercase tracking-wide">
@@ -150,7 +150,7 @@
               </div>
             </div>
             <h3 class="text-sm font-medium text-gray-900 mb-1">Products Associated</h3>
-            <p class="text-2xl font-bold text-gray-900">{{ principal.products_associated || 0 }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ principal.product_count || 0 }}</p>
             <p class="text-sm text-gray-500">Portfolio</p>
           </div>
         </div>
@@ -230,10 +230,9 @@
             </div>
             <div class="p-6">
               <PrincipalProductTable
-                :principal-id="principalId"
-                :product-data="productPerformanceData"
+                :products="productPerformanceData"
                 :loading="isLoadingProducts"
-                compact
+                :principal-name="principal?.principal_name"
               />
             </div>
           </div>
@@ -251,10 +250,9 @@
             </div>
             <div class="p-6">
               <DistributorRelationshipTable
-                :principal-id="principalId"
-                :relationship-data="distributorData"
+                :relationships="distributorData"
                 :loading="isLoadingDistributors"
-                compact
+                :principal-name="principal?.principal_name"
               />
             </div>
           </div>
@@ -346,9 +344,7 @@ import { useRoute, useRouter } from 'vue-router'
 import PrincipalActivityApi from '@/services/principalActivityApi'
 import type {
   PrincipalActivitySummary,
-  PrincipalDistributorRelationships,
-  PrincipalProductPerformance,
-  PrincipalTimelineSummary
+  PrincipalProductPerformance
 } from '@/services/principalActivityApi'
 
 // Component imports
@@ -390,9 +386,9 @@ const error = ref<string | null>(null)
 
 // Data states
 const principal = ref<PrincipalActivitySummary | null>(null)
-const timelineData = ref<PrincipalTimelineSummary[]>([])
+const timelineData = ref<any[]>([]) // TODO: Add proper timeline type
 const productPerformanceData = ref<PrincipalProductPerformance[]>([])
-const distributorData = ref<PrincipalDistributorRelationships[]>([])
+const distributorData = ref<any[]>([]) // TODO: Add proper distributor relationship type
 
 // ===============================
 // COMPUTED PROPERTIES
@@ -501,7 +497,7 @@ const loadTimelineData = async () => {
   isLoadingTimeline.value = true
   
   try {
-    const response = await PrincipalActivityApi.getPrincipalTimeline(principalId.value, 50)
+    const response = await PrincipalActivityApi.getPrincipalTimeline([principalId.value], 50)
     if (response.success) {
       timelineData.value = response.data || []
     }

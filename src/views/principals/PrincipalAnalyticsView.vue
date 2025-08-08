@@ -283,7 +283,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
   ChartBarIcon,
   ArrowTrendingUpIcon,
@@ -309,17 +309,13 @@ import {
 // Services and Types
 import { usePrincipalStore } from '@/stores/principalStore'
 import type {
-  PrincipalActivitySummary,
-  PrincipalProductPerformance,
-  PrincipalEngagementTrend,
-  PrincipalDistributorRelationship
-} from '@/services/principalActivityApi'
+  PrincipalProductPerformance
+} from '@/types/principal'
 
 // ===============================
 // REACTIVE STATE
 // ===============================
 
-const router = useRouter()
 const route = useRoute()
 const principalStore = usePrincipalStore()
 
@@ -463,7 +459,7 @@ const generateActivityVolumeData = () => {
     date.setDate(date.getDate() - i)
     
     const activityCount = Math.floor(Math.random() * 8)
-    const types = []
+    const types: string[] = []
     
     if (activityCount > 0) {
       const possibleTypes = ['PHONE_CALL', 'EMAIL', 'IN_PERSON', 'VIDEO_CALL', 'SAMPLE_VISIT']
@@ -495,13 +491,51 @@ const generateProductPerformanceData = (): PrincipalProductPerformance[] => {
   ]
   
   return products.map((name, index) => ({
+    principal_id: 'mock_principal',
+    principal_name: 'Mock Principal',
     product_id: `prod_${index + 1}`,
     product_name: name,
-    product_performance_score: Math.floor(Math.random() * 40) + 40, // 40-80
+    product_category: null,
+    product_sku: `SKU-${index + 1}`,
+    is_primary_principal: true,
+    exclusive_rights: false,
+    wholesale_price: Math.floor(Math.random() * 1000) + 100,
+    minimum_order_quantity: Math.floor(Math.random() * 100) + 10,
+    lead_time_days: Math.floor(Math.random() * 30) + 7,
+    contract_start_date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    contract_end_date: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    territory_restrictions: null,
+    // Database interface properties
+    opportunities_for_product: Math.floor(Math.random() * 15) + 3,
+    won_opportunities_for_product: Math.floor(Math.random() * 8) + 1,
+    active_opportunities_for_product: Math.floor(Math.random() * 10) + 2,
+    latest_opportunity_date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    avg_opportunity_probability: Math.floor(Math.random() * 50) + 25,
+    
+    // Component-expected properties (aliases/computed)
     total_opportunities: Math.floor(Math.random() * 15) + 3, // 3-18
     win_rate: Math.floor(Math.random() * 50) + 25, // 25-75%
     total_value: Math.floor(Math.random() * 100000) + 50000, // $50k-$150k
-    last_interaction_date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+    
+    // Interaction metrics
+    interactions_for_product: Math.floor(Math.random() * 20) + 5,
+    recent_interactions_for_product: Math.floor(Math.random() * 5) + 1,
+    last_interaction_date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    
+    // Product status
+    product_is_active: true,
+    launch_date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    discontinue_date: null,
+    unit_cost: Math.floor(Math.random() * 500) + 50,
+    suggested_retail_price: Math.floor(Math.random() * 1500) + 200,
+    
+    // Calculated metrics
+    contract_status: 'ACTIVE' as const,
+    product_performance_score: Math.floor(Math.random() * 40) + 40, // 40-80
+    
+    // Metadata
+    relationship_created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    relationship_updated_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
   })).slice(0, 6) // Show top 6 products
 }
 

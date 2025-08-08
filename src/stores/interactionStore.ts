@@ -9,22 +9,17 @@ import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { interactionsApi } from '@/services/interactionsApi'
 import type {
-  Interaction,
   InteractionListView,
   InteractionDetailView,
   InteractionFormData,
   InteractionKPIs,
   InteractionFilters,
   InteractionPagination,
-  InteractionListResponse,
   InteractionType,
   InteractionStatus,
-  InteractionOutcome
-} from '@/types/interactions'
-import type { 
-  InteractionInsert,
+  InteractionOutcome,
   InteractionUpdate
-} from '@/types/database.types'
+} from '@/types/interactions'
 
 /**
  * Store state interface for better type safety
@@ -263,7 +258,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       const response = await interactionsApi.getInteractionById(id)
       
       if (response.success && response.data) {
-        state.selectedInteraction = response.data
+        state.selectedInteraction = response.data as any
       } else {
         state.error = response.error || 'Failed to fetch interaction'
       }
@@ -298,6 +293,7 @@ export const useInteractionStore = defineStore('interaction', () => {
             duration_minutes: response.data.duration_minutes,
             rating: response.data.rating,
             follow_up_required: response.data.follow_up_required || false,
+            notes: response.data.notes || null,
             follow_up_date: response.data.follow_up_date,
             created_at: response.data.created_at,
             updated_at: response.data.updated_at,
@@ -310,7 +306,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         }
         
         // Update opportunity interactions cache if relevant
-        if (state.opportunityInteractions[interactionData.opportunity_id]) {
+        if (interactionData.opportunity_id && state.opportunityInteractions[interactionData.opportunity_id]) {
           await fetchInteractionsByOpportunity(interactionData.opportunity_id)
         }
         
@@ -363,7 +359,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         
         // Update opportunity interactions cache
         const opportunityId = response.data.opportunity_id
-        if (state.opportunityInteractions[opportunityId]) {
+        if (opportunityId && state.opportunityInteractions[opportunityId]) {
           await fetchInteractionsByOpportunity(opportunityId)
         }
         
@@ -615,7 +611,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       interactions_this_month: 15,
       interactions_last_month: 23,
       average_duration_minutes: 35,
-      most_common_type: 'CALL'
+      most_common_type: 'Phone'
     }
   }
 
@@ -626,7 +622,7 @@ export const useInteractionStore = defineStore('interaction', () => {
     return [
       {
         id: 'demo-int-1',
-        type: 'CALL',
+        type: 'Phone',
         subject: 'Product Demo Discussion',
         interaction_date: '2024-08-03T14:00:00Z',
         opportunity_id: 'demo-1',
@@ -636,6 +632,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         rating: 5,
         follow_up_required: true,
         follow_up_date: '2024-08-10T10:00:00Z',
+        notes: 'Very productive call. Client is interested in our enterprise features and wants to schedule a technical demo.',
         created_at: '2024-08-03T14:00:00Z',
         updated_at: '2024-08-03T15:00:00Z',
         opportunity_name: 'Enterprise Integration - TechCorp',
@@ -645,7 +642,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       },
       {
         id: 'demo-int-2',
-        type: 'EMAIL',
+        type: 'Email',
         subject: 'Follow-up on Pricing Discussion',
         interaction_date: '2024-08-02T09:30:00Z',
         opportunity_id: 'demo-2',
@@ -655,6 +652,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         rating: 3,
         follow_up_required: false,
         follow_up_date: null,
+        notes: 'Sent detailed pricing breakdown. Client is evaluating budget and will respond by end of week.',
         created_at: '2024-08-02T09:30:00Z',
         updated_at: '2024-08-02T09:35:00Z',
         opportunity_name: 'Cloud Migration - StartupCo',
@@ -664,7 +662,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       },
       {
         id: 'demo-int-3',
-        type: 'IN_PERSON',
+        type: 'Meeting',
         subject: 'Site Visit and Requirements Review',
         interaction_date: '2024-08-01T13:00:00Z',
         opportunity_id: 'demo-3',
@@ -674,6 +672,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         rating: 4,
         follow_up_required: true,
         follow_up_date: '2024-08-05T14:00:00Z',
+        notes: 'Comprehensive on-site meeting. Toured their facilities and documented all technical requirements. Strong interest in our analytics platform.',
         created_at: '2024-08-01T13:00:00Z',
         updated_at: '2024-08-01T15:30:00Z',
         opportunity_name: 'Data Analytics - RetailGiant',
@@ -683,7 +682,7 @@ export const useInteractionStore = defineStore('interaction', () => {
       },
       {
         id: 'demo-int-4',
-        type: 'DEMO',
+        type: 'Demo',
         subject: 'Technical Demo Scheduled',
         interaction_date: '2024-08-05T11:00:00Z',
         opportunity_id: 'demo-1',
@@ -693,6 +692,7 @@ export const useInteractionStore = defineStore('interaction', () => {
         rating: null,
         follow_up_required: false,
         follow_up_date: null,
+        notes: 'Scheduled follow-up technical demo to showcase integration capabilities. Meeting confirmed with their IT team.',
         created_at: '2024-08-03T16:00:00Z',
         updated_at: '2024-08-03T16:00:00Z',
         opportunity_name: 'Enterprise Integration - TechCorp',

@@ -81,7 +81,7 @@ export const interactionValidationSchema = yup.object({
       INTERACTION_STATUSES.map(s => s.value), 
       'Please select a valid status'
     )
-    .default('SCHEDULED') as yup.StringSchema<InteractionStatus>,
+    .default('SCHEDULED'),
 
   outcome: yup
     .string()
@@ -202,7 +202,7 @@ export const quickInteractionSchema = yup.object({
   status: yup
     .string()
     .oneOf(INTERACTION_STATUSES.map(s => s.value), 'Invalid status')
-    .default('COMPLETED') as yup.StringSchema<InteractionStatus>,
+    .default('COMPLETED'),
 
   notes: yup
     .string()
@@ -339,7 +339,7 @@ export const bulkInteractionSchema = yup.object({
   status: yup
     .string()
     .oneOf(INTERACTION_STATUSES.map(s => s.value), 'Invalid status')
-    .default('SCHEDULED') as yup.StringSchema<InteractionStatus>,
+    .default('SCHEDULED'),
 
   notes_template: yup
     .string()
@@ -490,8 +490,12 @@ export const getValidationMessage = (
   type: 'required' | 'too_short' | 'too_long' | 'invalid' | 'limits',
   isMobile: boolean = false
 ): string => {
-  if (isMobile && field in MOBILE_VALIDATION_MESSAGES[type.toUpperCase() as keyof typeof MOBILE_VALIDATION_MESSAGES]) {
-    return MOBILE_VALIDATION_MESSAGES[type.toUpperCase() as keyof typeof MOBILE_VALIDATION_MESSAGES][field as keyof typeof MOBILE_VALIDATION_MESSAGES.REQUIRED] || `${field} ${type}`
+  if (isMobile) {
+    const messageCategory = MOBILE_VALIDATION_MESSAGES[type.toUpperCase() as keyof typeof MOBILE_VALIDATION_MESSAGES]
+    if (messageCategory && typeof messageCategory === 'object') {
+      const message = (messageCategory as any)[field]
+      if (message) return message
+    }
   }
   
   // Fallback to standard messages for desktop
@@ -617,21 +621,19 @@ export const validateInteractionTypeCompatibility = (
  */
 export const getDefaultInteractionFormValues = (
   opportunityId?: string,
-  contactId?: string,
   interactionType: InteractionType = 'Phone'
 ): Partial<InteractionFormData> => ({
-  interaction_type: interactionType,
+  type: interactionType,
   subject: '',
-  date: new Date().toISOString().slice(0, 16), // Format for datetime-local input
+  interaction_date: new Date().toISOString().slice(0, 16), // Format for datetime-local input
   opportunity_id: opportunityId || '',
-  contact_id: contactId || '',
   status: 'SCHEDULED',
   outcome: null,
   notes: '',
   duration_minutes: null,
   location: '',
   rating: null,
-  follow_up_needed: false,
+  follow_up_required: false,
   follow_up_date: '',
   follow_up_notes: '',
   next_action: '',
@@ -689,13 +691,5 @@ export const getQuickInteractionDefaults = (
 }
 
 // =============================================================================
-// Export All Validation Schemas and Types
+// All validation schemas are exported as individual const exports above
 // =============================================================================
-
-export {
-  interactionValidationSchema,
-  quickInteractionSchema,
-  followUpSchedulingSchema,
-  interactionCompletionSchema,
-  bulkInteractionSchema
-}

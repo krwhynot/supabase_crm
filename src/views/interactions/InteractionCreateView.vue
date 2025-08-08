@@ -33,13 +33,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import InteractionFormWrapper from '@/components/interactions/InteractionFormWrapper.vue'
 import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import type { Interaction } from '@/types/interactions'
 
 const router = useRouter()
-const route = useRoute()
 
 const goBack = () => {
   // Go back to the referring page or interactions list

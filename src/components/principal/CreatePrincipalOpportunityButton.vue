@@ -82,7 +82,7 @@
                               {{ principal?.principal_name }}
                             </p>
                             <p class="text-xs text-gray-500">
-                              {{ principal?.organization_name }}
+                              {{ principal?.organization_type || 'No organization type' }}
                             </p>
                           </div>
                           <EngagementScoreRing
@@ -387,7 +387,7 @@ const handleSubmit = async () => {
     // Prepare opportunity data
     const opportunityData = {
       name: formData.name,
-      organization_id: props.principal.organization_id,
+      organization_id: props.principal.principal_id, // Using principal_id as organization reference
       principal_id: props.principal.principal_id,
       product_id: formData.productId || null,
       stage: formData.stage,
@@ -465,7 +465,7 @@ const generateOpportunityName = () => {
     year: 'numeric' 
   })
   
-  formData.name = `${props.principal.organization_name} - ${props.principal.principal_name} - ${monthYear}`
+  formData.name = `${props.principal.organization_type || 'Organization'} - ${props.principal.principal_name} - ${monthYear}`
 }
 
 const getTodayDate = (): string => {

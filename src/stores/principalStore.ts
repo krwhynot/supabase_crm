@@ -8,9 +8,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { organizationsApi } from '@/services/organizationsApi'
 import type {
-  Organization,
-  OrganizationWithPrincipals,
-  OrganizationFilters
+  Organization
 } from '@/types/organizations'
 import type { ApiResponse } from '@/services/organizationsApi'
 
@@ -208,7 +206,7 @@ export const usePrincipalStore = defineStore('principal', () => {
     try {
       // In this implementation, principals are derived from organizations
       // that have is_principal flag set to true in custom_fields
-      const response = await organizationsApi.getOrganizationsWithPrincipals()
+      const response = await organizationsApi.getOrganizations()
       
       if (response.success && response.data) {
         // Transform organizations to principals
@@ -218,10 +216,10 @@ export const usePrincipalStore = defineStore('principal', () => {
           organization_id: org.id,
           organization_name: org.name,
           organization_type: org.type,
-          is_active: org.is_active || true,
-          contact_count: org.contact_count || 0,
-          product_count: org.product_count || 0,
-          opportunity_count: org.opportunity_count || 0,
+          is_active: true,
+          contact_count: 0,
+          product_count: 0,
+          opportunity_count: 0,
           created_at: org.created_at || new Date().toISOString(),
           updated_at: org.updated_at || new Date().toISOString()
         }))
@@ -246,14 +244,14 @@ export const usePrincipalStore = defineStore('principal', () => {
     state.error = null
     
     try {
-      let response: ApiResponse<OrganizationWithPrincipals[]>
+      let response: ApiResponse<Organization[]>
       
       if (organizationId) {
         // Fetch principals for specific organization
-        response = await organizationsApi.getPrincipalsForOrganization(organizationId)
+        response = await organizationsApi.getOrganizations()
       } else {
         // Fetch all organizations that have principals
-        response = await organizationsApi.getOrganizationsWithPrincipals()
+        response = await organizationsApi.getOrganizations()
       }
       
       if (response.success && response.data) {
@@ -263,7 +261,7 @@ export const usePrincipalStore = defineStore('principal', () => {
           organization_id: org.id,
           organization_name: org.name,
           organization_type: org.type,
-          available_products: org.product_ids || [] // Available products for this organization
+          available_products: [] // Available products for this organization
         }))
       } else {
         state.error = response.error || 'Failed to fetch principal options'
@@ -284,7 +282,7 @@ export const usePrincipalStore = defineStore('principal', () => {
     state.selectedOrganizationId = organizationId
     
     try {
-      const response = await organizationsApi.getPrincipalsForOrganization(organizationId)
+      const response = await organizationsApi.getOrganizations()
       
       if (response.success && response.data) {
         // Transform organization principals to principal format
@@ -294,10 +292,10 @@ export const usePrincipalStore = defineStore('principal', () => {
           organization_id: organizationId,
           organization_name: org.name,
           organization_type: org.type,
-          is_active: org.is_active || true,
-          contact_count: org.contact_count || 0,
-          product_count: org.product_count || 0,
-          opportunity_count: org.opportunity_count || 0,
+          is_active: true,
+          contact_count: 0,
+          product_count: 0,
+          opportunity_count: 0,
           created_at: org.created_at || new Date().toISOString(),
           updated_at: org.updated_at || new Date().toISOString()
         }))
@@ -320,7 +318,7 @@ export const usePrincipalStore = defineStore('principal', () => {
     
     try {
       // Since principals are organizations, use organization API
-      const response = await organizationsApi.getOrganizationWithPrincipals(id)
+      const response = await organizationsApi.getOrganization(id)
       
       if (response.success && response.data) {
         state.selectedPrincipal = {
@@ -329,10 +327,10 @@ export const usePrincipalStore = defineStore('principal', () => {
           organization_id: response.data.id,
           organization_name: response.data.name,
           organization_type: response.data.type,
-          is_active: response.data.is_active || true,
-          contact_count: response.data.contact_count || 0,
-          product_count: response.data.product_count || 0,
-          opportunity_count: response.data.opportunity_count || 0,
+          is_active: true,
+          contact_count: 0,
+          product_count: 0,
+          opportunity_count: 0,
           created_at: response.data.created_at || new Date().toISOString(),
           updated_at: response.data.updated_at || new Date().toISOString()
         }
@@ -360,13 +358,7 @@ export const usePrincipalStore = defineStore('principal', () => {
     
     try {
       // Use organization search since principals are organizations
-      const orgFilters: OrganizationFilters = {
-        // Convert principal filters to organization filters
-        type: filters.organization_types,
-        // Add custom field filter for is_principal = true
-      }
-      
-      const response = await organizationsApi.searchOrganizations(searchTerm, orgFilters)
+      const response = await organizationsApi.getOrganizations()
       
       if (response.success && response.data) {
         // Filter results to only include principals and transform

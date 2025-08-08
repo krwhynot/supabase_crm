@@ -641,10 +641,10 @@ export const DEFAULT_PRINCIPAL_FILTERS: PrincipalFilters = {
   search: '',
   activity_status: [],
   organization_status: [],
-  has_opportunities: null,
-  has_products: null,
-  is_principal: null,
-  is_distributor: null
+  has_opportunities: undefined,
+  has_products: undefined,
+  is_principal: undefined,
+  is_distributor: undefined
 }
 
 /**

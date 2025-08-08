@@ -488,10 +488,11 @@ const handleSubmit = async () => {
       clearAutoSavedDraft()
       
       // Emit success
-      emit('success', result.id)
-      
-      // Navigate to contact detail
-      router.push(`/contacts/${result.id}`)
+      if (result.id) {
+        emit('success', result.id)
+        // Navigate to contact detail
+        router.push(`/contacts/${result.id}`)
+      }
     } else {
       globalError.value = 'Failed to save contact. Please try again.'
     }

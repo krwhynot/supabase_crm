@@ -88,6 +88,7 @@ class ProductsApiService {
       // Transform to ProductWithPrincipals format (simplified for now)
       const productsWithPrincipals: ProductWithPrincipals[] = (data || []).map(product => ({
         ...product,
+        is_active: product.is_active ?? true,
         category: product.category as ProductCategory | null,
         unit_price: product.suggested_retail_price,
         principal_ids: [], // TODO: Populate when junction table is implemented
@@ -118,7 +119,7 @@ class ProductsApiService {
       // For now, return all active products since we don't have the junction table yet
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, category, description, suggested_retail_price')
+        .select('id, name, category, description, suggested_retail_price, is_active')
         .eq('is_active', true)
 
       if (error) {
@@ -137,6 +138,7 @@ class ProductsApiService {
         category: product.category as ProductCategory | null,
         description: product.description,
         unit_price: product.suggested_retail_price,
+        is_active: product.is_active ?? true,
         available_principals: principalIds // Use the input principal IDs for now
       }))
 

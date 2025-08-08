@@ -8,7 +8,6 @@ import { defineStore } from 'pinia'
 import { ref, computed, reactive } from 'vue'
 import { opportunitiesApi } from '@/services/opportunitiesApi'
 import type {
-  Opportunity,
   OpportunityListView,
   OpportunityDetailView,
   OpportunityFormData,
@@ -16,11 +15,9 @@ import type {
   BatchCreationResult,
   OpportunityKPIs,
   OpportunityFilters,
-  OpportunityPagination,
-  OpportunityListResponse,
-  OpportunityStage
+  OpportunityPagination
 } from '@/types/opportunities'
-import type { ApiResponse } from '@/services/opportunitiesApi'
+import { OpportunityStage } from '@/types/opportunities'
 
 /**
  * Store state interface for better type safety
@@ -119,7 +116,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
   })
   
   const totalPipelineValue = computed(() => {
-    return state.opportunities.reduce((total, opp) => {
+    return state.opportunities.reduce((total) => {
       // TODO: Calculate based on product pricing when available
       return total + 0
     }, 0)
@@ -231,6 +228,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
             is_won: response.data.is_won,
             created_at: response.data.created_at,
             updated_at: response.data.updated_at,
+            notes: response.data.notes || null,
             organization_name: '',
             organization_type: '',
             principal_name: null,
@@ -531,12 +529,26 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     return {
       total_opportunities: 15,
       active_opportunities: 11,
+      won_opportunities: 4,
       won_this_month: 3,
       average_probability: 68,
       total_pipeline_value: 2150000,
-      average_deal_size: 143333,
       win_rate: 72,
-      time_to_close_avg: 45
+      time_to_close_avg: 45,
+      conversion_rate: 26.7,
+      average_days_to_close: 45,
+      stage_distribution: {
+        'New Lead': 3,
+        'Initial Outreach': 2,
+        'Sample/Visit Offered': 3,
+        'Awaiting Response': 2,
+        'Feedback Logged': 2,
+        'Demo Scheduled': 2,
+        'Closed - Won': 4
+      },
+      created_this_week: 2,
+      updated_this_week: 8,
+      closed_this_week: 1
     }
   }
 
@@ -548,11 +560,12 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       {
         id: 'demo-1',
         name: 'Enterprise Integration - TechCorp',
-        stage: 'DEMO_SCHEDULED',
+        stage: OpportunityStage.DEMO_SCHEDULED,
         probability_percent: 75,
         expected_close_date: '2024-09-15',
         deal_owner: 'Sarah Johnson',
         is_won: false,
+        notes: 'Technical demo scheduled for next week. Strong interest in enterprise features and scalability.',
         created_at: '2024-08-01T10:00:00Z',
         updated_at: '2024-08-01T15:30:00Z',
         organization_name: 'TechCorp Solutions',
@@ -568,11 +581,12 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       {
         id: 'demo-2',
         name: 'Cloud Migration - StartupCo',
-        stage: 'SAMPLE_VISIT_OFFERED',
+        stage: OpportunityStage.SAMPLE_VISIT_OFFERED,
         probability_percent: 60,
         expected_close_date: '2024-10-30',
         deal_owner: 'Alex Rodriguez',
         is_won: false,
+        notes: 'Startup looking to migrate legacy systems to cloud infrastructure. Cost-conscious but very interested in scalability features.',
         created_at: '2024-07-20T14:00:00Z',
         updated_at: '2024-08-01T09:15:00Z',
         organization_name: 'StartupCo Inc',
@@ -588,11 +602,12 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       {
         id: 'demo-3',
         name: 'Data Analytics - RetailGiant',
-        stage: 'FEEDBACK_LOGGED',
+        stage: OpportunityStage.FEEDBACK_LOGGED,
         probability_percent: 85,
         expected_close_date: '2024-08-30',
         deal_owner: 'Emma Thompson',
         is_won: false,
+        notes: 'Large retail client with extensive data needs. Positive feedback from initial analytics review. Strong alignment with their digital transformation goals.',
         created_at: '2024-07-10T08:30:00Z',
         updated_at: '2024-08-01T16:45:00Z',
         organization_name: 'RetailGiant Corp',
@@ -608,11 +623,12 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       {
         id: 'demo-4',
         name: 'Security Upgrade - FinanceSecure',
-        stage: 'CLOSED_WON',
+        stage: OpportunityStage.CLOSED_WON,
         probability_percent: 100,
         expected_close_date: '2024-07-25',
         deal_owner: 'James Wilson',
         is_won: true,
+        notes: 'Successfully closed security platform implementation. Client was impressed with compliance features and rapid deployment capabilities.',
         created_at: '2024-06-15T11:00:00Z',
         updated_at: '2024-07-25T17:00:00Z',
         organization_name: 'Finance Secure Ltd',

@@ -100,8 +100,8 @@
                         class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       >
                         <option value="">All Categories</option>
-                        <option v-for="category in productCategories" :key="category" :value="category">
-                          {{ category }}
+                        <option v-for="category in productCategories" :key="category || 'null'" :value="category || ''">
+                          {{ category || 'Uncategorized' }}
                         </option>
                       </select>
                       
@@ -307,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   Dialog,
   DialogPanel,
@@ -329,6 +329,7 @@ import {
 import { useProductStore } from '@/stores/productStore'
 import { usePrincipalStore } from '@/stores/principalStore'
 import type { PrincipalActivitySummary, PrincipalProductPerformance } from '@/services/principalActivityApi'
+import { ProductCategory } from '@/types/products'
 
 // Component imports
 import ProductPerformanceIndicator from './ProductPerformanceIndicator.vue'
@@ -383,7 +384,11 @@ const productPerformanceData = ref<PrincipalProductPerformance[]>([])
 // ===============================
 
 const productCategories = computed(() => {
-  const categories = new Set(productStore.products.map(p => p.category).filter(Boolean))
+  const categories = new Set(
+    productStore.products
+      .map(p => p.category)
+      .filter((category): category is ProductCategory => Boolean(category) && category !== null)
+  )
   return Array.from(categories).sort()
 })
 
@@ -557,7 +562,7 @@ const loadProductData = async () => {
   }
 }
 
-const loadAssociatedProducts = async (principalId: string): Promise<string[]> => {
+const loadAssociatedProducts = async (_principalId: string): Promise<string[]> => {
   // This would typically call an API to get associated products
   // For now, return mock data
   return ['product-1', 'product-2'] // Mock product IDs
@@ -565,20 +570,66 @@ const loadAssociatedProducts = async (principalId: string): Promise<string[]> =>
 
 const loadProductPerformanceData = async (principalId: string) => {
   // This would load actual performance data from the API
-  // For now, create mock performance data
-  productPerformanceData.value = currentAssociatedProductIds.value.map(productId => ({
-    principal_id: principalId,
-    product_id: productId,
-    product_name: productStore.products.find(p => p.id === productId)?.name || 'Unknown',
-    product_performance_score: Math.floor(Math.random() * 100),
-    total_opportunities: Math.floor(Math.random() * 10),
-    won_opportunities: Math.floor(Math.random() * 5),
-    total_value: Math.floor(Math.random() * 100000),
-    win_rate: Math.random() * 100,
-    avg_opportunity_value: Math.floor(Math.random() * 20000),
-    last_opportunity_date: new Date().toISOString(),
-    engagement_trend: Math.random() > 0.5 ? 'UP' : 'DOWN'
-  }))
+  // For now, create mock performance data that matches the PrincipalProductPerformance interface
+  productPerformanceData.value = currentAssociatedProductIds.value.map(productId => {
+    const product = productStore.products.find(p => p.id === productId)
+    const totalOpportunities = Math.floor(Math.random() * 10)
+    const wonOpportunities = Math.floor(Math.random() * Math.max(1, totalOpportunities))
+    
+    return {
+      // Core identifiers
+      principal_id: principalId,
+      principal_name: props.principal?.principal_name || 'Unknown Principal',
+      product_id: productId,
+      product_name: product?.name || 'Unknown Product',
+      product_category: product?.category || null,
+      product_sku: product?.sku || null,
+      
+      // Relationship details
+      is_primary_principal: Math.random() > 0.5,
+      exclusive_rights: Math.random() > 0.7,
+      wholesale_price: Math.floor(Math.random() * 1000) + 100,
+      minimum_order_quantity: Math.floor(Math.random() * 100) + 10,
+      lead_time_days: Math.floor(Math.random() * 30) + 5,
+      
+      // Contract info
+      contract_start_date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      contract_end_date: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      territory_restrictions: null,
+      
+      // Performance metrics
+      opportunities_for_product: totalOpportunities,
+      won_opportunities_for_product: wonOpportunities,
+      active_opportunities_for_product: Math.floor(Math.random() * (totalOpportunities - wonOpportunities)),
+      latest_opportunity_date: new Date().toISOString(),
+      avg_opportunity_probability: Math.floor(Math.random() * 100),
+      
+      // Component-expected properties (aliases/computed values)
+      total_opportunities: totalOpportunities,
+      win_rate: totalOpportunities > 0 ? Math.floor((wonOpportunities / totalOpportunities) * 100) : 0,
+      total_value: Math.floor(Math.random() * 100000),
+      
+      // Interaction metrics
+      interactions_for_product: Math.floor(Math.random() * 20),
+      recent_interactions_for_product: Math.floor(Math.random() * 5),
+      last_interaction_date: new Date().toISOString(),
+      
+      // Product status
+      product_is_active: product?.is_active || true,
+      launch_date: new Date(Date.now() - Math.random() * 730 * 24 * 60 * 60 * 1000).toISOString(),
+      discontinue_date: null,
+      unit_cost: Math.floor(Math.random() * 500) + 50,
+      suggested_retail_price: Math.floor(Math.random() * 1500) + 200,
+      
+      // Calculated metrics
+      contract_status: Math.random() > 0.8 ? 'EXPIRED' : Math.random() > 0.6 ? 'EXPIRING_SOON' : 'ACTIVE',
+      product_performance_score: Math.floor(Math.random() * 100),
+      
+      // Metadata
+      relationship_created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      relationship_updated_at: new Date().toISOString()
+    }
+  })
 }
 
 // ===============================

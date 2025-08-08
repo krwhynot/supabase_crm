@@ -75,7 +75,7 @@
         </option>
 
         <!-- Product options grouped by category -->
-        <template v-if="!isFiltering && availableProducts.length > 0">
+        <template v-if="!isFiltering && availableProducts.length > 0 && productCategories.length > 0">
           <optgroup
             v-for="category in productCategories"
             :key="category.name"
@@ -96,7 +96,7 @@
         </template>
 
         <!-- Ungrouped products (fallback) -->
-        <template v-else-if="!isFiltering && availableProducts.length > 0 && productCategories.length === 0">
+        <template v-else-if="!isFiltering && availableProducts.length > 0">
           <option
             v-for="product in availableProducts"
             :key="product.id"

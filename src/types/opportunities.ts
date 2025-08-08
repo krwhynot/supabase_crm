@@ -96,6 +96,7 @@ export interface OpportunityListView {
   is_won: boolean
   created_at: string
   updated_at: string
+  notes: string | null // Added missing notes property
   
   // Related organization data
   organization_name: string
@@ -204,6 +205,8 @@ export interface OpportunityKPIs {
   won_this_month: number
   conversion_rate: number
   average_days_to_close: number
+  win_rate: number
+  time_to_close_avg?: number
   
   // Stage distribution
   stage_distribution: {

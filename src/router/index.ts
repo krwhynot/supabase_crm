@@ -260,7 +260,7 @@ const isValidPrincipalId = async (principalId: string): Promise<boolean> => {
 }
 
 // Navigation guards for page titles, authentication, and validation
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   // Set page title from route meta
   if (to.meta.title) {
     document.title = `${to.meta.title} - CRM`
@@ -342,7 +342,7 @@ router.beforeEach(async (to, from, next) => {
 })
 
 // After navigation guards for route tracking
-router.afterEach((to, from) => {
+router.afterEach((to, _from) => {
   // Future: Add analytics tracking here
   // analytics.trackPageView(to.path)
   

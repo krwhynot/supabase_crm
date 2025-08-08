@@ -95,6 +95,7 @@ class InteractionsApiService {
           rating,
           follow_up_required,
           follow_up_date,
+          notes,
           created_at,
           updated_at,
           opportunities (
@@ -174,10 +175,11 @@ class InteractionsApiService {
         rating: interaction.rating,
         follow_up_required: interaction.follow_up_required || false,
         follow_up_date: interaction.follow_up_date,
+        notes: interaction.notes || null,
         created_at: interaction.created_at,
         updated_at: interaction.updated_at,
-        opportunity_name: interaction.opportunities?.name || '',
-        organization_name: interaction.opportunities?.organizations?.name || '',
+        opportunity_name: (interaction.opportunities && 'name' in interaction.opportunities) ? String(interaction.opportunities.name) : '',
+        organization_name: (interaction.opportunities && 'organizations' in interaction.opportunities && interaction.opportunities.organizations && 'name' in interaction.opportunities.organizations) ? String(interaction.opportunities.organizations.name) : '',
         days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
         days_until_followup: interaction.follow_up_date ? 
           this.calculateDaysUntil(interaction.follow_up_date) : null
@@ -236,6 +238,7 @@ class InteractionsApiService {
           rating,
           follow_up_required,
           follow_up_date,
+          notes,
           created_at,
           updated_at,
           opportunities (
@@ -269,10 +272,11 @@ class InteractionsApiService {
         rating: interaction.rating,
         follow_up_required: interaction.follow_up_required || false,
         follow_up_date: interaction.follow_up_date,
+        notes: interaction.notes || null,
         created_at: interaction.created_at,
         updated_at: interaction.updated_at,
-        opportunity_name: interaction.opportunities?.name || '',
-        organization_name: interaction.opportunities?.organizations?.name || '',
+        opportunity_name: (interaction.opportunities && 'name' in interaction.opportunities) ? String(interaction.opportunities.name) : '',
+        organization_name: (interaction.opportunities && 'organizations' in interaction.opportunities && interaction.opportunities.organizations && 'name' in interaction.opportunities.organizations) ? String(interaction.opportunities.organizations.name) : '',
         days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
         days_until_followup: interaction.follow_up_date ? 
           this.calculateDaysUntil(interaction.follow_up_date) : null
@@ -358,14 +362,15 @@ class InteractionsApiService {
         created_at: data.created_at,
         updated_at: data.updated_at,
         created_by: data.created_by,
-        opportunity: data.opportunities ? {
-          id: data.opportunities.id,
-          name: data.opportunities.name,
-          stage: data.opportunities.stage,
-          organization: data.opportunities.organizations ? {
-            id: data.opportunities.organizations.id,
-            name: data.opportunities.organizations.name,
-            type: data.opportunities.organizations.type
+        deleted_at: null, // Required for InteractionDetailView interface
+        opportunity: (data.opportunities && 'id' in data.opportunities) ? {
+          id: String(data.opportunities.id),
+          name: String(data.opportunities.name),
+          stage: String(data.opportunities.stage),
+          organization: (data.opportunities.organizations && 'id' in data.opportunities.organizations) ? {
+            id: String(data.opportunities.organizations.id),
+            name: (data.opportunities && 'organizations' in data.opportunities && data.opportunities.organizations && 'name' in data.opportunities.organizations) ? String(data.opportunities.organizations.name) : '',
+            type: (data.opportunities && 'organizations' in data.opportunities && data.opportunities.organizations && 'type' in data.opportunities.organizations) ? String(data.opportunities.organizations.type) : null
           } : null
         } : null
       }
@@ -402,7 +407,7 @@ class InteractionsApiService {
         type: interactionData.type,
         subject: interactionData.subject,
         interaction_date: interactionData.interaction_date,
-        opportunity_id: interactionData.opportunity_id,
+        opportunity_id: interactionData.opportunity_id || '',
         status: interactionData.status || 'SCHEDULED',
         outcome: interactionData.outcome || null,
         notes: interactionData.notes || null,
@@ -703,6 +708,7 @@ class InteractionsApiService {
           rating,
           follow_up_required,
           follow_up_date,
+          notes,
           created_at,
           updated_at,
           opportunities (
@@ -737,10 +743,11 @@ class InteractionsApiService {
         rating: interaction.rating,
         follow_up_required: interaction.follow_up_required || false,
         follow_up_date: interaction.follow_up_date,
+        notes: interaction.notes || null,
         created_at: interaction.created_at,
         updated_at: interaction.updated_at,
-        opportunity_name: interaction.opportunities?.name || '',
-        organization_name: interaction.opportunities?.organizations?.name || '',
+        opportunity_name: (interaction.opportunities && 'name' in interaction.opportunities) ? String(interaction.opportunities.name) : '',
+        organization_name: (interaction.opportunities && 'organizations' in interaction.opportunities && interaction.opportunities.organizations && 'name' in interaction.opportunities.organizations) ? String(interaction.opportunities.organizations.name) : '',
         days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
         days_until_followup: interaction.follow_up_date ? 
           this.calculateDaysUntil(interaction.follow_up_date) : null
@@ -788,6 +795,7 @@ class InteractionsApiService {
           rating,
           follow_up_required,
           follow_up_date,
+          notes,
           created_at,
           updated_at,
           opportunities (
@@ -821,10 +829,11 @@ class InteractionsApiService {
         rating: interaction.rating,
         follow_up_required: interaction.follow_up_required || false,
         follow_up_date: interaction.follow_up_date,
+        notes: interaction.notes || null,
         created_at: interaction.created_at,
         updated_at: interaction.updated_at,
-        opportunity_name: interaction.opportunities?.name || '',
-        organization_name: interaction.opportunities?.organizations?.name || '',
+        opportunity_name: (interaction.opportunities && 'name' in interaction.opportunities) ? String(interaction.opportunities.name) : '',
+        organization_name: (interaction.opportunities && 'organizations' in interaction.opportunities && interaction.opportunities.organizations && 'name' in interaction.opportunities.organizations) ? String(interaction.opportunities.organizations.name) : '',
         days_since_interaction: this.calculateDaysSince(interaction.interaction_date),
         days_until_followup: interaction.follow_up_date ? 
           this.calculateDaysUntil(interaction.follow_up_date) : null

@@ -73,7 +73,7 @@
             <!-- Probability -->
             <div v-if="opportunity.probability_percent !== null" class="flex items-center">
               <ProbabilityBar 
-                :percentage="opportunity.probability_percent" 
+                :probability="opportunity.probability_percent || 0" 
                 size="sm"
                 class="mr-2"
               />
@@ -138,7 +138,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import type { OpportunityListView } from '@/types/opportunities'
+import type { OpportunityListView, OpportunityStage } from '@/types/opportunities'
 import StageTag from '@/components/opportunities/StageTag.vue'
 import ProbabilityBar from '@/components/opportunities/ProbabilityBar.vue'
 
@@ -209,28 +209,50 @@ const opportunities = computed((): OpportunityListView[] => {
     {
       id: '1',
       name: `${props.principalName} - Q4 Initiative`,
-      stage: 'INITIAL_OUTREACH',
+      stage: 'INITIAL_OUTREACH' as OpportunityStage,
       probability_percent: 25,
       expected_close_date: '2024-12-31',
       organization_name: 'Sample Organization',
+      organization_type: 'DISTRIBUTOR',
       product_name: 'Product A',
+      deal_owner: 'John Doe',
+      is_won: false,
+      principal_name: props.principalName || 'Unknown Principal',
       notes: 'Initial outreach completed, waiting for response from decision maker.',
+      product_category: 'CHEMICALS',
+      days_since_created: 15,
+      days_to_close: 45,
+      stage_duration_days: 5,
       created_at: '2024-11-01T10:00:00Z',
-      updated_at: '2024-11-15T14:30:00Z'
+      updated_at: '2024-11-15T14:30:00Z',
+      deleted_at: null,
+      organization_id: 'org-1',
+      principal_id: props.principalId
     },
     {
       id: '2',
       name: `${props.principalName} - Expansion Project`,
-      stage: 'SAMPLE_VISIT_OFFERED',
+      stage: 'SAMPLE_VISIT_OFFERED' as OpportunityStage,
       probability_percent: 60,
       expected_close_date: '2024-11-30',
       organization_name: 'Another Organization',
+      organization_type: 'RETAILER',
       product_name: 'Product B',
+      deal_owner: 'Jane Smith',
+      is_won: false,
+      principal_name: props.principalName || 'Unknown Principal',
       notes: 'Sample visit scheduled for next week. High interest level.',
+      product_category: 'EQUIPMENT',
+      days_since_created: 32,
+      days_to_close: 15,
+      stage_duration_days: 12,
       created_at: '2024-10-15T09:00:00Z',
-      updated_at: '2024-11-10T16:45:00Z'
+      updated_at: '2024-11-10T16:45:00Z',
+      deleted_at: null,
+      organization_id: 'org-2',
+      principal_id: props.principalId
     }
-  ].filter(opp => props.principalId) // Only show if principal is selected
+  ].filter(() => props.principalId) // Only show if principal is selected
 })
 
 // ===============================

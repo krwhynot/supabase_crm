@@ -49,7 +49,7 @@ export { default as PrincipalInteractionList } from './PrincipalInteractionList.
 export type {
   PrincipalActivitySummary,
   PrincipalProductPerformance,
-  PrincipalEngagementTrend,
+  // PrincipalEngagementTrend, // TODO: Add this type to API when needed
   PrincipalDistributorRelationship
 } from '@/services/principalActivityApi'
 

@@ -25,7 +25,7 @@
           {{ principal.principal_name }}
         </h3>
         <p class="text-sm text-gray-600 truncate">
-          {{ principal.organization_name }}
+          {{ principal.principal_name }}
         </p>
         <p v-if="principal.organization_type" class="text-xs text-gray-500 uppercase tracking-wide">
           {{ principal.organization_type }}
@@ -34,7 +34,7 @@
       
       <!-- Activity Status Badge -->
       <ActivityStatusBadge 
-        :status="principal.activity_status" 
+        :status="mapActivityStatus(principal.activity_status)" 
         size="sm"
         class="flex-shrink-0"
       />
@@ -66,7 +66,7 @@
       
       <div class="text-center">
         <div class="text-lg font-semibold text-gray-900">
-          {{ principal.products_associated || 0 }}
+          {{ principal.product_count || 0 }}
         </div>
         <div class="text-xs text-gray-500">Products</div>
       </div>
@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+// Vue imports (computed removed as unused)
 import type { PrincipalActivitySummary } from '@/services/principalActivityApi'
 import ActivityStatusBadge from './ActivityStatusBadge.vue'
 import EngagementScoreRing from './EngagementScoreRing.vue'
@@ -177,6 +177,25 @@ const formatDate = (dateString: string): string => {
     day: 'numeric',
     year: 'numeric'
   })
+}
+
+// ===============================
+// UTILITY FUNCTIONS
+// ===============================
+
+const mapActivityStatus = (status: 'NO_ACTIVITY' | 'STALE' | 'MODERATE' | 'ACTIVE'): 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW' => {
+  switch (status) {
+    case 'NO_ACTIVITY':
+      return 'NO_ACTIVITY'
+    case 'STALE':
+      return 'LOW'
+    case 'MODERATE':
+      return 'MODERATE'
+    case 'ACTIVE':
+      return 'ACTIVE'
+    default:
+      return 'LOW'
+  }
 }
 
 // ===============================

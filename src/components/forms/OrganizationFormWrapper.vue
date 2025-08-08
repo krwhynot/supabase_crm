@@ -472,7 +472,7 @@ const handleSubmit = async () => {
       industry: formData.industry || null,
       lead_score: formData.lead_score || null,
       // Clean up tags array to remove undefined values
-      tags: formData.tags?.filter(tag => tag !== undefined) || null,
+      tags: formData.tags?.filter((tag: string | undefined): tag is string => tag !== undefined) || null,
       // Remove contact data from custom_fields as it will be handled separately
       custom_fields: customFields ? {
         ...customFields,

@@ -123,7 +123,7 @@
               <div class="flex items-center space-x-4 mt-2">
                 <StageTag :stage="opportunity.stage" />
                 <ProbabilityBar 
-                  :probability="opportunity.probability_percent" 
+                  :probability="opportunity.probability_percent || 0" 
                   :size="'sm'"
                   :show-label="true"
                 />
@@ -152,7 +152,7 @@
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-500">Probability</span>
                 <ProbabilityBar 
-                  :probability="opportunity.probability_percent" 
+                  :probability="opportunity.probability_percent || 0" 
                   :size="'sm'"
                   :show-label="true"
                 />
@@ -430,8 +430,8 @@
                 This action cannot be undone.
               </p>
             </div>
-            <div class="items-center px-4 py-3">
-              <div class="flex space-x-3 justify-center">
+            <div class="flex items-center px-4 py-3">
+              <div class="flex space-x-3 justify-center w-full">
                 <button
                   @click="showDeleteModal = false"
                   class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -451,7 +451,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -475,7 +474,13 @@ import {
   PresentationChartLineIcon,
   ArrowPathIcon,
   TruckIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon,
+  ClipboardDocumentIcon,
+  PencilIcon,
+  CheckCircleIcon,
+  UserIcon,
+  GlobeAltIcon
 } from '@heroicons/vue/24/outline'
 
 // Dependencies
@@ -577,10 +582,10 @@ const loadOpportunity = async () => {
     loading.value = true
     error.value = null
     
-    const success = await opportunityStore.fetchOpportunityById(opportunityId)
+    await opportunityStore.fetchOpportunityById(opportunityId)
     
-    if (success) {
-      opportunity.value = opportunityStore.currentOpportunity
+    if (opportunityStore.selectedOpportunity) {
+      opportunity.value = opportunityStore.selectedOpportunity
       // Load interactions for this opportunity
       await loadInteractions()
     } else {
@@ -688,12 +693,18 @@ const formatInteractionDate = (dateString: string): string => {
  */
 const getInteractionIcon = (type: InteractionType) => {
   const iconMap = {
-    EMAIL: EnvelopeIcon,
-    CALL: PhoneIcon,
-    IN_PERSON: UserGroupIcon,
-    DEMO: PresentationChartLineIcon,
-    FOLLOW_UP: ArrowPathIcon,
-    SAMPLE_DELIVERY: TruckIcon
+    Email: EnvelopeIcon,
+    Phone: PhoneIcon,
+    Meeting: UserGroupIcon,
+    Demo: PresentationChartLineIcon,
+    Other: ArrowPathIcon,
+    Event: TruckIcon,
+    Proposal: DocumentTextIcon,
+    Contract: ClipboardDocumentIcon,
+    Note: PencilIcon,
+    Task: CheckCircleIcon,
+    Social: UserIcon,
+    Website: GlobeAltIcon
   }
   return iconMap[type] || ChatBubbleLeftRightIcon
 }
@@ -751,7 +762,7 @@ onMounted(() => {
 }
 
 .opportunity-detail-view nav ol li[aria-current="page"] span {
-  @apply text-gray-500;
+  color: rgb(107 114 128); /* text-gray-500 */
 }
 
 /* Back button enhancements */
@@ -780,10 +791,7 @@ onMounted(() => {
     @apply px-2 py-4;
   }
   
-  /* Single column layout on mobile */
-  .opportunity-detail-view .grid.grid-cols-1.lg\\:grid-cols-2 {
-    @apply grid-cols-1;
-  }
+  /* Single column layout on mobile - already applied via responsive classes */
   
   /* Stack action buttons on mobile */
   .opportunity-detail-view .flex.space-x-3:has(button) {

@@ -102,6 +102,7 @@ export interface ProductOption {
   category: ProductCategory | null
   description: string | null
   unit_price?: number | null
+  is_active: boolean
   available_principals: string[]  // Principal IDs that can access this product
 }
 

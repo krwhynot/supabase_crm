@@ -93,7 +93,7 @@
             
             <!-- Organization Filter -->
             <select
-              v-model="filters.organization"
+              v-model="filters.organization_id"
               class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
               @change="applyFilters"
             >
@@ -282,14 +282,14 @@ const isLoadingKPIs = ref(false)
 
 // Filters
 const filters = ref<OpportunityFilters>({
-  stage: '',
-  organization: '',
-  product: '',
+  stage: [],
+  organization_id: '',
+  product_id: '',
   deal_owner: '',
   probability_min: undefined,
   probability_max: undefined,
-  close_date_from: '',
-  close_date_to: ''
+  expected_close_after: '',
+  expected_close_before: ''
 })
 
 // ===============================
@@ -299,19 +299,18 @@ const filters = ref<OpportunityFilters>({
 const opportunities = computed(() => opportunityStore.opportunities)
 const isLoading = computed(() => opportunityStore.isLoading)
 const error = computed(() => opportunityStore.error)
-const totalCount = computed(() => opportunityStore.totalCount)
 
 const hasActiveFilters = computed(() => {
   return !!(
     searchQuery.value ||
     filters.value.stage ||
-    filters.value.organization ||
-    filters.value.product ||
+    filters.value.organization_id ||
+    filters.value.product_id ||
     filters.value.deal_owner ||
     filters.value.probability_min ||
     filters.value.probability_max ||
-    filters.value.close_date_from ||
-    filters.value.close_date_to
+    filters.value.expected_close_after ||
+    filters.value.expected_close_before
   )
 })
 
@@ -351,14 +350,14 @@ const applyFilters = async () => {
 const clearFilters = () => {
   searchQuery.value = ''
   filters.value = {
-    stage: '',
-    organization: '',
-    product: '',
+    stage: [],
+    organization_id: '',
+    product_id: '',
     deal_owner: '',
     probability_min: undefined,
     probability_max: undefined,
-    close_date_from: '',
-    close_date_to: ''
+    expected_close_after: '',
+    expected_close_before: ''
   }
   sortBy.value = 'created_at'
   sortOrder.value = 'desc'

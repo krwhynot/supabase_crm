@@ -318,7 +318,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+// Vue imports (computed removed as unused)
 import {
   ExclamationTriangleIcon,
   ClockIcon,

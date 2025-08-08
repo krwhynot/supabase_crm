@@ -155,12 +155,10 @@ export const testPrincipalSpecificQueries = async () => {
     console.log('  - Principal Related Organizations:', orgStore.principalRelatedOrganizations.length)
     
     // Test new methods
-    const testPrincipalId = 'test-principal-123'
-    
     // This would normally make a database call, but we're testing the method exists
     if (typeof orgStore.fetchOrganizationsByPrincipal === 'function') {
       console.log('  ✅ fetchOrganizationsByPrincipal method available')
-      // await orgStore.fetchOrganizationsByPrincipal(testPrincipalId)
+      // await orgStore.fetchOrganizationsByPrincipal('test-principal-123')
     }
     
     if (typeof orgStore.fetchPrincipalAnalytics === 'function') {

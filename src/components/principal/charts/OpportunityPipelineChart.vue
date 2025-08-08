@@ -92,7 +92,7 @@
         class="absolute z-10 px-3 py-2 bg-gray-900 text-white text-sm rounded shadow-lg pointer-events-none transform -translate-x-1/2"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
       >
-        <div class="font-medium">{{ formatStageName(tooltip.data?.stage) }}</div>
+        <div class="font-medium">{{ formatStageName(tooltip.data?.stage || 'NEW_LEAD') }}</div>
         <div class="text-blue-300">
           {{ tooltip.data?.count }} opportunities
         </div>
@@ -368,7 +368,7 @@ const getConversionRate = (index: number): number => {
   return Math.round((currentStage.count / previousStage.count) * 100)
 }
 
-const showTooltip = (data: PipelineStage, index: number, event: MouseEvent) => {
+const showTooltip = (data: PipelineStage, index: number, _event: MouseEvent) => {
   tooltip.value = {
     visible: true,
     x: chartWidth.value / 2,

@@ -5,7 +5,8 @@
  */
 
 import { supabase } from '@/config/supabaseClient'
-import type { Organization, OrganizationInsert, OrganizationUpdate } from '@/types/organizations'
+import type { Organization } from '@/types/organizations'
+import type { OrganizationInsert, OrganizationUpdate } from '@/types/database.types'
 
 /**
  * Generic API response interface

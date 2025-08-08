@@ -64,20 +64,20 @@
         <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-md bg-white">
           <div
             v-for="contact in filteredContacts"
-            :key="contact.id"
+            :key="contact.id || contact.email || `contact-${Math.random()}`"
             class="flex items-center justify-between p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
           >
             <div class="flex items-center space-x-3">
               <input
-                :id="`contact-${contact.id}`"
+                :id="`contact-${contact.id || 'unknown'}`"
                 type="checkbox"
-                :checked="selectedContactIds.includes(contact.id)"
-                @change="toggleContact(contact.id, ($event.target as HTMLInputElement).checked)"
+                :checked="contact.id ? selectedContactIds.includes(contact.id) : false"
+                @change="contact.id && toggleContact(contact.id, ($event.target as HTMLInputElement).checked)"
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <div class="flex-1">
                 <label
-                  :for="`contact-${contact.id}`"
+                  :for="`contact-${contact.id || 'unknown'}`"
                   class="text-sm font-medium text-gray-900 cursor-pointer block"
                 >
                   {{ contact.first_name }} {{ contact.last_name }}
@@ -88,22 +88,22 @@
             </div>
             <div class="flex items-center space-x-2">
               <span
-                v-if="getPrimaryContactId() === contact.id"
+                v-if="contact.id && getPrimaryContactId() === contact.id"
                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
               >
                 Primary
               </span>
               <button
-                v-if="selectedContactIds.includes(contact.id)"
+                v-if="contact.id && selectedContactIds.includes(contact.id)"
                 type="button"
-                @click="setPrimaryContact(contact.id)"
+                @click="contact.id && setPrimaryContact(contact.id)"
                 :class="[
                   'text-xs px-2 py-1 rounded border transition-colors',
                   getPrimaryContactId() === contact.id
                     ? 'bg-blue-50 text-blue-600 border-blue-200 cursor-default'
                     : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600'
                 ]"
-                :disabled="getPrimaryContactId() === contact.id"
+                :disabled="!contact.id || getPrimaryContactId() === contact.id"
               >
                 {{ getPrimaryContactId() === contact.id ? 'Primary' : 'Set Primary' }}
               </button>
@@ -245,6 +245,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useContactStore } from '@/stores/contactStore'
 import BaseInputField from './BaseInputField.vue'
 import QuickContactForm from './QuickContactForm.vue'
+import type { ContactListView } from '@/types/database.types'
 
 /**
  * New Contact Interface
@@ -317,11 +318,11 @@ const filteredContacts = computed(() => {
   }
   
   const query = searchQuery.value.toLowerCase()
-  return contactStore.contacts.filter(contact => 
-    contact.first_name?.toLowerCase().includes(query) ||
-    contact.last_name?.toLowerCase().includes(query) ||
-    contact.email?.toLowerCase().includes(query) ||
-    contact.position?.toLowerCase().includes(query)
+  return contactStore.contacts.filter((contact: ContactListView) => 
+    (contact.first_name?.toLowerCase().includes(query)) ||
+    (contact.last_name?.toLowerCase().includes(query)) ||
+    (contact.email?.toLowerCase().includes(query)) ||
+    (contact.position?.toLowerCase().includes(query))
   ).slice(0, 50) // Limit search results
 })
 
@@ -411,8 +412,9 @@ const getPrimaryContactId = (): string | undefined => {
 }
 
 const getContactName = (contactId: string): string => {
-  const contact = contactStore.contacts.find(c => c.id === contactId)
-  return contact ? `${contact.first_name} ${contact.last_name}` : 'Unknown Contact'
+  const contact = contactStore.contacts.find((c: ContactListView) => c.id === contactId)
+  if (!contact) return 'Unknown Contact'
+  return `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Unknown Contact'
 }
 
 /**

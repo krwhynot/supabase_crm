@@ -1,4 +1,4 @@
-import { ref, computed, watch, reactive, type Ref } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 import { debounce } from 'lodash-es'
 import type { 
   PrincipalFilters, 
@@ -6,10 +6,9 @@ import type {
   PrincipalActivityStatus,
   PrincipalActivitySummary,
   PrincipalFilterFormData,
-  PrincipalSelectionItem,
-  DEFAULT_PRINCIPAL_FILTERS,
-  DEFAULT_PRINCIPAL_SORT
+  PrincipalSelectionItem
 } from '@/types/principal'
+import { DEFAULT_PRINCIPAL_FILTERS, DEFAULT_PRINCIPAL_SORT } from '@/types/principal'
 import type { Enums } from '@/types/database.types'
 
 /**
@@ -470,7 +469,7 @@ export function usePrincipalFilter(
       activity_status: formData.activity_statuses.length > 0 ? formData.activity_statuses : undefined,
       organization_status: formData.organization_statuses.length > 0 ? formData.organization_statuses : undefined,
       product_categories: formData.product_categories.length > 0 ? formData.product_categories : undefined,
-      has_opportunities: formData.has_active_opportunities
+      has_opportunities: formData.has_active_opportunities || undefined
     }
     
     // Add engagement score range

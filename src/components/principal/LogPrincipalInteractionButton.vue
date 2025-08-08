@@ -84,7 +84,7 @@
                               {{ principal?.principal_name }}
                             </h4>
                             <p class="text-sm text-gray-600">
-                              {{ principal?.organization_name }}
+                              {{ principal?.organization_type || 'Organization' }}
                             </p>
                           </div>
                         </div>
@@ -114,13 +114,12 @@
                           :class="{ 'border-red-300': errors.type }"
                         >
                           <option value="">Select type...</option>
-                          <option value="PHONE_CALL">Phone Call</option>
-                          <option value="EMAIL">Email</option>
-                          <option value="IN_PERSON">In-Person Meeting</option>
-                          <option value="VIDEO_CALL">Video Call</option>
-                          <option value="SAMPLE_VISIT">Sample Visit</option>
-                          <option value="FOLLOW_UP">Follow-up</option>
-                          <option value="OTHER">Other</option>
+                          <option value="Phone">Phone Call</option>
+                          <option value="Email">Email</option>
+                          <option value="Meeting">In-Person Meeting</option>
+                          <option value="Demo">Product Demo</option>
+                          <option value="Event">Sample Visit</option>
+                          <option value="Other">Follow-up</option>
                         </select>
                         <p v-if="errors.type" class="mt-1 text-sm text-red-600">{{ errors.type }}</p>
                       </div>
@@ -271,10 +270,10 @@
                             v-model="formData.followUpType"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           >
-                            <option value="PHONE_CALL">Phone Call</option>
-                            <option value="EMAIL">Email</option>
-                            <option value="IN_PERSON">In-Person Meeting</option>
-                            <option value="SAMPLE_DELIVERY">Sample Delivery</option>
+                            <option value="Phone">Phone Call</option>
+                            <option value="Email">Email</option>
+                            <option value="Meeting">In-Person Meeting</option>
+                            <option value="Event">Sample Delivery</option>
                           </select>
                         </div>
 
@@ -354,6 +353,7 @@ import {
 import { useProductStore } from '@/stores/productStore'
 import { useInteractionStore } from '@/stores/interactionStore'
 import type { PrincipalActivitySummary } from '@/services/principalActivityApi'
+import type { InteractionType } from '@/types/interactions'
 
 // Component imports
 import EngagementScoreRing from './EngagementScoreRing.vue'
@@ -392,7 +392,7 @@ const logging = ref(false)
 const error = ref<string | null>(null)
 
 const formData = reactive({
-  type: '',
+  type: '' as InteractionType | '',
   dateTime: '',
   subject: '',
   notes: '',
@@ -400,7 +400,7 @@ const formData = reactive({
   productIds: [] as string[],
   outcome: '',
   scheduleFollowUp: false,
-  followUpType: 'PHONE_CALL',
+  followUpType: 'Phone' as InteractionType,
   followUpDate: '',
   followUpNotes: ''
 })
@@ -460,18 +460,19 @@ const handleSubmit = async () => {
   try {
     // Prepare interaction data
     const interactionData = {
-      type: formData.type,
-      date: new Date(formData.dateTime).toISOString(),
+      type: formData.type as InteractionType,
+      interaction_date: new Date(formData.dateTime).toISOString(),
       subject: formData.subject,
       notes: formData.notes,
       rating: formData.rating || null,
-      outcome: formData.outcome || null,
-      organization_id: props.principal.organization_id,
+      outcome: formData.outcome as ("POSITIVE" | "NEUTRAL" | "NEGATIVE" | "NEEDS_FOLLOW_UP" | null) || null,
+      organization_id: props.principal.principal_id, // Using principal_id as organization reference
       principal_id: props.principal.principal_id,
+      opportunity_id: null, // Not tied to specific opportunity
       product_ids: formData.productIds.length > 0 ? formData.productIds : null,
       // Follow-up data
       follow_up_required: formData.scheduleFollowUp,
-      follow_up_type: formData.scheduleFollowUp ? formData.followUpType : null,
+      follow_up_type: formData.scheduleFollowUp ? formData.followUpType as InteractionType : null,
       follow_up_date: formData.scheduleFollowUp && formData.followUpDate 
         ? new Date(formData.followUpDate).toISOString() 
         : null,
@@ -510,7 +511,7 @@ const resetForm = () => {
   formData.productIds = []
   formData.outcome = ''
   formData.scheduleFollowUp = false
-  formData.followUpType = 'PHONE_CALL'
+  formData.followUpType = 'Phone'
   formData.followUpDate = ''
   formData.followUpNotes = ''
   clearErrors()

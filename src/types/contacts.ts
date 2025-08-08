@@ -546,10 +546,10 @@ export class ContactValidator {
    */
   static contactToForm(contact: Contact | ContactDetailView): ContactCreateForm {
     return {
-      first_name: contact.first_name,
-      last_name: contact.last_name,
-      organization_id: contact.organization_id,
-      position: contact.position,
+      first_name: contact.first_name || '',
+      last_name: contact.last_name || '',
+      organization_id: contact.organization_id || '',
+      position: contact.position || '',
       phone: contact.phone,
       email: contact.email,
       address: contact.address,

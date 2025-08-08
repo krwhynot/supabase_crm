@@ -41,15 +41,15 @@
           
           <!-- Vertical grid lines -->
           <line
-            v-for="(point, index) in chartData"
+            v-for="(_, index) in chartData"
             :key="`v-grid-${index}`"
-            :x1="getXPosition(index)"
-            :x2="getXPosition(index)"
+            :x1="getXPosition(index as number)"
+            :x2="getXPosition(index as number)"
             :y1="padding.top"
             :y2="chartHeight - padding.bottom"
             stroke="#f9fafb"
             stroke-width="1"
-            v-if="index % Math.ceil(chartData.length / 5) === 0"
+            v-show="(index as number) % Math.ceil(chartData.length / 5) === 0"
           />
         </g>
         
@@ -67,12 +67,12 @@
           <circle
             v-for="(point, index) in chartData"
             :key="`point-${index}`"
-            :cx="getXPosition(index)"
-            :cy="getYPosition(point.engagement_score)"
+            :cx="getXPosition(index as number)"
+            :cy="getYPosition((point as EngagementDataPoint).engagement_score)"
             r="4"
             fill="#3b82f6"
             class="hover:r-6 transition-all duration-200 cursor-pointer"
-            @mouseenter="showTooltip(point, index, $event)"
+            @mouseenter="showTooltip(point as EngagementDataPoint, index as number, $event)"
           />
         </g>
         
@@ -130,13 +130,13 @@
           <text
             v-for="(point, index) in chartData"
             :key="`x-label-${index}`"
-            :x="getXPosition(index)"
+            :x="getXPosition(index as number)"
             :y="chartHeight - padding.bottom + 15"
             text-anchor="middle"
             class="text-xs fill-gray-600"
-            v-if="index % Math.ceil(chartData.length / 5) === 0"
+            v-show="(index as number) % Math.ceil(chartData.length / 5) === 0"
           >
-            {{ formatXAxisLabel(point.date) }}
+            {{ formatXAxisLabel((point as EngagementDataPoint).date) }}
           </text>
         </g>
       </svg>
@@ -349,7 +349,7 @@ const formatTooltipDate = (dateString?: string): string => {
   })
 }
 
-const showTooltip = (data: EngagementDataPoint, index: number, event: MouseEvent) => {
+const showTooltip = (data: EngagementDataPoint, index: number, _event: MouseEvent) => {
   const rect = chartSvg.value?.getBoundingClientRect()
   if (!rect) return
   

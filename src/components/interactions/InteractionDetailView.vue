@@ -412,7 +412,7 @@ const interactionStore = useInteractionStore()
 const showDeleteModal = ref(false)
 
 // Computed properties
-const interaction = computed(() => interactionStore.selectedInteraction)
+const interaction = computed(() => interactionStore.selectedInteraction as any)
 const loading = computed(() => interactionStore.loading)
 const error = computed(() => interactionStore.error)
 

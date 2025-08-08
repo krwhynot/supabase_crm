@@ -11,7 +11,7 @@ import { useProductStore } from './productStore'
 import { useOrganizationStore } from './organizationStore'
 import { usePrincipalStore } from './principalStore'
 import type { OpportunityKPIs, OpportunityStage } from '@/types/opportunities'
-import type { ProductStats, ProductCategory } from '@/types/products'
+import type { ProductCategory } from '@/types/products'
 import type { OrganizationMetrics } from '@/types/organizations'
 import type { PrincipalStats } from './principalStore'
 
@@ -357,7 +357,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const isAnyStoreLoading = computed((): boolean => {
     return opportunityStore.loading || 
            productStore.loading || 
-           organizationStore.loading || 
+           (typeof organizationStore.loading === 'boolean' 
+             ? organizationStore.loading 
+             : Object.values(organizationStore.loading).some(Boolean)) || 
            principalStore.loading
   })
   

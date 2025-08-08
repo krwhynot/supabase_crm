@@ -44,13 +44,13 @@
           <rect
             v-for="(point, index) in chartData"
             :key="`bar-${index}`"
-            :x="getBarX(index)"
-            :y="getYPosition(point.count)"
+            :x="getBarX(index as number)"
+            :y="getYPosition((point as ActivityDataPoint).count)"
             :width="barWidth"
-            :height="getBarHeight(point.count)"
-            :fill="getBarColor(point.types)"
+            :height="getBarHeight((point as ActivityDataPoint).count)"
+            :fill="getBarColor((point as ActivityDataPoint).types)"
             class="hover:opacity-80 transition-opacity duration-200 cursor-pointer"
-            @mouseenter="showTooltip(point, index, $event)"
+            @mouseenter="showTooltip(point as ActivityDataPoint, index as number, $event)"
             @mousemove="updateTooltipPosition($event)"
           />
           
@@ -58,13 +58,13 @@
           <text
             v-for="(point, index) in chartData"
             :key="`label-${index}`"
-            :x="getBarX(index) + barWidth / 2"
-            :y="getYPosition(point.count) - 5"
+            :x="getBarX(index as number) + barWidth / 2"
+            :y="getYPosition((point as ActivityDataPoint).count) - 5"
             text-anchor="middle"
             class="text-xs fill-gray-700 font-medium"
-            v-if="point.count > 0"
+            v-show="(point as ActivityDataPoint).count > 0"
           >
-            {{ point.count }}
+            {{ (point as ActivityDataPoint).count }}
           </text>
         </g>
         
@@ -108,13 +108,13 @@
           <text
             v-for="(point, index) in chartData"
             :key="`x-label-${index}`"
-            :x="getBarX(index) + barWidth / 2"
+            :x="getBarX(index as number) + barWidth / 2"
             :y="chartHeight - padding.bottom + 15"
             text-anchor="middle"
             class="text-xs fill-gray-600"
-            v-if="shouldShowXLabel(index)"
+            v-show="shouldShowXLabel(index as number)"
           >
-            {{ formatXAxisLabel(point.date) }}
+            {{ formatXAxisLabel((point as ActivityDataPoint).date) }}
           </text>
         </g>
       </svg>
@@ -342,7 +342,7 @@ const formatActivityType = (type: string): string => {
   return type.toLowerCase().replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
-const showTooltip = (data: ActivityDataPoint, index: number, event: MouseEvent) => {
+const showTooltip = (data: ActivityDataPoint, index: number, _event: MouseEvent) => {
   const rect = chartSvg.value?.getBoundingClientRect()
   if (!rect) return
   

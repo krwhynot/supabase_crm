@@ -289,7 +289,7 @@ const formatCurrency = (value: number): string => {
   }).format(value)
 }
 
-const showTooltip = (data: PrincipalProductPerformance, index: number, event: MouseEvent) => {
+const showTooltip = (data: PrincipalProductPerformance, index: number, _event: MouseEvent) => {
   const rect = chartSvg.value?.getBoundingClientRect()
   if (!rect) return
   

@@ -489,7 +489,7 @@ const handleFocus = (event: FocusEvent) => {
   emit('focus', event)
 }
 
-const handleOverrideBlur = (event: FocusEvent) => {
+const handleOverrideBlur = (_event: FocusEvent) => {
   // If override is empty, revert to generated name
   if (!manualOverride.value.trim() && previewName.value) {
     emit('update:modelValue', previewName.value)

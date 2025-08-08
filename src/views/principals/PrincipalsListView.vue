@@ -555,8 +555,8 @@ const handleSearch = () => {
   }, 300)
 }
 
-const handlePrincipalChange = (principalId: string) => {
-  selectedPrincipalId.value = principalId
+const handlePrincipalChange = (principal: PrincipalActivitySummary | null) => {
+  selectedPrincipalId.value = principal?.principal_id || 'all'
   // KPI cards will automatically update based on selectedPrincipalId
 }
 

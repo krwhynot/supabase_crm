@@ -172,7 +172,6 @@ import { useRouter } from 'vue-router'
 import { useInteractionStore } from '@/stores/interactionStore'
 import { useOpportunityStore } from '@/stores/opportunityStore'
 import type {
-  InteractionFormData,
   InteractionFormStep1,
   InteractionFormStep2,
   InteractionFormStep3,
@@ -434,33 +433,37 @@ const loadExistingInteraction = async () => {
     const interaction = interactionStore.selectedInteraction
     
     if (interaction) {
+      // Cast to any to avoid infinite type recursion
+      const interactionData = interaction as any
+      
       // Populate form data from existing interaction
       formData.step1 = {
-        type: interaction.type,
-        subject: interaction.subject,
-        opportunity_id: interaction.opportunity_id,
-        interaction_date: interaction.interaction_date.slice(0, 16)
+        type: interactionData.type,
+        subject: interactionData.subject || '',
+        opportunity_id: interactionData.opportunity_id,
+        interaction_date: interactionData.interaction_date.slice(0, 16)
       }
       
+      const participantsArray: string[] = Array.isArray(interactionData.participants) ? interactionData.participants : []
       formData.step2 = {
-        status: interaction.status || 'SCHEDULED',
-        duration_minutes: interaction.duration_minutes,
-        location: interaction.location,
-        contact_method: interaction.contact_method,
-        participants: interaction.participants as string[] || []
+        status: interactionData.status || 'SCHEDULED',
+        duration_minutes: interactionData.duration_minutes,
+        location: interactionData.location,
+        contact_method: interactionData.contact_method,
+        participants: participantsArray
       }
       
       formData.step3 = {
-        outcome: interaction.outcome,
-        rating: interaction.rating,
-        notes: interaction.notes || '',
-        follow_up_required: interaction.follow_up_required || false,
-        follow_up_date: interaction.follow_up_date,
-        follow_up_notes: interaction.follow_up_notes || '',
-        next_action: interaction.next_action || '',
-        tags: interaction.tags as string[] || [],
-        attachments: interaction.attachments as string[] || [],
-        custom_fields: interaction.custom_fields
+        outcome: interactionData.outcome,
+        rating: interactionData.rating,
+        notes: interactionData.notes || '',
+        follow_up_required: interactionData.follow_up_required || false,
+        follow_up_date: interactionData.follow_up_date,
+        follow_up_notes: interactionData.follow_up_notes || '',
+        next_action: interactionData.next_action || '',
+        tags: Array.isArray(interactionData.tags) ? interactionData.tags : [],
+        attachments: Array.isArray(interactionData.attachments) ? interactionData.attachments : [],
+        custom_fields: interactionData.custom_fields
       }
     }
   } catch (error) {
@@ -472,12 +475,15 @@ const loadExistingInteraction = async () => {
 const handleSubmit = async () => {
   if (!canSubmit.value) return
   
-  // Combine all form data
-  const interactionData: InteractionFormData = {
+  // Combine all form data and convert to database format
+  const interactionData = {
     ...formData.step1,
     ...formData.step2,
     ...formData.step3
   }
+
+  // Note: Database schema requires opportunity_id, but business logic allows null
+  // This is a known limitation that should be addressed in database schema
   
   try {
     let success = false

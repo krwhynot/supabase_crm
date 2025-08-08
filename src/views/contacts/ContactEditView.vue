@@ -348,7 +348,7 @@ const validateForm = async (): Promise<boolean> => {
 
 // Handle form submission
 const handleSubmit = async () => {
-  if (!contact.value) return
+  if (!contact.value || !contact.value.id) return
   
   try {
     submitting.value = true

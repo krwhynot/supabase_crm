@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { InteractionType } from '@/types/interactions'
+import { INTERACTION_TYPES } from '@/types/interactions'
 
 /**
  * Base date validation helpers
@@ -36,7 +36,7 @@ const validateFollowUpDateAfterInteractionDate = function(this: yup.TestContext,
 /**
  * Business logic validation: Either opportunity or contact must be selected
  */
-const validateOpportunityOrContact = function(this: yup.TestContext, value: string | null | undefined): boolean | yup.ValidationError {
+const validateOpportunityOrContact = function(this: yup.TestContext): boolean | yup.ValidationError {
   const opportunityId = this.parent.opportunity_id
   const contactId = this.parent.contact_id
   
@@ -58,7 +58,7 @@ export const interactionCreateSchema = yup.object({
   interaction_type: yup
     .string()
     .required('Interaction type is required')
-    .oneOf(Object.values(InteractionType) as string[], 'Please select a valid interaction type'),
+    .oneOf(INTERACTION_TYPES.map(t => t.value), 'Please select a valid interaction type'),
     
   date: yup
     .string()
@@ -118,7 +118,7 @@ export const interactionCreateSchema = yup.object({
 export const interactionUpdateSchema = yup.object({
   interaction_type: yup
     .string()
-    .oneOf(Object.values(InteractionType) as string[], 'Please select a valid interaction type')
+    .oneOf(INTERACTION_TYPES.map(t => t.value), 'Please select a valid interaction type')
     .optional(),
     
   date: yup
@@ -183,7 +183,7 @@ export const quickInteractionSchema = yup.object({
   interaction_type: yup
     .string()
     .required('Interaction type is required')
-    .oneOf(Object.values(InteractionType) as string[], 'Please select a valid interaction type'),
+    .oneOf(INTERACTION_TYPES.map(t => t.value), 'Please select a valid interaction type'),
     
   date: yup
     .string()
@@ -230,7 +230,7 @@ export const batchInteractionSchema = yup.object({
     interaction_type: yup
       .string()
       .required('Interaction type is required for all interactions')
-      .oneOf(Object.values(InteractionType) as string[], 'Please select a valid interaction type'),
+      .oneOf(INTERACTION_TYPES.map(t => t.value), 'Please select a valid interaction type'),
       
     date: yup
       .string()
@@ -351,7 +351,7 @@ export const followUpSchema = yup.object({
       interaction_type: yup
       .string()
       .required('Interaction type is required')
-      .oneOf(Object.values(InteractionType) as string[], 'Please select a valid interaction type'),
+      .oneOf(INTERACTION_TYPES.map(t => t.value), 'Please select a valid interaction type'),
         
       subject: yup
         .string()

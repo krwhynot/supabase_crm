@@ -1,13 +1,12 @@
-import { ref, computed, watch, reactive, type Ref } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import type { 
   PrincipalActivitySummary,
   PrincipalAnalytics,
   PrincipalMetricsSummary,
   PrincipalActivityStatus,
-  PrincipalFilters,
-  ACTIVITY_STATUS_CONFIG,
-  ENGAGEMENT_SCORE_RANGES
+  PrincipalFilters
 } from '@/types/principal'
+import { ACTIVITY_STATUS_CONFIG } from '@/types/principal'
 import type { Enums } from '@/types/database.types'
 
 /**
@@ -276,8 +275,8 @@ export function usePrincipalAnalytics(
     realTimeCalculations = true,
     cacheDuration = 300000,
     enablePerformanceMonitoring = false,
-    timeZone = 'UTC',
-    fiscalYearStart = 1
+    // timeZone = 'UTC', // TODO: Implement timezone support
+    // fiscalYearStart = 1 // TODO: Implement fiscal year calculations
   } = options
   
   // ============================
@@ -365,7 +364,7 @@ export function usePrincipalAnalytics(
     
     // This would be calculated from the raw data during analytics calculation
     // For now, we'll return a placeholder structure
-    const total = analytics.value.total_principals
+    // const total = analytics.value.total_principals // TODO: Use for actual calculations
     
     return {
       low: { count: 0, percentage: 0 },
@@ -501,7 +500,7 @@ export function usePrincipalAnalytics(
   }
   
   const measurePerformance = async <T>(
-    operation: string,
+    _operation: string, // Parameter available for future performance logging
     fn: () => Promise<T>
   ): Promise<T> => {
     const startTime = performance.now()
@@ -773,7 +772,7 @@ export function usePrincipalAnalytics(
     
     let previousCount = principals.length
     
-    return stages.map((stage, index) => {
+    return stages.map((stage, _index) => {
       const dropOffRate = 0.2 + Math.random() * 0.3 // Simulated drop-off
       const currentCount = Math.floor(previousCount * (1 - dropOffRate))
       const conversionRate = previousCount > 0 ? (currentCount / previousCount) * 100 : 0

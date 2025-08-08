@@ -56,7 +56,7 @@
               
               <!-- Activity count badge for grouped activities -->
               <div
-                v-if="activity.activity_count > 1"
+                v-if="activity.activity_count && activity.activity_count > 1"
                 class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white"
               >
                 {{ activity.activity_count }}
@@ -71,8 +71,8 @@
                     {{ getActivityTitle(activity) }}
                   </h4>
                   <ActivityStatusBadge 
-                    v-if="activity.engagement_impact"
-                    :status="getEngagementImpactStatus(activity.engagement_impact)"
+                    v-if="activity.timeline_rank"
+                    :status="getEngagementImpactStatus(activity.timeline_rank)"
                     size="xs"
                   />
                 </div>
@@ -90,37 +90,24 @@
                   {{ getActivityDescription(activity) }}
                 </p>
                 
-                <!-- Activity Metrics -->
-                <div v-if="hasActivityMetrics(activity)" class="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                  <span v-if="activity.interaction_rating" class="flex items-center">
-                    <StarIcon class="h-3 w-3 mr-1 text-yellow-400" />
-                    {{ activity.interaction_rating }}/5
-                  </span>
-                  <span v-if="activity.opportunity_value" class="flex items-center">
-                    <CurrencyDollarIcon class="h-3 w-3 mr-1" />
-                    ${{ formatCurrency(activity.opportunity_value) }}
-                  </span>
-                  <span v-if="activity.product_count" class="flex items-center">
-                    <CubeIcon class="h-3 w-3 mr-1" />
-                    {{ activity.product_count }} products
-                  </span>
-                </div>
+                <!-- Activity Metrics - Removed non-existent properties -->
+                <!-- Note: interaction_rating, opportunity_value, and product_count are not part of PrincipalTimelineEntry interface -->
                 
-                <!-- Engagement Score Impact -->
-                <div v-if="activity.engagement_impact" class="mt-2">
+                <!-- Timeline Rank Impact -->
+                <div v-if="activity.timeline_rank" class="mt-2">
                   <div class="flex items-center space-x-2">
-                    <span class="text-xs font-medium text-gray-700">Impact:</span>
+                    <span class="text-xs font-medium text-gray-700">Timeline Rank:</span>
                     <div class="flex items-center">
                       <component
-                        :is="getImpactIcon(activity.engagement_impact)"
+                        :is="getImpactIcon(activity.timeline_rank)"
                         class="h-3 w-3 mr-1"
-                        :class="getImpactIconColor(activity.engagement_impact)"
+                        :class="getImpactIconColor(activity.timeline_rank)"
                       />
                       <span 
                         class="text-xs font-medium"
-                        :class="getImpactTextColor(activity.engagement_impact)"
+                        :class="getImpactTextColor(activity.timeline_rank)"
                       >
-                        {{ getImpactLabel(activity.engagement_impact) }}
+                        {{ getImpactLabel(activity.timeline_rank) }}
                       </span>
                     </div>
                   </div>
@@ -128,16 +115,16 @@
               </div>
               
               <!-- Activity Details Expansion -->
-              <div v-if="activity.details && expandedActivities.includes(activity.activity_date)">
+              <div v-if="activity.activity_details && expandedActivities.includes(activity.activity_date)">
                 <div class="mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
-                  {{ activity.details }}
+                  {{ activity.activity_details }}
                 </div>
               </div>
               
               <!-- Activity Actions -->
               <div class="mt-3 flex items-center space-x-3">
                 <button
-                  v-if="activity.details"
+                  v-if="activity.activity_details"
                   @click="toggleActivityExpansion(activity.activity_date)"
                   class="text-xs text-blue-600 hover:text-blue-800 font-medium"
                 >
@@ -181,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   ClockIcon,
   ChatBubbleLeftIcon,
@@ -191,15 +178,13 @@ import {
   DocumentIcon,
   TrophyIcon,
   CubeIcon,
-  StarIcon,
-  CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   MinusIcon,
   UserGroupIcon
 } from '@heroicons/vue/24/outline'
-import { StarIcon as StarIconSolid } from '@heroicons/vue/24/solid'
-import type { PrincipalTimelineSummary } from '@/services/principalActivityApi'
+// Solid icons - removed unused StarIconSolid
+import type { PrincipalTimelineEntry } from '@/services/principalActivityApi'
 
 // Component imports
 import ActivityStatusBadge from './ActivityStatusBadge.vue'
@@ -210,14 +195,14 @@ import ActivityStatusBadge from './ActivityStatusBadge.vue'
 
 interface Props {
   principalId: string
-  timelineData?: PrincipalTimelineSummary[]
+  timelineData?: PrincipalTimelineEntry[]
   loading?: boolean
   limit?: number
 }
 
 interface Emits {
-  (e: 'create-follow-up', activity: PrincipalTimelineSummary): void
-  (e: 'view-related', activity: PrincipalTimelineSummary, type: string): void
+  (e: 'create-follow-up', activity: PrincipalTimelineEntry): void
+  (e: 'view-related', activity: PrincipalTimelineEntry, type: string): void
   (e: 'load-more'): void
 }
 
@@ -245,7 +230,7 @@ const groupedActivities = computed(() => {
   if (!props.timelineData) return []
   
   // Group activities by date and type for better visual organization
-  const grouped = new Map<string, PrincipalTimelineSummary>()
+  const grouped = new Map<string, PrincipalTimelineEntry & { activity_count?: number }>()
   
   props.timelineData.forEach(activity => {
     const key = `${activity.activity_date}-${activity.activity_type}`
@@ -255,13 +240,8 @@ const groupedActivities = computed(() => {
       // Increment count for grouped activities
       existing.activity_count = (existing.activity_count || 1) + 1
       
-      // Combine engagement impacts
-      if (activity.engagement_impact && existing.engagement_impact) {
-        existing.engagement_impact = Math.max(
-          parseFloat(existing.engagement_impact.toString()),
-          parseFloat(activity.engagement_impact.toString())
-        ).toString()
-      }
+      // Note: engagement_impact property doesn't exist on PrincipalTimelineEntry
+      // This functionality has been removed as it's not part of the interface
     } else {
       grouped.set(key, { ...activity, activity_count: 1 })
     }
@@ -321,7 +301,7 @@ const getActivityIconColor = (activityType: string): string => {
   return colorMap[activityType] || colorMap.default
 }
 
-const getActivityTitle = (activity: PrincipalTimelineSummary): string => {
+const getActivityTitle = (activity: PrincipalTimelineEntry & { activity_count?: number }): string => {
   const titles: Record<string, string> = {
     'interaction': 'Interaction Logged',
     'phone_call': 'Phone Call',
@@ -334,10 +314,10 @@ const getActivityTitle = (activity: PrincipalTimelineSummary): string => {
   }
   
   const baseTitle = titles[activity.activity_type] || 'Activity'
-  return activity.activity_count > 1 ? `${baseTitle} (${activity.activity_count})` : baseTitle
+  return activity.activity_count && activity.activity_count > 1 ? `${baseTitle} (${activity.activity_count})` : baseTitle
 }
 
-const getActivityDescription = (activity: PrincipalTimelineSummary): string => {
+const getActivityDescription = (activity: PrincipalTimelineEntry & { activity_count?: number }): string => {
   // This would typically come from the activity details
   // For now, return a formatted description based on available data
   const descriptions: Record<string, string> = {
@@ -354,9 +334,6 @@ const getActivityDescription = (activity: PrincipalTimelineSummary): string => {
   return descriptions[activity.activity_type] || `Activity with ${activity.principal_name}`
 }
 
-const hasActivityMetrics = (activity: PrincipalTimelineSummary): boolean => {
-  return !!(activity.interaction_rating || activity.opportunity_value || activity.product_count)
-}
 
 const getEngagementImpactStatus = (impact: string | number): 'ACTIVE' | 'MODERATE' | 'LOW' | 'NO_ACTIVITY' => {
   const impactValue = typeof impact === 'string' ? parseFloat(impact) : impact
@@ -399,17 +376,17 @@ const getImpactLabel = (impact: string | number): string => {
   return 'No impact'
 }
 
-const canCreateFollowUp = (activity: PrincipalTimelineSummary): boolean => {
+const canCreateFollowUp = (activity: PrincipalTimelineEntry & { activity_count?: number }): boolean => {
   return ['interaction', 'phone_call', 'meeting'].includes(activity.activity_type)
 }
 
-const canViewRelated = (activity: PrincipalTimelineSummary): boolean => {
-  return ['opportunity', 'product_association'].includes(activity.activity_type)
+const canViewRelated = (activity: PrincipalTimelineEntry & { activity_count?: number }): boolean => {
+  return ['OPPORTUNITY_CREATED', 'PRODUCT_ASSOCIATION'].includes(activity.activity_type)
 }
 
-const getRelatedType = (activity: PrincipalTimelineSummary): string => {
-  if (activity.activity_type === 'opportunity') return 'Opportunity'
-  if (activity.activity_type === 'product_association') return 'Product'
+const getRelatedType = (activity: PrincipalTimelineEntry & { activity_count?: number }): string => {
+  if (activity.activity_type === 'OPPORTUNITY_CREATED') return 'Opportunity'
+  if (activity.activity_type === 'PRODUCT_ASSOCIATION') return 'Product'
   return 'Related Item'
 }
 
@@ -433,11 +410,6 @@ const formatActivityDate = (dateString: string): string => {
   })
 }
 
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`
-  return value.toLocaleString()
-}
 
 // ===============================
 // EVENT HANDLERS
@@ -452,11 +424,11 @@ const toggleActivityExpansion = (activityDate: string) => {
   }
 }
 
-const createFollowUp = (activity: PrincipalTimelineSummary) => {
+const createFollowUp = (activity: PrincipalTimelineEntry & { activity_count?: number }) => {
   emit('create-follow-up', activity)
 }
 
-const viewRelated = (activity: PrincipalTimelineSummary) => {
+const viewRelated = (activity: PrincipalTimelineEntry & { activity_count?: number }) => {
   const type = getRelatedType(activity)
   emit('view-related', activity, type)
 }

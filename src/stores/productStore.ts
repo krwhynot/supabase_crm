@@ -18,7 +18,7 @@ import type {
   BulkProductResult,
   ProductCategory
 } from '@/types/products'
-import type { ApiResponse } from '@/services/productsApi'
+// ApiResponse type from productsApi - used for consistent API responses
 
 /**
  * Store state interface for better type safety

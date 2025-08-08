@@ -116,12 +116,12 @@
                     <span class="font-medium text-gray-900 truncate">
                       {{ principal.principal_name }}
                     </span>
-                    <ActivityStatusBadge :status="principal.activity_status" />
+                    <ActivityStatusBadge :status="(principal.activity_status === 'STALE' ? 'LOW' : principal.activity_status) as 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW'" />
                   </div>
                   
                   <!-- Organization Info -->
                   <div class="text-sm text-gray-500 truncate">
-                    {{ principal.organization_name }}
+                    {{ principal.organization_type }}
                   </div>
                   
                   <!-- Metrics Row -->
@@ -203,10 +203,10 @@
               {{ selectedPrincipal.principal_name }}
             </h3>
             <p class="text-sm text-gray-600">
-              {{ selectedPrincipal.organization_name }}
+              {{ selectedPrincipal.organization_type }}
             </p>
             <div class="flex items-center space-x-3 mt-1">
-              <ActivityStatusBadge :status="selectedPrincipal.activity_status" />
+              <ActivityStatusBadge :status="(selectedPrincipal.activity_status === 'STALE' ? 'LOW' : selectedPrincipal.activity_status) as 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW'" />
               <span class="text-xs text-gray-500">
                 {{ selectedPrincipal.total_opportunities || 0 }} opportunities •
                 {{ selectedPrincipal.total_interactions || 0 }} interactions
@@ -237,7 +237,7 @@ import {
   CalendarIcon,
   BuildingOfficeIcon
 } from '@heroicons/vue/24/outline'
-import { usePrincipalStore } from '@/stores/principalStore'
+// import { usePrincipalStore } from '@/stores/principalStore' // Removed unused import
 import PrincipalActivityApi from '@/services/principalActivityApi'
 import type { PrincipalActivitySummary } from '@/services/principalActivityApi'
 
@@ -279,7 +279,7 @@ const emit = defineEmits<Emits>()
 // COMPOSABLES & STORES
 // ===============================
 
-const principalStore = usePrincipalStore()
+// const principalStore = usePrincipalStore() // Removed unused variable
 
 // ===============================
 // REACTIVE STATE
@@ -323,7 +323,7 @@ const filteredPrincipals = computed(() => {
     const search = searchTerm.value.toLowerCase()
     filtered = filtered.filter(p =>
       p.principal_name.toLowerCase().includes(search) ||
-      p.organization_name.toLowerCase().includes(search)
+      (p.organization_type || '').toLowerCase().includes(search)
     )
   }
 
@@ -341,7 +341,7 @@ const filteredPrincipals = computed(() => {
   })
 })
 
-const isLoading = computed(() => props.loading || isSearching.value)
+// const isLoading = computed(() => props.loading || isSearching.value) // Removed unused variable
 
 // ===============================
 // EVENT HANDLERS

@@ -133,9 +133,9 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
                 v-for="contact in contacts"
-                :key="contact.id"
+                :key="contact.id || contact.email || 'unknown'"
                 class="hover:bg-gray-50 cursor-pointer"
-                @click="viewContact(contact.id)"
+                @click="contact.id && viewContact(contact.id)"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
@@ -157,7 +157,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ contact.organization_name }}
+                  {{ contact.organization_id ? 'Organization' : 'No organization' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <a :href="`mailto:${contact.email}`" class="hover:text-blue-600" @click.stop>
@@ -268,8 +268,10 @@ const toggleSortOrder = () => {
 }
 
 // Navigation
-const viewContact = (id: string) => {
-  router.push(`/contacts/${id}`)
+const viewContact = (id: string | null) => {
+  if (id) {
+    router.push(`/contacts/${id}`)
+  }
 }
 
 // Utility functions

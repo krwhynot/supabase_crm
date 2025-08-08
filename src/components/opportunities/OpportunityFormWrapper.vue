@@ -138,7 +138,7 @@
             </div>
 
             <!-- Custom Context -->
-            <div v-if="formData.context === 'CUSTOM'">
+            <div v-if="formData.context === OpportunityContextRef.CUSTOM">
               <label for="custom-context" class="block text-sm font-medium text-gray-700 mb-1">
                 Custom Context
               </label>
@@ -421,20 +421,18 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useOpportunityStore } from '@/stores/opportunityStore'
 import OpportunityNameField from './OpportunityNameField.vue'
 import PrincipalMultiSelect from './PrincipalMultiSelect.vue'
 import ProductSelect from './ProductSelect.vue'
 import StageSelect from './StageSelect.vue'
 import type { 
-  OpportunityStage, 
-  OpportunityContext,
+  OpportunityStage,
   OpportunityNamePreview 
 } from '@/types/opportunities'
+import { OpportunityContext } from '@/types/opportunities'
 import type { 
-  OpportunityFormWrapperData,
-  OpportunityContextData
+  OpportunityFormWrapperData
 } from '@/types/opportunityForm'
 import type { PrincipalOption } from '@/stores/principalStore'
 
@@ -474,8 +472,10 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 // Dependencies
-const router = useRouter()
 const opportunityStore = useOpportunityStore()
+
+// Expose enums to template
+const OpportunityContextRef = OpportunityContext
 
 // ===============================
 // FORM STATE MANAGEMENT
@@ -572,6 +572,26 @@ const getSubmitButtonText = () => {
 // ===============================
 // UTILITY FUNCTIONS
 // ===============================
+
+/**
+ * Transform wrapper form data to API form data format
+ */
+const transformToApiFormat = (): any => {
+  return {
+    name: formData.opportunityName,
+    organization_id: 'temp-id', // This would need to be resolved from organizationName
+    stage: formData.stage,
+    principal_ids: formData.selectedPrincipals,
+    product_id: formData.selectedProduct,
+    context: formData.context,
+    probability_percent: formData.probabilityPercent,
+    expected_close_date: formData.expectedCloseDate,
+    deal_owner: formData.dealOwner,
+    notes: formData.notes,
+    auto_generate_name: formData.autoGenerateName,
+    name_template: null // This could be set based on auto-generation
+  }
+}
 
 const getSinglePrincipalName = (): string | undefined => {
   if (formData.selectedPrincipals.length === 1) {
@@ -673,7 +693,7 @@ const handleProductSelected = (productId: string, product: any) => {
   console.log('Product selected:', productId, product)
 }
 
-const handleStageChanged = (stage: OpportunityStage, probability: number) => {
+const handleStageChanged = (_stage: OpportunityStage, probability: number) => {
   formData.probabilityPercent = probability
 }
 
@@ -688,7 +708,8 @@ const handleSubmit = async () => {
   try {
     if (props.isEditing) {
       // Handle update logic
-      const success = await opportunityStore.updateOpportunity('', formData)
+      const apiData = transformToApiFormat()
+      const success = await opportunityStore.updateOpportunity('', apiData)
       if (success) {
         emit('success', { opportunityId: 'updated' })
       } else {
@@ -699,7 +720,8 @@ const handleSubmit = async () => {
     } else {
       // Handle batch creation
       if (formData.selectedPrincipals.length > 1) {
-        const success = await opportunityStore.createBatchOpportunities(formData)
+        const apiData = transformToApiFormat()
+        const success = await opportunityStore.createBatchOpportunities(apiData)
         if (success && opportunityStore.batchCreationResult) {
           emit('success', {
             opportunityIds: opportunityStore.batchCreationResult.created_opportunities.map(o => o.id),
@@ -712,7 +734,8 @@ const handleSubmit = async () => {
         }
       } else {
         // Single opportunity creation
-        const success = await opportunityStore.createOpportunity(formData)
+        const apiData = transformToApiFormat()
+        const success = await opportunityStore.createOpportunity(apiData)
         if (success) {
           // Assuming the store sets a currentOpportunity or returns an ID
           emit('success', { opportunityId: 'created' }) // This would need to be the actual ID

@@ -258,12 +258,12 @@
         <!-- Table View -->
         <div v-else class="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <PrincipalProductTable
-            :data="filteredProducts"
+            :products="filteredProducts"
             :loading="loading"
             :view-mode="'table'"
             :show-actions="true"
             @view-details="viewProductDetails"
-            @create-opportunity="createOpportunity"
+            @create-opportunity="(productId: string) => createOpportunity(productId)"
           />
         </div>
 
@@ -506,13 +506,57 @@ const loadProductsData = async () => {
     ]
 
     productsData.value = productNames.map((name, index) => ({
+      // Core identification
+      principal_id: selectedPrincipal.value?.id || `principal_${index + 1}`,
+      principal_name: selectedPrincipal.value?.name || `Principal ${index + 1}`,
       product_id: `prod_${index + 1}`,
       product_name: name,
+      product_category: ['Protein', 'Sauce', 'Seasoning', 'Beverage', 'Snack'][Math.floor(Math.random() * 5)] as any,
+      product_sku: `SKU-${String(index + 1).padStart(4, '0')}`,
+      
+      // Relationship details
+      is_primary_principal: Math.random() > 0.5,
+      exclusive_rights: Math.random() > 0.7,
+      wholesale_price: Math.floor(Math.random() * 1000) + 100,
+      minimum_order_quantity: Math.floor(Math.random() * 500) + 50,
+      lead_time_days: Math.floor(Math.random() * 30) + 7,
+      
+      // Contract info
+      contract_start_date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      contract_end_date: new Date(Date.now() + Math.random() * 730 * 24 * 60 * 60 * 1000).toISOString(),
+      territory_restrictions: null,
+      
+      // Performance metrics
+      opportunities_for_product: Math.floor(Math.random() * 25) + 5,
+      won_opportunities_for_product: Math.floor(Math.random() * 10) + 1,
+      active_opportunities_for_product: Math.floor(Math.random() * 15) + 3,
+      latest_opportunity_date: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      avg_opportunity_probability: Math.floor(Math.random() * 60) + 20,
+      
+      // Component-expected properties (aliases/computed values)
+      total_opportunities: Math.floor(Math.random() * 25) + 5, // Maps to opportunities_for_product
+      win_rate: Math.floor(Math.random() * 50) + 25, // Win percentage (0-100)
+      total_value: Math.floor(Math.random() * 200000) + 50000, // Total monetary value
+      
+      // Interaction metrics
+      interactions_for_product: Math.floor(Math.random() * 20) + 5,
+      recent_interactions_for_product: Math.floor(Math.random() * 5) + 1,
+      last_interaction_date: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
+      
+      // Product status
+      product_is_active: Math.random() > 0.1,
+      launch_date: new Date(Date.now() - Math.random() * 1095 * 24 * 60 * 60 * 1000).toISOString(),
+      discontinue_date: null,
+      unit_cost: Math.floor(Math.random() * 500) + 50,
+      suggested_retail_price: Math.floor(Math.random() * 1500) + 200,
+      
+      // Calculated metrics
+      contract_status: ['ACTIVE', 'PENDING', 'EXPIRED', 'EXPIRING_SOON'][Math.floor(Math.random() * 4)] as any,
       product_performance_score: Math.floor(Math.random() * 60) + 30, // 30-90
-      total_opportunities: Math.floor(Math.random() * 25) + 5, // 5-30
-      win_rate: Math.floor(Math.random() * 50) + 25, // 25-75%
-      total_value: Math.floor(Math.random() * 200000) + 50000, // $50k-$250k
-      last_interaction_date: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString()
+      
+      // Metadata
+      relationship_created_at: new Date(Date.now() - Math.random() * 730 * 24 * 60 * 60 * 1000).toISOString(),
+      relationship_updated_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
     }))
 
   } catch (err) {
@@ -532,23 +576,49 @@ const formatCurrency = (value: number): string => {
   return `$${value.toFixed(0)}`
 }
 
-const viewProductDetails = (product: PrincipalProductPerformance) => {
-  // Navigate to product detail page or open modal
-  console.log('Viewing product details:', product)
-  // In real implementation, this would navigate to a product detail page
-  // router.push(`/products/${product.product_id}`)
+const viewProductDetails = (productOrId: PrincipalProductPerformance | string) => {
+  // Handle both product object and product ID
+  let product: PrincipalProductPerformance | undefined
+  
+  if (typeof productOrId === 'string') {
+    // Find the product by ID
+    product = productsData.value?.find(p => p.product_id === productOrId)
+  } else {
+    product = productOrId
+  }
+  
+  if (product) {
+    console.log('Viewing product details:', product)
+    // In real implementation, this would navigate to a product detail page
+    // router.push(`/products/${product.product_id}`)
+  } else {
+    console.warn('Product not found for details view')
+  }
 }
 
-const createOpportunity = (product: PrincipalProductPerformance) => {
-  // Navigate to opportunity creation with pre-selected product and principal
-  console.log('Creating opportunity for product:', product)
-  router.push({
-    path: '/opportunities/new',
-    query: {
-      principalId: selectedPrincipal.value?.id,
-      productId: product.product_id
-    }
-  })
+const createOpportunity = (productOrId: PrincipalProductPerformance | string) => {
+  // Handle both product object and product ID
+  let product: PrincipalProductPerformance | undefined
+  
+  if (typeof productOrId === 'string') {
+    // Find the product by ID
+    product = productsData.value?.find(p => p.product_id === productOrId)
+  } else {
+    product = productOrId
+  }
+  
+  if (product) {
+    console.log('Creating opportunity for product:', product)
+    router.push({
+      path: '/opportunities/new',
+      query: {
+        principalId: selectedPrincipal.value?.id,
+        productId: product.product_id
+      }
+    })
+  } else {
+    console.warn('Product not found for opportunity creation')
+  }
 }
 
 const openManageProductsModal = () => {

@@ -75,24 +75,14 @@
         <div v-else class="space-y-4">
           <div
             v-for="relationship in relationshipTree"
-            :key="relationship.distributor_id"
+            :key="relationship.distributor_id || relationship.principal_id"
             class="relationship-node"
           >
             <!-- Parent Distributor -->
             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div class="flex items-center space-x-4">
-                <!-- Expand/Collapse Button -->
-                <button
-                  v-if="relationship.subdistributors && relationship.subdistributors.length > 0"
-                  @click="toggleExpanded(relationship.distributor_id)"
-                  class="flex-shrink-0 p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <component
-                    :is="expandedNodes.has(relationship.distributor_id) ? ChevronDownIcon : ChevronRightIcon"
-                    class="h-4 w-4 text-gray-500"
-                  />
-                </button>
-                <div v-else class="w-6"></div>
+                <!-- Expand/Collapse Button (simplified for now) -->
+                <div class="w-6"></div>
                 
                 <!-- Distributor Info -->
                 <div class="flex items-center space-x-3">
@@ -106,7 +96,7 @@
                     <div class="flex items-center space-x-2 text-xs text-gray-500">
                       <span>{{ relationship.relationship_type }}</span>
                       <span>•</span>
-                      <span>Level {{ relationship.hierarchy_level }}</span>
+                      <span>Direct Relationship</span>
                     </div>
                   </div>
                 </div>
@@ -117,28 +107,30 @@
                 <div class="flex items-center">
                   <div
                     class="w-2 h-2 rounded-full mr-2"
-                    :class="getStatusColor(relationship.relationship_status)"
+                    :class="getStatusColor(relationship.principal_status)"
                   ></div>
                   <span class="text-sm text-gray-600 capitalize">
-                    {{ relationship.relationship_status?.toLowerCase().replace('_', ' ') }}
+                    {{ relationship.principal_status?.toLowerCase().replace('_', ' ') || 'Unknown' }}
                   </span>
                 </div>
                 
                 <!-- Last Activity -->
                 <div class="text-sm text-gray-500">
-                  {{ formatDate(relationship.last_activity_date) }}
+                  {{ formatDate(relationship.principal_last_contact) }}
                 </div>
                 
                 <!-- Actions -->
                 <div class="flex items-center space-x-2">
                   <button
-                    @click="viewDistributorDetails(relationship.distributor_id)"
-                    class="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors"
+                    @click="viewDistributorDetails(relationship.distributor_id!)"
+                    :disabled="!relationship.distributor_id"
+                    class="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     View
                   </button>
                   <button
-                    @click="contactDistributor(relationship.distributor_id, relationship.distributor_name)"
+                    @click="contactDistributor(relationship.distributor_id!, relationship.distributor_name!)" 
+                    :disabled="!relationship.distributor_id || !relationship.distributor_name"
                     class="text-green-600 hover:text-green-900 text-sm font-medium transition-colors"
                   >
                     Contact
@@ -147,16 +139,12 @@
               </div>
             </div>
             
-            <!-- Subdistributors (Expandable) -->
+            <!-- Distributor Details (if available) -->
             <div
-              v-if="relationship.subdistributors && relationship.subdistributors.length > 0 && expandedNodes.has(relationship.distributor_id)"
+              v-if="relationship.distributor_name && expandedNodes.has(relationship.distributor_id || relationship.principal_id)"
               class="ml-8 mt-2 space-y-2"
             >
-              <div
-                v-for="subdistributor in relationship.subdistributors"
-                :key="subdistributor.distributor_id"
-                class="flex items-center justify-between p-3 border border-gray-100 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
-              >
+              <div class="flex items-center justify-between p-3 border border-gray-100 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div class="flex items-center space-x-3">
                   <!-- Connection Line -->
                   <div class="flex items-center">
@@ -164,19 +152,19 @@
                     <div class="w-2 h-2 rounded-full bg-gray-300"></div>
                   </div>
                   
-                  <!-- Subdistributor Info -->
+                  <!-- Distributor Info -->
                   <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
                       <BuildingStorefrontIcon class="h-6 w-6 text-gray-400" />
                     </div>
                     <div>
                       <h5 class="text-sm font-medium text-gray-800">
-                        {{ subdistributor.distributor_name }}
+                        {{ relationship.distributor_name }}
                       </h5>
                       <div class="flex items-center space-x-2 text-xs text-gray-500">
-                        <span>{{ subdistributor.relationship_type }}</span>
+                        <span>{{ relationship.relationship_type }}</span>
                         <span>•</span>
-                        <span>Level {{ subdistributor.hierarchy_level }}</span>
+                        <span>{{ relationship.distributor_city }}, {{ relationship.distributor_state }}</span>
                       </div>
                     </div>
                   </div>
@@ -187,28 +175,30 @@
                   <div class="flex items-center">
                     <div
                       class="w-1.5 h-1.5 rounded-full mr-2"
-                      :class="getStatusColor(subdistributor.relationship_status)"
+                      :class="getStatusColor(relationship.distributor_status)"
                     ></div>
                     <span class="text-xs text-gray-600 capitalize">
-                      {{ subdistributor.relationship_status?.toLowerCase().replace('_', ' ') }}
+                      {{ relationship.distributor_status?.toLowerCase().replace('_', ' ') || 'Unknown' }}
                     </span>
                   </div>
                   
                   <!-- Last Activity -->
                   <div class="text-xs text-gray-500">
-                    {{ formatDate(subdistributor.last_activity_date) }}
+                    {{ formatDate(relationship.distributor_last_contact) }}
                   </div>
                   
                   <!-- Actions -->
                   <div class="flex items-center space-x-2">
                     <button
-                      @click="viewDistributorDetails(subdistributor.distributor_id)"
-                      class="text-blue-600 hover:text-blue-900 text-xs font-medium transition-colors"
+                      @click="viewDistributorDetails(relationship.distributor_id!)"
+                      :disabled="!relationship.distributor_id"
+                      class="text-blue-600 hover:text-blue-900 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       View
                     </button>
                     <button
-                      @click="contactDistributor(subdistributor.distributor_id, subdistributor.distributor_name)"
+                      @click="contactDistributor(relationship.distributor_id!, relationship.distributor_name!)"
+                      :disabled="!relationship.distributor_id || !relationship.distributor_name"
                       class="text-green-600 hover:text-green-900 text-xs font-medium transition-colors"
                     >
                       Contact
@@ -312,7 +302,6 @@ import { ref, computed } from 'vue'
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   ChevronUpIcon,
   BuildingOfficeIcon,
   BuildingStorefrontIcon,
@@ -356,46 +345,15 @@ const expandedNodes = ref(new Set<string>())
 // ===============================
 
 const relationshipTree = computed(() => {
-  // Group relationships by hierarchy to create a tree structure
+  // Return relationships as a flat list since we don't have hierarchy data
   if (!props.relationships || props.relationships.length === 0) return []
   
-  // Create a map to group distributors by parent relationship
-  const parentMap = new Map<string, PrincipalDistributorRelationship[]>()
-  const rootDistributors: PrincipalDistributorRelationship[] = []
-  
-  // First pass: identify root distributors (level 1) and group others by parent
-  props.relationships.forEach(relationship => {
-    if (relationship.hierarchy_level === 1) {
-      rootDistributors.push({
-        ...relationship,
-        subdistributors: []
-      })
-    } else {
-      // For now, we'll simulate parent-child relationships
-      // In a real implementation, this would use actual parent_distributor_id
-      const parentId = 'parent-' + Math.floor((relationship.hierarchy_level - 1) / 2)
-      
-      if (!parentMap.has(parentId)) {
-        parentMap.set(parentId, [])
-      }
-      parentMap.get(parentId)!.push(relationship)
-    }
-  })
-  
-  // Second pass: attach subdistributors to their parents
-  rootDistributors.forEach((root, index) => {
-    const parentKey = 'parent-' + index
-    if (parentMap.has(parentKey)) {
-      root.subdistributors = parentMap.get(parentKey)
-    }
-  })
-  
-  return rootDistributors
+  return props.relationships
 })
 
 const allExpanded = computed(() => {
   return relationshipTree.value.every(rel => 
-    !rel.subdistributors?.length || expandedNodes.value.has(rel.distributor_id)
+    !rel.distributor_name || expandedNodes.value.has(rel.distributor_id || rel.principal_id)
   )
 })
 
@@ -405,40 +363,34 @@ const totalDistributors = computed(() => {
 
 const activeRelationships = computed(() => {
   return props.relationships?.filter(rel => 
-    rel.relationship_status === 'ACTIVE'
+    rel.principal_status === 'Active'
   ).length || 0
 })
 
 const pendingRelationships = computed(() => {
   return props.relationships?.filter(rel => 
-    rel.relationship_status === 'PENDING'
+    rel.principal_status === 'Prospect'
   ).length || 0
 })
 
 const maxHierarchyLevel = computed(() => {
   if (!props.relationships || props.relationships.length === 0) return 0
-  return Math.max(...props.relationships.map(rel => rel.hierarchy_level || 1))
+  return props.relationships.filter(rel => rel.distributor_name).length > 0 ? 2 : 1
 })
 
 // ===============================
 // EVENT HANDLERS
 // ===============================
 
-const toggleExpanded = (distributorId: string) => {
-  if (expandedNodes.value.has(distributorId)) {
-    expandedNodes.value.delete(distributorId)
-  } else {
-    expandedNodes.value.add(distributorId)
-  }
-}
+// Removed unused function - expandable functionality simplified
 
 const toggleAllExpanded = () => {
   if (allExpanded.value) {
     expandedNodes.value.clear()
   } else {
     relationshipTree.value.forEach(rel => {
-      if (rel.subdistributors?.length) {
-        expandedNodes.value.add(rel.distributor_id)
+      if (rel.distributor_name) {
+        expandedNodes.value.add(rel.distributor_id || rel.principal_id)
       }
     })
   }
@@ -462,10 +414,12 @@ const exportData = () => {
 
 const getStatusColor = (status: string | null): string => {
   const statusColors: Record<string, string> = {
-    'ACTIVE': 'bg-green-400',
-    'PENDING': 'bg-yellow-400',
-    'INACTIVE': 'bg-gray-400',
-    'TERMINATED': 'bg-red-400'
+    'Active': 'bg-green-400',
+    'Prospect': 'bg-yellow-400',
+    'Inactive': 'bg-gray-400',
+    'Customer': 'bg-blue-400',
+    'Partner': 'bg-purple-400',
+    'Vendor': 'bg-orange-400'
   }
   return statusColors[status || ''] || 'bg-gray-400'
 }

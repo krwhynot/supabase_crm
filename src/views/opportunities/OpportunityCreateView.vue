@@ -113,10 +113,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import OpportunityFormWrapper from '@/components/opportunities/OpportunityFormWrapper.vue'
 import type { OpportunityFormWrapperData } from '@/types/opportunityForm'
+import { OpportunityContext } from '@/types/opportunities'
 
 // Dependencies
 const router = useRouter()
@@ -138,7 +139,7 @@ const contextData = computed((): Partial<OpportunityFormWrapperData> => {
   if (query.contextType === 'contact') {
     initialData.organizationName = (query.organizationName as string) || ''
     // Set context to indicate this came from a contact
-    initialData.context = 'REFERRAL' // Default context for contact-initiated opportunities
+    initialData.context = OpportunityContext.NEW_PRODUCT_INTEREST // Default context for contact-initiated opportunities
     initialData.notes = query.contactName 
       ? `Opportunity created from contact: ${query.contactName}`
       : 'Opportunity created from contact page'
@@ -148,7 +149,7 @@ const contextData = computed((): Partial<OpportunityFormWrapperData> => {
   if (query.contextType === 'organization') {
     initialData.organizationName = (query.organizationName as string) || ''
     // Set context to indicate this came from an organization
-    initialData.context = 'FOLLOW_UP' // Default context for organization-initiated opportunities
+    initialData.context = OpportunityContext.FOLLOW_UP // Default context for organization-initiated opportunities
     initialData.notes = 'Opportunity created from organization page'
   }
   

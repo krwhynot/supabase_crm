@@ -29,7 +29,7 @@ import {
   DEFAULT_PRINCIPAL_FILTERS,
   DEFAULT_PRINCIPAL_SORT
 } from '@/types/principal'
-import type { Enums } from '@/types/database.types'
+// Removed unused Enums import
 import { principalActivityApi } from '@/services/principalActivityApi'
 
 /**
@@ -136,8 +136,8 @@ interface PrincipalActivityStoreState {
   // MULTI-SELECTION STATE
   // ============================
   
-  /** Selected principal IDs */
-  selectedPrincipalIds: string[]
+  /** Selected principal IDs - now handled by separate ref */
+  // selectedPrincipalIds: string[] // Moved to separate ref for test compatibility
   
   /** Batch operation mode */
   batchMode: boolean
@@ -165,6 +165,192 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   // STATE INITIALIZATION
   // ============================
   
+  // Create separate refs for test compatibility - selectedPrincipalIds, batchMode, maxSelections
+  const selectedPrincipalIdsRef = ref<string[]>([])
+  const batchModeRef = ref<boolean>(false)
+  const maxSelectionsRef = ref<number | null>(null)
+  
+  // Create separate refs for error states to handle test compatibility
+  const errorRef = ref<string | null>(null)
+  const dashboardErrorRef = ref<string | null>(null)
+  const timelineErrorRef = ref<string | null>(null)
+  const analyticsErrorRef = ref<string | null>(null)
+  
+  // Create separate refs for other state properties that need test compatibility
+  const searchQueryRef = ref<string>('')
+  const lastFetchedRef = ref<Date | null>(null)
+  
+  // Create computed for selectedPrincipalIds that handles both getter and setter
+  const selectedPrincipalIdsComputed = computed({
+    get: () => {
+      return selectedPrincipalIdsRef.value
+    },
+    set: (value: string[]) => {
+      selectedPrincipalIdsRef.value = [...value]
+    }
+  })
+
+  // Create computed for batchMode that handles both getter and setter
+  const batchModeComputed = computed({
+    get: () => {
+      return batchModeRef.value
+    },
+    set: (value: boolean) => {
+      batchModeRef.value = value
+    }
+  })
+
+  // Create computed for maxSelections that handles both getter and setter
+  const maxSelectionsComputed = computed({
+    get: () => {
+      return maxSelectionsRef.value
+    },
+    set: (value: number | null) => {
+      maxSelectionsRef.value = value
+    }
+  })
+
+  // Create computed for error that handles both getter and setter
+  const errorComputed = computed({
+    get: () => {
+      return errorRef.value
+    },
+    set: (value: string | null) => {
+      errorRef.value = value
+    }
+  })
+
+  // Create computed for dashboardError that handles both getter and setter
+  const dashboardErrorComputed = computed({
+    get: () => {
+      return dashboardErrorRef.value
+    },
+    set: (value: string | null) => {
+      dashboardErrorRef.value = value
+    }
+  })
+
+  // Create computed for timelineError that handles both getter and setter
+  const timelineErrorComputed = computed({
+    get: () => {
+      return timelineErrorRef.value
+    },
+    set: (value: string | null) => {
+      timelineErrorRef.value = value
+    }
+  })
+
+  // Create computed for analyticsError that handles both getter and setter
+  const analyticsErrorComputed = computed({
+    get: () => {
+      return analyticsErrorRef.value
+    },
+    set: (value: string | null) => {
+      analyticsErrorRef.value = value
+    }
+  })
+
+  // Create computed for searchQuery that handles both getter and setter
+  const searchQueryComputed = computed({
+    get: () => {
+      return searchQueryRef.value
+    },
+    set: (value: string) => {
+      searchQueryRef.value = value
+      state.searchQuery = value // Keep state in sync
+    }
+  })
+
+  // Create computed for lastFetched that handles both getter and setter
+  const lastFetchedComputed = computed({
+    get: () => {
+      return lastFetchedRef.value || state.lastFetched
+    },
+    set: (value: Date | null) => {
+      lastFetchedRef.value = value
+      state.lastFetched = value // Keep state in sync
+    }
+  })
+
+  // Create computed for principals to ensure test compatibility
+  const principalsComputed = computed(() => {
+    return state.principals
+  })
+
+  // Create computed for metricsSummary to ensure test compatibility
+  const metricsSummaryComputed = computed(() => {
+    return state.metricsSummary
+  })
+
+  // Create computed for other core state properties to ensure test compatibility
+  const selectedPrincipalComputed = computed(() => {
+    return state.selectedPrincipal
+  })
+
+  const dashboardDataComputed = computed(() => {
+    return state.dashboardData
+  })
+
+  const analyticsComputed = computed({
+    get: () => {
+      return state.analytics
+    },
+    set: (value: PrincipalAnalytics | null) => {
+      state.analytics = value
+    }
+  })
+
+  // Create computed for activeFilters to ensure test compatibility
+  const activeFiltersComputed = computed({
+    get: () => {
+      return state.activeFilters
+    },
+    set: (value: PrincipalFilters) => {
+      state.activeFilters = value
+    }
+  })
+
+  // Create computed for principalOptions to ensure test compatibility
+  const principalOptionsComputed = computed(() => {
+    return state.principalOptions
+  })
+
+  // Create computed for loading state to ensure test compatibility
+  const loadingComputed = computed({
+    get: () => {
+      return state.loading
+    },
+    set: (value: boolean) => {
+      state.loading = value
+    }
+  })
+
+  // Create computed for dataStale to ensure test compatibility
+  const dataStaleComputed = computed(() => {
+    return state.dataStale
+  })
+
+  // Create ref for pagination to ensure test compatibility
+  const paginationRef = ref<PrincipalPagination>({
+    page: 1,
+    limit: 20,
+    total: 0,
+    total_pages: 0,
+    has_next: false,
+    has_previous: false
+  })
+
+  // Create computed for pagination that handles both getter and setter
+  const paginationComputed = computed({
+    get: () => {
+      return paginationRef.value || state.pagination
+    },
+    set: (value: PrincipalPagination) => {
+      paginationRef.value = { ...value }
+      state.pagination = { ...value } // Keep state in sync
+    }
+  })
+
   const state = reactive<PrincipalActivityStoreState>({
     // Data collections
     principals: [],
@@ -189,8 +375,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     timelineError: null,
     analyticsError: null,
     
-    // Search and filtering
-    searchQuery: '',
+    // Search and filtering - searchQuery handled by separate ref for test compatibility
+    searchQuery: '', // This will be kept in sync with searchQueryRef
     activeFilters: { ...DEFAULT_PRINCIPAL_FILTERS },
     sortConfig: { ...DEFAULT_PRINCIPAL_SORT },
     pagination: {
@@ -211,8 +397,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       auto_refresh: true
     },
     
-    // Multi-selection
-    selectedPrincipalIds: [],
+    // Multi-selection state
     batchMode: false,
     maxSelections: null,
     
@@ -239,11 +424,11 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   )
   
   const hasError = computed(() => 
-    !!(state.error || state.dashboardError || state.timelineError || state.analyticsError)
+    !!(errorRef.value || dashboardErrorRef.value || timelineErrorRef.value || analyticsErrorRef.value)
   )
   
   const allErrors = computed(() => 
-    [state.error, state.dashboardError, state.timelineError, state.analyticsError]
+    [errorRef.value, dashboardErrorRef.value, timelineErrorRef.value, analyticsErrorRef.value]
       .filter(Boolean)
       .join('; ')
   )
@@ -255,29 +440,29 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   )
   
   const hasActiveFilters = computed(() => {
-    const filters = state.activeFilters
+    const filters = activeFiltersComputed.value
     return !!(
       filters.search ||
       filters.activity_status?.length ||
       filters.organization_status?.length ||
       filters.organization_type?.length ||
       filters.product_categories?.length ||
-      filters.has_opportunities !== null ||
-      filters.has_products !== null ||
+      (filters.has_opportunities !== undefined && filters.has_opportunities !== null) ||
+      (filters.has_products !== undefined && filters.has_products !== null) ||
       filters.engagement_score_range ||
       filters.lead_score_range ||
       filters.country?.length ||
-      filters.is_principal !== null ||
-      filters.is_distributor !== null ||
+      (filters.is_principal !== undefined && filters.is_principal !== null) ||
+      (filters.is_distributor !== undefined && filters.is_distributor !== null) ||
       filters.created_after ||
       filters.created_before
     )
   })
   
-  const selectionCount = computed(() => state.selectedPrincipalIds.length)
+  const selectionCount = computed(() => selectedPrincipalIdsRef.value.length)
   
   const isMaxSelectionsReached = computed(() => 
-    state.maxSelections ? state.selectedPrincipalIds.length >= state.maxSelections : false
+    maxSelectionsRef.value ? selectedPrincipalIdsRef.value.length >= maxSelectionsRef.value : false
   )
   
   const getPrincipalById = computed(() => (id: string) => 
@@ -285,7 +470,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   )
   
   const getSelectedPrincipals = computed(() => 
-    state.principals.filter(p => state.selectedPrincipalIds.includes(p.principal_id))
+    state.principals.filter(p => selectedPrincipalIdsRef.value.includes(p.principal_id))
   )
   
   const principalsByActivityStatus = computed(() => {
@@ -328,7 +513,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   
   const isDataStale = computed(() => {
     if (!state.lastFetched) return true
-    return Date.now() - state.lastFetched.getTime() > state.cacheDuration
+    const timeDiff = Date.now() - state.lastFetched.getTime()
+    return timeDiff > state.cacheDuration
   })
 
   // ============================
@@ -344,7 +530,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     pagination: { page?: number; limit?: number } = {}
   ): Promise<void> => {
     state.loading = true
-    state.error = null
+    errorRef.value = null
     
     try {
       // Merge with current state
@@ -364,8 +550,13 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       if (response.success && response.data) {
         const listResponse = response.data as PrincipalListResponse
         
+        console.log('DEBUG: fetchPrincipals response =', response)
+        console.log('DEBUG: listResponse =', listResponse)
+        console.log('DEBUG: listResponse.data =', listResponse.data)
+        
         state.principals = listResponse.data
         state.pagination = listResponse.pagination
+        paginationRef.value = { ...listResponse.pagination } // Update pagination ref for test compatibility
         state.activeFilters = listResponse.filters
         state.sortConfig = listResponse.sort
         
@@ -381,13 +572,16 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
           }
         }
         
-        state.lastFetched = new Date()
+        // Update both refs to ensure test compatibility
+        const now = new Date()
+        lastFetchedRef.value = now
+        state.lastFetched = now
         state.dataStale = false
       } else {
-        state.error = response.error || 'Failed to fetch principals'
+        errorRef.value = response.error || 'Failed to fetch principals'
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Unexpected error occurred'
+      errorRef.value = error instanceof Error ? error.message : 'Unexpected error occurred'
       console.error('Principal fetch error:', error)
     } finally {
       state.loading = false
@@ -399,7 +593,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    */
   const fetchPrincipalDashboard = async (principalId: string): Promise<void> => {
     state.loadingDashboard = true
-    state.dashboardError = null
+    dashboardErrorRef.value = null
     
     try {
       const response = await principalActivityApi.getPrincipalDashboard(principalId)
@@ -408,10 +602,10 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
         state.dashboardData = response.data as PrincipalDashboardData
         state.selectedPrincipal = state.dashboardData.summary
       } else {
-        state.dashboardError = response.error || 'Failed to fetch principal dashboard'
+        dashboardErrorRef.value = response.error || 'Failed to fetch principal dashboard'
       }
     } catch (error) {
-      state.dashboardError = error instanceof Error ? error.message : 'Dashboard fetch failed'
+      dashboardErrorRef.value = error instanceof Error ? error.message : 'Dashboard fetch failed'
       console.error('Dashboard fetch error:', error)
     } finally {
       state.loadingDashboard = false
@@ -426,7 +620,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     limit = 50
   ): Promise<void> => {
     state.loadingTimeline = true
-    state.timelineError = null
+    timelineErrorRef.value = null
     
     try {
       const response = await principalActivityApi.getPrincipalTimeline(principalIds, limit)
@@ -434,10 +628,10 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       if (response.success && response.data) {
         state.timelineEntries = response.data as PrincipalTimelineEntry[]
       } else {
-        state.timelineError = response.error || 'Failed to fetch timeline'
+        timelineErrorRef.value = response.error || 'Failed to fetch timeline'
       }
     } catch (error) {
-      state.timelineError = error instanceof Error ? error.message : 'Timeline fetch failed'
+      timelineErrorRef.value = error instanceof Error ? error.message : 'Timeline fetch failed'
       console.error('Timeline fetch error:', error)
     } finally {
       state.loadingTimeline = false
@@ -449,7 +643,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    */
   const fetchDistributorRelationships = async (): Promise<void> => {
     state.loading = true
-    state.error = null
+    errorRef.value = null
     
     try {
       const response = await principalActivityApi.getDistributorRelationships()
@@ -457,10 +651,10 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       if (response.success && response.data) {
         state.distributorRelationships = response.data as PrincipalDistributorRelationship[]
       } else {
-        state.error = response.error || 'Failed to fetch distributor relationships'
+        errorRef.value = response.error || 'Failed to fetch distributor relationships'
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Failed to fetch relationships'
+      errorRef.value = error instanceof Error ? error.message : 'Failed to fetch relationships'
       console.error('Distributor relationships fetch error:', error)
     } finally {
       state.loading = false
@@ -472,7 +666,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    */
   const fetchProductPerformance = async (principalIds?: string[]): Promise<void> => {
     state.loading = true
-    state.error = null
+    errorRef.value = null
     
     try {
       const response = await principalActivityApi.getProductPerformance(principalIds)
@@ -480,10 +674,10 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       if (response.success && response.data) {
         state.productPerformance = response.data as PrincipalProductPerformance[]
       } else {
-        state.error = response.error || 'Failed to fetch product performance'
+        errorRef.value = response.error || 'Failed to fetch product performance'
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Product performance fetch failed'
+      errorRef.value = error instanceof Error ? error.message : 'Product performance fetch failed'
       console.error('Product performance fetch error:', error)
     } finally {
       state.loading = false
@@ -507,7 +701,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     }
     
     state.calculatingAnalytics = true
-    state.analyticsError = null
+    analyticsErrorRef.value = null
     
     try {
       const response = await principalActivityApi.calculateAnalytics(state.principals)
@@ -516,10 +710,10 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
         state.analytics = response.data as PrincipalAnalytics
         state.realTimeMetrics.last_updated = new Date()
       } else {
-        state.analyticsError = response.error || 'Analytics calculation failed'
+        analyticsErrorRef.value = response.error || 'Analytics calculation failed'
       }
     } catch (error) {
-      state.analyticsError = error instanceof Error ? error.message : 'Analytics calculation error'
+      analyticsErrorRef.value = error instanceof Error ? error.message : 'Analytics calculation error'
       console.error('Analytics calculation error:', error)
     } finally {
       state.calculatingAnalytics = false
@@ -548,6 +742,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     query: string,
     filters: Partial<PrincipalFilters> = {}
   ): Promise<void> => {
+    // Update both refs to ensure test compatibility
+    searchQueryRef.value = query
     state.searchQuery = query
     const searchFilters = { ...filters, search: query }
     await fetchPrincipals(searchFilters, {}, { page: 1 })
@@ -565,6 +761,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Clear all filters
    */
   const clearFilters = async (): Promise<void> => {
+    // Clear both refs to ensure test compatibility
+    searchQueryRef.value = ''
     state.searchQuery = ''
     await fetchPrincipals(DEFAULT_PRINCIPAL_FILTERS, {}, { page: 1 })
   }
@@ -585,7 +783,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Navigate to specific page
    */
   const goToPage = async (page: number): Promise<void> => {
-    if (page < 1 || page > state.pagination.total_pages) return
+    const currentPagination = paginationRef.value || state.pagination
+    if (page < 1 || page > currentPagination.total_pages) return
     await fetchPrincipals({}, {}, { page })
   }
   
@@ -593,8 +792,9 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Go to next page
    */
   const nextPage = async (): Promise<void> => {
-    if (state.pagination.has_next) {
-      await goToPage(state.pagination.page + 1)
+    const currentPagination = paginationRef.value || state.pagination
+    if (currentPagination.has_next) {
+      await goToPage(currentPagination.page + 1)
     }
   }
   
@@ -602,8 +802,9 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Go to previous page
    */
   const previousPage = async (): Promise<void> => {
-    if (state.pagination.has_previous) {
-      await goToPage(state.pagination.page - 1)
+    const currentPagination = paginationRef.value || state.pagination
+    if (currentPagination.has_previous) {
+      await goToPage(currentPagination.page - 1)
     }
   }
   
@@ -622,13 +823,14 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Toggle selection of a principal
    */
   const toggleSelection = (principalId: string): void => {
-    const index = state.selectedPrincipalIds.indexOf(principalId)
+    const currentIds = selectedPrincipalIdsRef.value
+    const index = currentIds.indexOf(principalId)
     
     if (index > -1) {
-      state.selectedPrincipalIds.splice(index, 1)
+      selectedPrincipalIdsRef.value = currentIds.filter((_, i) => i !== index)
     } else {
-      if (!state.maxSelections || state.selectedPrincipalIds.length < state.maxSelections) {
-        state.selectedPrincipalIds.push(principalId)
+      if (!maxSelectionsRef.value || currentIds.length < maxSelectionsRef.value) {
+        selectedPrincipalIdsRef.value = [...currentIds, principalId]
       }
     }
   }
@@ -637,18 +839,20 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Select specific principals
    */
   const selectPrincipals = (principalIds: string[]): void => {
-    const limitedIds = state.maxSelections 
-      ? principalIds.slice(0, state.maxSelections)
+    const limitedIds = maxSelectionsRef.value 
+      ? principalIds.slice(0, maxSelectionsRef.value)
       : principalIds
     
-    state.selectedPrincipalIds = [...limitedIds]
+    // Set the array directly for consistency
+    selectedPrincipalIdsRef.value = [...limitedIds]
   }
   
   /**
    * Clear all selections
    */
   const clearSelections = (): void => {
-    state.selectedPrincipalIds = []
+    // Reset to empty array to ensure clearing works regardless of how array was set
+    selectedPrincipalIdsRef.value = []
   }
   
   /**
@@ -663,15 +867,15 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Check if principal is selected
    */
   const isSelected = (principalId: string): boolean => {
-    return state.selectedPrincipalIds.includes(principalId)
+    return selectedPrincipalIdsRef.value.includes(principalId)
   }
   
   /**
    * Enable/disable batch mode
    */
   const setBatchMode = (enabled: boolean, maxSelections?: number): void => {
-    state.batchMode = enabled
-    state.maxSelections = maxSelections || null
+    batchModeRef.value = enabled
+    maxSelectionsRef.value = maxSelections || null
     
     if (!enabled) {
       clearSelections()
@@ -688,16 +892,19 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   const batchUpdatePrincipals = async (
     updates: Partial<PrincipalActivitySummary>
   ): Promise<boolean> => {
-    if (state.selectedPrincipalIds.length === 0) return false
+    console.log('DEBUG: batchUpdatePrincipals called, selectedIds =', selectedPrincipalIdsRef.value)
+    if (selectedPrincipalIdsRef.value.length === 0) return false
     
     state.processingBatch = true
-    state.error = null
+    errorRef.value = null
     
     try {
       const response = await principalActivityApi.batchUpdatePrincipals(
-        state.selectedPrincipalIds,
+        selectedPrincipalIdsRef.value,
         updates
       )
+      
+      console.log('DEBUG: API response =', response)
       
       if (response.success) {
         // Refresh data to reflect changes
@@ -705,11 +912,13 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
         clearSelections()
         return true
       } else {
-        state.error = response.error || 'Batch update failed'
+        console.log('DEBUG: Setting error =', response.error)
+        errorRef.value = response.error || 'Batch update failed'
+        console.log('DEBUG: state.error after setting =', state.error)
         return false
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Batch update failed'
+      errorRef.value = error instanceof Error ? error.message : 'Batch update failed'
       return false
     } finally {
       state.processingBatch = false
@@ -774,7 +983,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
         await calculateAnalytics(true)
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Refresh failed'
+      errorRef.value = error instanceof Error ? error.message : 'Refresh failed'
     } finally {
       state.refreshing = false
     }
@@ -784,17 +993,17 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
    * Clear all errors
    */
   const clearErrors = (): void => {
-    state.error = null
-    state.dashboardError = null
-    state.timelineError = null
-    state.analyticsError = null
+    errorRef.value = null
+    dashboardErrorRef.value = null
+    timelineErrorRef.value = null
+    analyticsErrorRef.value = null
   }
   
   /**
    * Set selected principal
    */
   const selectPrincipal = (principal: PrincipalActivitySummary): void => {
-    state.selectedPrincipal = principal
+    state.selectedPrincipal = { ...principal }
   }
   
   /**
@@ -837,12 +1046,170 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
         state.principalOptions = response.data as PrincipalSelectionItem[]
         return state.principalOptions
       } else {
-        state.error = response.error || 'Failed to fetch principal options'
+        errorRef.value = response.error || 'Failed to fetch principal options'
         return []
       }
     } catch (error) {
-      state.error = error instanceof Error ? error.message : 'Failed to fetch options'
+      errorRef.value = error instanceof Error ? error.message : 'Failed to fetch options'
       return []
+    }
+  }
+
+  /**
+   * Load engagement breakdown data for dashboard charts
+   */
+  const loadEngagementBreakdown = async (principalId?: string): Promise<void> => {
+    state.calculatingAnalytics = true
+    analyticsErrorRef.value = null
+    
+    try {
+      // If no specific principal ID, calculate for all principals
+      const targetPrincipals = principalId 
+        ? state.principals.filter(p => p.principal_id === principalId)
+        : state.principals
+        
+      if (targetPrincipals.length === 0) {
+        analyticsErrorRef.value = 'No principal data available for engagement breakdown'
+        return
+      }
+
+      // Calculate engagement breakdown from existing principal data
+      const engagementBreakdown = {
+        high_engagement: targetPrincipals.filter(p => p.engagement_score >= 80).length,
+        medium_engagement: targetPrincipals.filter(p => p.engagement_score >= 50 && p.engagement_score < 80).length,
+        low_engagement: targetPrincipals.filter(p => p.engagement_score < 50).length,
+        total_interactions: targetPrincipals.reduce((sum, p) => sum + p.total_interactions, 0),
+        avg_engagement_score: targetPrincipals.reduce((sum, p) => sum + p.engagement_score, 0) / targetPrincipals.length,
+        active_principals: targetPrincipals.filter(p => p.activity_status === 'ACTIVE').length,
+        principals_with_recent_activity: targetPrincipals.filter(p => {
+          if (!p.last_activity_date) return false
+          const lastActivity = new Date(p.last_activity_date)
+          const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          return lastActivity > thirtyDaysAgo
+        }).length
+      }
+
+      // Update analytics with engagement breakdown
+      state.analytics = {
+        ...state.analytics,
+        engagement_breakdown: engagementBreakdown,
+        total_principals: targetPrincipals.length,
+        last_updated: new Date().toISOString()
+      } as PrincipalAnalytics
+      
+      state.realTimeMetrics.last_updated = new Date()
+    } catch (error) {
+      analyticsErrorRef.value = error instanceof Error ? error.message : 'Failed to load engagement breakdown'
+      console.error('Engagement breakdown calculation error:', error)
+    } finally {
+      state.calculatingAnalytics = false
+    }
+  }
+
+  /**
+   * Load principal statistics for dashboard KPIs
+   */
+  const loadPrincipalStats = async (principalId?: string): Promise<void> => {
+    state.calculatingAnalytics = true
+    analyticsErrorRef.value = null
+    
+    try {
+      // If no specific principal ID, calculate for all principals
+      const targetPrincipals = principalId 
+        ? state.principals.filter(p => p.principal_id === principalId)
+        : state.principals
+        
+      if (targetPrincipals.length === 0) {
+        analyticsErrorRef.value = 'No principal data available for statistics'
+        return
+      }
+
+      // Calculate comprehensive principal statistics
+      const now = new Date()
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+      
+      const stats = {
+        total_principals: targetPrincipals.length,
+        active_principals: targetPrincipals.filter(p => p.activity_status === 'ACTIVE').length,
+        inactive_principals: targetPrincipals.filter(p => p.activity_status === ('INACTIVE' as any)).length,
+        high_value_principals: targetPrincipals.filter(p => p.engagement_score >= 80).length,
+        avg_engagement_score: Math.round(
+          targetPrincipals.reduce((sum, p) => sum + p.engagement_score, 0) / targetPrincipals.length * 100
+        ) / 100,
+        total_interactions: targetPrincipals.reduce((sum, p) => sum + p.total_interactions, 0),
+        interactions_last_30_days: targetPrincipals.reduce((sum, p) => sum + p.interactions_last_30_days, 0),
+        interactions_last_90_days: targetPrincipals.reduce((sum, p) => sum + p.interactions_last_90_days, 0),
+        total_opportunities: targetPrincipals.reduce((sum, p) => sum + p.total_opportunities, 0),
+        active_opportunities: targetPrincipals.reduce((sum, p) => sum + p.active_opportunities, 0),
+        won_opportunities: targetPrincipals.reduce((sum, p) => sum + p.won_opportunities, 0),
+        opportunities_last_30_days: targetPrincipals.reduce((sum, p) => sum + p.opportunities_last_30_days, 0),
+        avg_probability_percent: Math.round(
+          targetPrincipals.reduce((sum, p) => sum + (p.avg_probability_percent || 0), 0) / targetPrincipals.length * 100
+        ) / 100,
+        total_contacts: targetPrincipals.reduce((sum, p) => sum + p.contact_count, 0),
+        active_contacts: targetPrincipals.reduce((sum, p) => sum + p.active_contacts, 0),
+        follow_ups_required: targetPrincipals.reduce((sum, p) => sum + p.follow_ups_required, 0),
+        principals_by_type: targetPrincipals.reduce((acc, p) => {
+          const type = p.organization_type || 'Unknown'
+          acc[type] = (acc[type] || 0) + 1
+          return acc
+        }, {} as Record<string, number>),
+        principals_by_industry: targetPrincipals.reduce((acc, p) => {
+          const industry = p.industry || 'Unknown'
+          acc[industry] = (acc[industry] || 0) + 1
+          return acc
+        }, {} as Record<string, number>),
+        top_performing_principals: targetPrincipals
+          .sort((a, b) => b.engagement_score - a.engagement_score)
+          .slice(0, 5)
+          .map(p => ({
+            principal_id: p.principal_id,
+            principal_name: p.principal_name,
+            engagement_score: p.engagement_score,
+            total_opportunities: p.total_opportunities,
+            total_interactions: p.total_interactions
+          })),
+        recent_activity_trend: {
+          last_30_days: targetPrincipals.filter(p => {
+            if (!p.last_activity_date) return false
+            return new Date(p.last_activity_date) > thirtyDaysAgo
+          }).length,
+          last_90_days: targetPrincipals.filter(p => {
+            if (!p.last_activity_date) return false
+            return new Date(p.last_activity_date) > ninetyDaysAgo
+          }).length
+        }
+      }
+
+      // Update metrics summary with calculated stats
+      state.metricsSummary = {
+        total_principals: stats.total_principals,
+        active_this_month: stats.recent_activity_trend.last_30_days,
+        top_engagement_score: Math.max(...targetPrincipals.map(p => p.engagement_score)),
+        opportunities_created_this_month: stats.opportunities_last_30_days,
+        interactions_this_week: Math.floor(stats.interactions_last_30_days / 4),
+        pending_follow_ups: stats.follow_ups_required
+      }
+
+      // Update analytics with comprehensive stats
+      state.analytics = {
+        ...state.analytics,
+        principal_stats: stats,
+        total_principals: stats.total_principals,
+        active_principals: stats.active_principals,
+        avg_engagement_score: stats.avg_engagement_score,
+        total_interactions: stats.total_interactions,
+        total_opportunities: stats.total_opportunities,
+        last_updated: new Date().toISOString()
+      } as PrincipalAnalytics
+      
+      state.realTimeMetrics.last_updated = new Date()
+    } catch (error) {
+      analyticsErrorRef.value = error instanceof Error ? error.message : 'Failed to load principal statistics'
+      console.error('Principal statistics calculation error:', error)
+    } finally {
+      state.calculatingAnalytics = false
     }
   }
 
@@ -856,11 +1223,31 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   const startRealTimeUpdates = (): void => {
     if (realTimeTimer) return
     
-    realTimeTimer = setInterval(async () => {
+    // Enable auto-refresh when starting updates
+    state.realTimeMetrics.auto_refresh = true
+    
+    console.log('DEBUG: Starting real-time timer with frequency:', state.realTimeMetrics.update_frequency)
+    realTimeTimer = setInterval(() => {
+      console.log('DEBUG: Timer callback executed, checking conditions:', {
+        auto_refresh: state.realTimeMetrics.auto_refresh,
+        isLoading: isLoading.value
+      })
+      
       if (state.realTimeMetrics.auto_refresh && !isLoading.value) {
-        await calculateAnalytics()
+        console.log('DEBUG: Calling calculateAnalytics from timer')
+        // Use non-async call to avoid timer issues in tests
+        calculateAnalytics(true).catch(err => {
+          console.error('Real-time analytics update failed:', err)
+        })
+      } else {
+        console.log('Real-time update skipped:', {
+          auto_refresh: state.realTimeMetrics.auto_refresh,
+          isLoading: isLoading.value
+        })
       }
     }, state.realTimeMetrics.update_frequency)
+    
+    console.log('DEBUG: Timer created with ID:', realTimeTimer)
   }
   
   /**
@@ -871,6 +1258,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
       clearInterval(realTimeTimer)
       realTimeTimer = null
     }
+    // Disable auto-refresh when stopping updates
+    state.realTimeMetrics.auto_refresh = false
   }
   
   /**
@@ -900,7 +1289,7 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   // Watch for data staleness
   watch(isDataStale, (stale) => {
     state.dataStale = stale
-  })
+  }, { immediate: true })
   
   // Auto-start real-time updates if enabled
   if (state.realTimeMetrics.auto_refresh) {
@@ -922,8 +1311,49 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
   // ============================
   
   return {
-    // Reactive state (read-only access)
-    ...state,
+    // Core data collections
+    principals: principalsComputed,
+    selectedPrincipal: selectedPrincipalComputed,
+    distributorRelationships: state.distributorRelationships,
+    productPerformance: state.productPerformance,
+    timelineEntries: state.timelineEntries,
+    dashboardData: dashboardDataComputed,
+    principalOptions: principalOptionsComputed,
+    
+    // UI states
+    loading: loadingComputed,
+    loadingDashboard: state.loadingDashboard,
+    loadingTimeline: state.loadingTimeline,
+    calculatingAnalytics: state.calculatingAnalytics,
+    refreshing: state.refreshing,
+    processingBatch: state.processingBatch,
+    
+    // Error states - Use computed properties for test compatibility
+    error: errorComputed,
+    dashboardError: dashboardErrorComputed,
+    timelineError: timelineErrorComputed,
+    analyticsError: analyticsErrorComputed,
+    
+    // Search and filtering state - Use computed for test compatibility
+    searchQuery: searchQueryComputed,
+    activeFilters: activeFiltersComputed,
+    sortConfig: state.sortConfig,
+    pagination: paginationComputed,
+    
+    // Analytics state
+    analytics: analyticsComputed,
+    metricsSummary: metricsSummaryComputed,
+    realTimeMetrics: state.realTimeMetrics,
+    
+    // Multi-selection state - Use computed properties for test compatibility
+    selectedPrincipalIds: selectedPrincipalIdsComputed,
+    batchMode: batchModeComputed,
+    maxSelections: maxSelectionsComputed,
+    
+    // Cache state - Use computed for test compatibility
+    lastFetched: lastFetchedComputed,
+    cacheDuration: state.cacheDuration,
+    dataStale: dataStaleComputed,
     
     // Computed properties
     isLoading,
@@ -984,6 +1414,8 @@ export const usePrincipalActivityStore = defineStore('principalActivity', () => 
     clearSelectedPrincipal,
     loadActivitySummaries,
     getPrincipalOptions,
+    loadEngagementBreakdown,
+    loadPrincipalStats,
     
     // Real-time updates
     startRealTimeUpdates,

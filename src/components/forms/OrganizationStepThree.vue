@@ -107,7 +107,7 @@ const hasContacts = computed(() => {
 
 const primaryContactName = computed(() => {
   if (contactData.value.mode === 'select' && contactData.value.primaryContactId) {
-    const contact = contactStore.contacts.find(c => c.id === contactData.value.primaryContactId)
+    const contact = contactStore.contacts.find((c: any) => c.id === contactData.value.primaryContactId)
     return contact ? `${contact.first_name} ${contact.last_name}` : undefined
   } else if (contactData.value.mode === 'create' && contactData.value.primaryContactIndex !== undefined && contactData.value.primaryContactIndex >= 0) {
     const contact = contactData.value.newContacts[contactData.value.primaryContactIndex]

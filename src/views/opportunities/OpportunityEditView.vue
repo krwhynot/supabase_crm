@@ -157,7 +157,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -197,10 +196,10 @@ const loadOpportunity = async () => {
     loading.value = true
     error.value = null
     
-    const success = await opportunityStore.fetchOpportunityById(opportunityId)
+    await opportunityStore.fetchOpportunityById(opportunityId)
     
-    if (success) {
-      opportunity.value = opportunityStore.currentOpportunity
+    if (opportunityStore.selectedOpportunity) {
+      opportunity.value = opportunityStore.selectedOpportunity
     } else {
       error.value = opportunityStore.error || 'Opportunity not found'
     }
@@ -220,7 +219,7 @@ const loadOpportunity = async () => {
  * Handle successful opportunity update
  * Navigate back to the opportunity detail page
  */
-const handleSuccess = (data: { opportunityId: string }) => {
+const handleSuccess = (data: { opportunityId?: string; opportunityIds?: string[]; count?: number }) => {
   console.log('Opportunity updated successfully:', data)
   
   // Clear any previous errors
@@ -292,7 +291,7 @@ onMounted(() => {
 }
 
 .opportunity-edit-view nav ol li[aria-current="page"] span {
-  @apply text-gray-500;
+  color: rgb(107 114 128); /* text-gray-500 */
 }
 
 /* Back button enhancements */
@@ -340,11 +339,11 @@ onMounted(() => {
   }
   
   .opportunity-edit-view .text-gray-500 {
-    @apply text-gray-800;
+    color: rgb(31 41 55); /* gray-800 */
   }
   
   .opportunity-edit-view .text-gray-600 {
-    @apply text-gray-900;
+    color: rgb(17 24 39); /* gray-900 */
   }
 }
 

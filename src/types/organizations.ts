@@ -1006,6 +1006,82 @@ export const getLeadTemperatureLabel = (score: number | null): string => {
   return 'Cold';
 };
 
+// =============================================================================
+// Additional Analytics and Performance Interfaces
+// =============================================================================
+
+/**
+ * Organization analytics summary data
+ */
+export interface OrganizationSummaryAnalytics {
+  id: string
+  organization_id: string
+  total_opportunities: number
+  active_opportunities: number
+  won_opportunities: number
+  total_interactions: number
+  last_activity_date: string | null
+  lead_score: number | null
+  conversion_rate: number | null
+  average_deal_size: number | null
+}
+
+/**
+ * Monthly organization performance metrics
+ */
+export interface MonthlyOrganizationPerformance {
+  id: string
+  organization_id: string
+  month: string
+  year: number
+  opportunities_created: number
+  opportunities_won: number
+  total_revenue: number | null
+  interaction_count: number
+  lead_score_change: number | null
+}
+
+/**
+ * Organization lead scoring data
+ */
+export interface OrganizationLeadScoring {
+  id: string
+  organization_id: string
+  lead_score: number
+  scoring_factors: Record<string, any> | null
+  last_updated: string
+  score_trend: 'up' | 'down' | 'stable' | null
+}
+
+/**
+ * Organization interaction record
+ */
+export interface OrganizationInteraction {
+  id: string
+  organization_id: string
+  interaction_type: InteractionType
+  subject: string
+  interaction_date: string
+  notes: string | null
+  outcome: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Organization document record
+ */
+export interface OrganizationDocument {
+  id: string
+  organization_id: string
+  document_name: string
+  document_type: string
+  file_path: string | null
+  file_size: number | null
+  uploaded_at: string
+  uploaded_by: string | null
+}
+
 // Re-export database types for convenience
 export type {
   Organization,

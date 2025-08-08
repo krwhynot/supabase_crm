@@ -152,8 +152,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { 
-  OpportunityStage, 
-  STAGE_COLORS, 
+  OpportunityStage,
   STAGE_DEFAULT_PROBABILITY 
 } from '@/types/opportunities'
 
@@ -293,8 +292,8 @@ const selectClasses = computed(() => {
   let stateClasses = ''
   if (hasError.value) {
     stateClasses = 'border-red-500 bg-red-50 focus:ring-red-500 focus:bg-white'
-  } else if (props.modelValue && props.modelValue !== '') {
-    const stageColors = getStageColorClasses(props.modelValue)
+  } else if (props.modelValue && props.modelValue !== '' as OpportunityStage) {
+    const stageColors = getStageColorClasses(props.modelValue as OpportunityStage)
     stateClasses = `border-${stageColors.border} bg-${stageColors.bgLight} focus:ring-${stageColors.ring} focus:bg-white`
   } else {
     stateClasses = isFocused.value
@@ -407,9 +406,9 @@ const handleChange = (event: Event) => {
   emit('change', event)
   
   // Emit stage-specific event with probability
-  if (value && value !== '') {
-    const probability = getDefaultProbability(value)
-    emit('stage-changed', value, probability)
+  if (value && value !== '' as OpportunityStage) {
+    const probability = getDefaultProbability(value as OpportunityStage)
+    emit('stage-changed', value as OpportunityStage, probability)
   }
 }
 

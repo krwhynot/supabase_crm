@@ -145,7 +145,7 @@
                   <span class="ml-1 text-gray-500">total</span>
                 </div>
                 <div class="text-xs text-green-600">
-                  {{ product.won_opportunities || 0 }} won
+                  {{ product.won_opportunities_for_product || 0 }} won
                 </div>
               </td>
               
@@ -171,21 +171,22 @@
                   {{ formatCurrency(product.total_value || 0) }}
                 </div>
                 <div class="text-xs text-gray-500">
-                  Avg: {{ formatCurrency(product.avg_opportunity_value || 0) }}
+                  Avg: {{ formatCurrency((product.total_value || 0) / Math.max(product.total_opportunities || 1, 1)) }}
                 </div>
               </td>
               
               <!-- Engagement Trend -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <TrendIndicator 
-                  :trend="product.engagement_trend || 'FLAT'"
+                  :change="0"
+                  :trend="'stable'"
                   size="sm"
                 />
               </td>
               
               <!-- Last Activity -->
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ formatDate(product.last_opportunity_date) }}
+                {{ formatDate(product.latest_opportunity_date) }}
               </td>
               
               <!-- Actions -->
@@ -267,7 +268,7 @@
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-600">Avg per Opp</span>
               <span class="text-sm font-medium text-gray-700">
-                {{ formatCurrency(product.avg_opportunity_value || 0) }}
+                {{ formatCurrency((product.total_value || 0) / Math.max(product.total_opportunities || 1, 1)) }}
               </span>
             </div>
           </div>
@@ -276,13 +277,14 @@
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center">
               <TrendIndicator 
-                :trend="product.engagement_trend || 'FLAT'"
+                :change="0"
+                :trend="'stable'"
                 size="sm"
               />
               <span class="ml-2 text-sm text-gray-600">Trend</span>
             </div>
             <div class="text-sm text-gray-500">
-              {{ formatDate(product.last_opportunity_date) }}
+              {{ formatDate(product.latest_opportunity_date) }}
             </div>
           </div>
           

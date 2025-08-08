@@ -49,10 +49,10 @@
             <!-- Interaction Type Icon -->
             <div
               class="relative flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white"
-              :class="getInteractionTypeClasses(interaction.interaction_type)"
+              :class="getInteractionTypeClasses(interaction.interaction_type || interaction.type || 'Other')"
             >
               <component
-                :is="getInteractionIcon(interaction.interaction_type)"
+                :is="getInteractionIcon(interaction.interaction_type || interaction.type || 'Other')"
                 class="h-4 w-4"
                 aria-hidden="true"
               />
@@ -71,7 +71,7 @@
                 <div class="flex items-start justify-between mb-2">
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-medium text-gray-900">
-                      {{ interaction.subject || getInteractionTypeLabel(interaction.interaction_type) }}
+                      {{ interaction.subject || getInteractionTypeLabel(interaction.interaction_type || interaction.type || 'Other') }}
                     </h4>
                     <div class="flex items-center mt-1 space-x-3 text-xs text-gray-500">
                       <span class="flex items-center">
@@ -123,8 +123,8 @@
                   <div class="flex items-center space-x-2">
                     <!-- Interaction Type Badge -->
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                          :class="getInteractionTypeBadgeClasses(interaction.interaction_type)">
-                      {{ getInteractionTypeLabel(interaction.interaction_type) }}
+                          :class="getInteractionTypeBadgeClasses(interaction.interaction_type || interaction.type || 'Other')">
+                      {{ getInteractionTypeLabel(interaction.interaction_type || interaction.type || 'Other') }}
                     </span>
 
                     <!-- Follow-up Badge -->
@@ -178,8 +178,7 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { useRouter } from 'vue-router'
-import type { InteractionWithDetails } from '@/types/interactions'
-import type { Enums } from '@/types/database.types'
+import type { InteractionWithDetails, InteractionType } from '@/types/interactions'
 
 /**
  * Component props interface
@@ -245,47 +244,107 @@ const interactions = computed((): InteractionWithDetails[] => {
   return [
     {
       id: '1',
-      interaction_type: 'phone_call',
+      type: 'Phone' as InteractionType,
+      interaction_type: 'Phone' as InteractionType,
       subject: `Follow-up call with ${props.principalName}`,
       summary: 'Discussed upcoming project requirements and timeline. Very positive response, showing strong interest in our solution.',
       interaction_date: '2024-11-15T14:30:00Z',
       sample_rating: 4,
+      rating: 4,
       follow_up_date: '2024-11-20',
+      follow_up_required: true,
       organization_name: 'Sample Organization',
       organization_id: 'org-1',
       principal_id: props.principalId,
+      opportunity_id: 'opp-1',
+      status: 'COMPLETED' as any,
+      outcome: 'POSITIVE' as any,
+      duration_minutes: 30,
+      location: null,
+      notes: 'Discussed upcoming project requirements and timeline. Very positive response, showing strong interest in our solution.',
+      contact_method: 'Phone',
+      participants: null,
+      attachments: null,
+      tags: null,
+      custom_fields: null,
+      next_action: 'Follow up next week',
+      follow_up_notes: 'Schedule product demo',
+      created_by: null,
       created_at: '2024-11-15T14:35:00Z',
-      updated_at: '2024-11-15T14:35:00Z'
+      updated_at: '2024-11-15T14:35:00Z',
+      deleted_at: null,
+      days_since_interaction: 7,
+      days_until_followup: 2
     },
     {
       id: '2',
-      interaction_type: 'email',
+      type: 'Email' as InteractionType,
+      interaction_type: 'Email' as InteractionType,
       subject: 'Product information request',
       summary: 'Sent detailed product specifications and pricing information as requested.',
       interaction_date: '2024-11-10T09:15:00Z',
       sample_rating: null,
+      rating: null,
       follow_up_date: null,
+      follow_up_required: false,
       organization_name: 'Another Organization',
       organization_id: 'org-2',
       principal_id: props.principalId,
+      opportunity_id: 'opp-2',
+      status: 'COMPLETED' as any,
+      outcome: 'NEUTRAL' as any,
+      duration_minutes: null,
+      location: null,
+      notes: 'Sent detailed product specifications and pricing information as requested.',
+      contact_method: 'Email',
+      participants: null,
+      attachments: null,
+      tags: null,
+      custom_fields: null,
+      next_action: null,
+      follow_up_notes: null,
+      created_by: null,
       created_at: '2024-11-10T09:20:00Z',
-      updated_at: '2024-11-10T09:20:00Z'
+      updated_at: '2024-11-10T09:20:00Z',
+      deleted_at: null,
+      days_since_interaction: 12,
+      days_until_followup: null
     },
     {
       id: '3',
-      interaction_type: 'meeting',
+      type: 'Meeting' as InteractionType,
+      interaction_type: 'Meeting' as InteractionType,
       subject: 'Quarterly business review',
       summary: 'Comprehensive review of product performance and relationship status. Identified new opportunities for expansion.',
       interaction_date: '2024-11-05T11:00:00Z',
       sample_rating: 5,
+      rating: 5,
       follow_up_date: null,
+      follow_up_required: false,
       organization_name: 'Sample Organization',
       organization_id: 'org-1',
       principal_id: props.principalId,
+      opportunity_id: 'opp-3',
+      status: 'COMPLETED' as any,
+      outcome: 'POSITIVE' as any,
+      duration_minutes: 90,
+      location: 'Client Office',
+      notes: 'Comprehensive review of product performance and relationship status. Identified new opportunities for expansion.',
+      contact_method: 'In Person',
+      participants: null,
+      attachments: null,
+      tags: null,
+      custom_fields: null,
+      next_action: null,
+      follow_up_notes: null,
+      created_by: null,
       created_at: '2024-11-05T11:30:00Z',
-      updated_at: '2024-11-05T11:30:00Z'
+      updated_at: '2024-11-05T11:30:00Z',
+      deleted_at: null,
+      days_since_interaction: 17,
+      days_until_followup: null
     }
-  ].filter(interaction => props.principalId) // Only show if principal is selected
+  ].filter(() => props.principalId) // Only show if principal is selected
 })
 
 // ===============================
@@ -315,14 +374,20 @@ const handleEdit = (interaction: InteractionWithDetails) => {
 /**
  * Get interaction type display label
  */
-const getInteractionTypeLabel = (type: Enums<'interaction_type'>): string => {
-  const labels: Record<Enums<'interaction_type'>, string> = {
-    'phone_call': 'Phone Call',
-    'email': 'Email',
-    'meeting': 'Meeting',
-    'site_visit': 'Site Visit',
-    'conference': 'Conference',
-    'other': 'Other'
+const getInteractionTypeLabel = (type: InteractionType): string => {
+  const labels: Record<InteractionType, string> = {
+    'Phone': 'Phone Call',
+    'Email': 'Email', 
+    'Meeting': 'Meeting',
+    'Demo': 'Demo',
+    'Event': 'Event',
+    'Other': 'Other',
+    'Proposal': 'Proposal',
+    'Contract': 'Contract',
+    'Note': 'Note',
+    'Task': 'Task',
+    'Social': 'Social',
+    'Website': 'Website'
   }
   return labels[type] || type
 }
@@ -330,59 +395,88 @@ const getInteractionTypeLabel = (type: Enums<'interaction_type'>): string => {
 /**
  * Get interaction type icon component
  */
-const getInteractionIcon = (type: Enums<'interaction_type'>) => {
+const getInteractionIcon = (type: InteractionType) => {
   const iconMap = {
-    'phone_call': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    'Phone': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' })
     ]),
-    'email': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    'Email': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' })
     ]),
-    'meeting': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    'Meeting': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
     ]),
-    'site_visit': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' }),
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15 11a3 3 0 11-6 0 3 3 0 016 0z' })
+    'Demo': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' })
     ]),
-    'conference': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' })
+    'Event': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
     ]),
-    'other': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    'Proposal': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
+    ]),
+    'Contract': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
+    ]),
+    'Note': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' })
+    ]),
+    'Task': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' })
+    ]),
+    'Social': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z' })
+    ]),
+    'Website': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' })
+    ]),
+    'Other': () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' })
     ])
   }
-  return iconMap[type] || iconMap['other']
+  return iconMap[type] || iconMap['Other']
 }
 
 /**
  * Get interaction type timeline icon classes
  */
-const getInteractionTypeClasses = (type: Enums<'interaction_type'>): string => {
+const getInteractionTypeClasses = (type: InteractionType): string => {
   const classMap = {
-    'phone_call': 'bg-blue-500 text-white',
-    'email': 'bg-green-500 text-white',
-    'meeting': 'bg-purple-500 text-white',
-    'site_visit': 'bg-orange-500 text-white',
-    'conference': 'bg-indigo-500 text-white',
-    'other': 'bg-gray-500 text-white'
+    'Phone': 'bg-blue-500 text-white',
+    'Email': 'bg-green-500 text-white',
+    'Meeting': 'bg-purple-500 text-white',
+    'Demo': 'bg-orange-500 text-white',
+    'Event': 'bg-indigo-500 text-white',
+    'Proposal': 'bg-yellow-500 text-white',
+    'Contract': 'bg-red-500 text-white',
+    'Note': 'bg-teal-500 text-white',
+    'Task': 'bg-pink-500 text-white',
+    'Social': 'bg-cyan-500 text-white',
+    'Website': 'bg-emerald-500 text-white',
+    'Other': 'bg-gray-500 text-white'
   }
-  return classMap[type] || classMap['other']
+  return classMap[type] || classMap['Other']
 }
 
 /**
  * Get interaction type badge classes
  */
-const getInteractionTypeBadgeClasses = (type: Enums<'interaction_type'>): string => {
+const getInteractionTypeBadgeClasses = (type: InteractionType): string => {
   const classMap = {
-    'phone_call': 'bg-blue-100 text-blue-800',
-    'email': 'bg-green-100 text-green-800',
-    'meeting': 'bg-purple-100 text-purple-800',
-    'site_visit': 'bg-orange-100 text-orange-800',
-    'conference': 'bg-indigo-100 text-indigo-800',
-    'other': 'bg-gray-100 text-gray-800'
+    'Phone': 'bg-blue-100 text-blue-800',
+    'Email': 'bg-green-100 text-green-800',
+    'Meeting': 'bg-purple-100 text-purple-800',
+    'Demo': 'bg-orange-100 text-orange-800',
+    'Event': 'bg-indigo-100 text-indigo-800',
+    'Proposal': 'bg-yellow-100 text-yellow-800',
+    'Contract': 'bg-red-100 text-red-800',
+    'Note': 'bg-teal-100 text-teal-800',
+    'Task': 'bg-pink-100 text-pink-800',
+    'Social': 'bg-cyan-100 text-cyan-800',
+    'Website': 'bg-emerald-100 text-emerald-800',
+    'Other': 'bg-gray-100 text-gray-800'
   }
-  return classMap[type] || classMap['other']
+  return classMap[type] || classMap['Other']
 }
 
 /**

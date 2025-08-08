@@ -22,7 +22,7 @@
               @keydown.enter="handleSort('name')"
               @keydown.space.prevent="handleSort('name')"
               tabindex="0"
-              :aria-sort="getSortAriaLabel('name')"
+              :aria-sort="getSortAriaLabel('name') as 'ascending' | 'descending' | 'none' | 'other' | undefined"
             >
               <div class="flex items-center space-x-1">
                 <span>Principal</span>
@@ -39,7 +39,7 @@
               @keydown.enter="handleSort('engagement')"
               @keydown.space.prevent="handleSort('engagement')"
               tabindex="0"
-              :aria-sort="getSortAriaLabel('engagement')"
+              :aria-sort="getSortAriaLabel('engagement') as 'ascending' | 'descending' | 'none' | 'other' | undefined"
             >
               <div class="flex items-center space-x-1">
                 <span>Engagement</span>
@@ -56,7 +56,7 @@
               @keydown.enter="handleSort('activity')"
               @keydown.space.prevent="handleSort('activity')"
               tabindex="0"
-              :aria-sort="getSortAriaLabel('activity')"
+              :aria-sort="getSortAriaLabel('activity') as 'ascending' | 'descending' | 'none' | 'other' | undefined"
             >
               <div class="flex items-center space-x-1">
                 <span>Last Activity</span>
@@ -73,7 +73,7 @@
               @keydown.enter="handleSort('opportunities')"
               @keydown.space.prevent="handleSort('opportunities')"
               tabindex="0"
-              :aria-sort="getSortAriaLabel('opportunities')"
+              :aria-sort="getSortAriaLabel('opportunities') as 'ascending' | 'descending' | 'none' | 'other' | undefined"
             >
               <div class="flex items-center space-x-1">
                 <span>Opportunities</span>
@@ -115,7 +115,7 @@
                     {{ principal.principal_name }}
                   </div>
                   <div class="text-sm text-gray-500 truncate max-w-[200px]">
-                    {{ principal.organization_name }}
+                    {{ principal.organization_type }}
                   </div>
                   <div v-if="principal.organization_type" class="text-xs text-gray-400 uppercase">
                     {{ principal.organization_type }}
@@ -137,7 +137,7 @@
                     {{ principal.engagement_score || 0 }}%
                   </span>
                   <ActivityStatusBadge 
-                    :status="principal.activity_status" 
+                    :status="(principal.activity_status === 'STALE' ? 'LOW' : principal.activity_status) as 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW'" 
                     size="xs"
                   />
                 </div>
@@ -166,8 +166,8 @@
                   <span class="text-xs text-gray-500">Interactions</span>
                 </div>
                 <div class="flex flex-col items-center">
-                  <span class="font-medium">{{ principal.products_associated || 0 }}</span>
-                  <span class="text-xs text-gray-500">Products</span>
+                  <span class="font-medium">{{ principal.total_opportunities || 0 }}</span>
+                  <span class="text-xs text-gray-500">Total</span>
                 </div>
               </div>
             </td>
@@ -236,7 +236,7 @@
                 {{ principal.principal_name }}
               </h3>
               <p class="text-xs text-gray-500 truncate">
-                {{ principal.organization_name }}
+                {{ principal.organization_type }}
               </p>
               <p v-if="principal.organization_type" class="text-xs text-gray-400 uppercase">
                 {{ principal.organization_type }}
@@ -245,7 +245,7 @@
           </div>
           
           <ActivityStatusBadge 
-            :status="principal.activity_status" 
+            :status="(principal.activity_status === 'STALE' ? 'LOW' : principal.activity_status) as 'NO_ACTIVITY' | 'MODERATE' | 'ACTIVE' | 'LOW'" 
             size="sm"
           />
         </div>
@@ -280,7 +280,7 @@
             <div class="text-xs text-gray-500">Interactions</div>
           </div>
           <div>
-            <div class="text-sm font-medium text-gray-900">{{ principal.products_associated || 0 }}</div>
+            <div class="text-sm font-medium text-gray-900">{{ principal.total_opportunities || 0 }}</div>
             <div class="text-xs text-gray-500">Products</div>
           </div>
         </div>
@@ -319,7 +319,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { PrincipalActivitySummary } from '@/services/principalActivityApi'
 import ActivityStatusBadge from './ActivityStatusBadge.vue'
 import EngagementScoreRing from './EngagementScoreRing.vue'
@@ -343,6 +343,9 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   loading: false
 })
+
+// Props are used in template, suppress unused warning
+void props
 
 const emit = defineEmits<Emits>()
 

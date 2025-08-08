@@ -2186,8 +2186,9 @@ export const Constants = {
 } as const
 
 // Helper types for principal activity summary - NEW TYPES FOR STAGE 1
-export type PrincipalActivitySummary = Tables<'principal_activity_summary'>
-export type PrincipalActivityStats = Database['public']['Functions']['get_principal_activity_stats']['Returns'][0]
+// Note: PrincipalActivitySummary and PrincipalActivityStats are defined as interfaces below with more detailed typing
+// export type PrincipalActivitySummary = Tables<'principal_activity_summary'>
+// export type PrincipalActivityStats = Database['public']['Functions']['get_principal_activity_stats']['Returns'][0]
 
 // Legacy compatibility types - keeping existing types intact
 export type UserSubmission = Tables<'user_submissions'>
@@ -2495,6 +2496,45 @@ export type TimelineActivityType = 'CONTACT_UPDATE' | 'INTERACTION' | 'OPPORTUNI
 export type Contact = Tables<'contacts'>
 export type ContactInsert = TablesInsert<'contacts'>
 export type ContactUpdate = TablesUpdate<'contacts'>
+export type ContactListView = Views<'contact_list_view'>
+export type ContactDetailView = Views<'contact_detail_view'>
 
-// Add missing OrganizationStatus type export
+// Add missing Organization type exports for services
 export type OrganizationStatus = Enums<'organization_status'>
+
+// Add missing Views type helper
+export type Views<
+  DefaultSchemaViewNameOrOptions extends
+    | keyof DefaultSchema["Views"]
+    | { schema: keyof DatabaseWithoutInternals },
+  ViewName extends DefaultSchemaViewNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaViewNameOrOptions["schema"]]["Views"]
+    : never = never,
+> = DefaultSchemaViewNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaViewNameOrOptions["schema"]]["Views"][ViewName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaViewNameOrOptions extends keyof DefaultSchema["Views"]
+    ? DefaultSchema["Views"][DefaultSchemaViewNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+// ===================================
+// BATCH 1: MISSING TYPE EXPORTS FOR ORGANIZATIONS.TS
+// ===================================
+
+// Add missing type aliases that other files expect
+export type OrganizationType = Database['public']['Enums']['organization_type']
+export type OrganizationSize = Database['public']['Enums']['organization_size']
+export type InteractionDirection = Database['public']['Enums']['interaction_direction']
+
+// InteractionUpdate type already defined above

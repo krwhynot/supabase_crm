@@ -1,11 +1,10 @@
-import { ref, computed, watch, reactive, type Ref } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import { debounce } from 'lodash-es'
 import type { 
   PrincipalTimelineEntry,
-  TimelineActivityType,
-  PrincipalActivitySummary,
-  TIMELINE_ACTIVITY_ICONS
+  TimelineActivityType
 } from '@/types/principal'
+import { TIMELINE_ACTIVITY_ICONS } from '@/types/principal'
 
 /**
  * =============================================================================
@@ -39,19 +38,19 @@ export interface UsePrincipalTimelineOptions {
   maxTimelineEntries?: number
   
   /**
-   * Group timeline entries by date - defaults to true
-   */
-  groupByDate?: boolean
-  
-  /**
-   * Time zone for date formatting - defaults to local
+   * Time zone for date formatting - defaults to browser timezone
    */
   timeZone?: string
   
   /**
-   * Date format for timeline display - defaults to 'MMM dd, yyyy'
+   * Date format pattern - defaults to 'MMM dd, yyyy'
    */
   dateFormat?: string
+  
+  /**
+   * Group timeline entries by date - defaults to true
+   */
+  groupByDate?: boolean
   
   /**
    * Enable timeline entry caching - defaults to true
@@ -425,6 +424,9 @@ export function usePrincipalTimeline(
     cacheDuration = 300000
   } = options
   
+  // Variables available for future timeline functionality
+  console.log('Timeline config:', { maxTimelineEntries, timeZone, dateFormat })
+  
   // ============================
   // REACTIVE STATE INITIALIZATION
   // ============================
@@ -439,7 +441,7 @@ export function usePrincipalTimeline(
     principal_ids: [],
     source_tables: [],
     activity_status: [],
-    follow_up_required: null,
+    follow_up_required: undefined,
     overdue_only: false
   })
   
@@ -989,7 +991,7 @@ export function usePrincipalTimeline(
       principal_ids: [],
       source_tables: [],
       activity_status: [],
-      follow_up_required: null,
+      follow_up_required: undefined,
       overdue_only: false
     }
     
@@ -1016,7 +1018,7 @@ export function usePrincipalTimeline(
   
   const filterByFollowUp = (required: boolean | null, overdueOnly = false): void => {
     updateFilters({ 
-      follow_up_required: required,
+      follow_up_required: required || undefined,
       overdue_only: overdueOnly
     })
   }

@@ -319,8 +319,8 @@
             <!-- Distributor Hierarchy -->
             <div class="ml-6 space-y-3">
               <div
-                v-for="distributor in filteredDistributors"
-                :key="distributor.distributor_id"
+                v-for="(distributor, distributorIndex) in filteredDistributors"
+                :key="distributor.distributor_id || `dist_${distributorIndex}`"
                 class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               >
                 <div class="flex-shrink-0">
@@ -332,20 +332,20 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <h5 class="text-sm font-medium text-gray-900 truncate">
-                        {{ distributor.organization_name }}
+                        {{ distributor.distributor_name }}
                       </h5>
                       <p class="text-sm text-gray-500">
-                        {{ formatRelationshipType(distributor.relationship_type) }} • {{ distributor.territory }}
+                        {{ formatRelationshipType(distributor.relationship_type) }} • {{ distributor.distributor_city }}, {{ distributor.distributor_state }}
                       </p>
                     </div>
                     <div class="flex items-center space-x-2 ml-4">
                       <span
                         :class="[
                           'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                          getRelationshipStatusClass(distributor.relationship_status)
+                          getRelationshipStatusClass(distributor.relationship_type)
                         ]"
                       >
-                        {{ formatRelationshipStatus(distributor.relationship_status) }}
+                        {{ formatRelationshipType(distributor.relationship_type) }}
                       </span>
                       <button
                         @click="viewDistributorDetails(distributor)"
@@ -364,9 +364,9 @@
         <!-- Table View -->
         <div v-else class="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <DistributorRelationshipTable
-            :data="filteredDistributors"
+            :relationships="filteredDistributors"
             :loading="loading"
-            :show-hierarchy="false"
+            :principal-name="selectedPrincipal?.name"
             @view-details="viewDistributorDetails"
             @edit-relationship="editRelationship"
             @remove-relationship="removeRelationship"
@@ -489,7 +489,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
+// const router = useRouter() // Available for future navigation needs
 import {
   ShareIcon,
   BuildingOfficeIcon,
@@ -517,11 +518,22 @@ import DistributorRelationshipTable from '@/components/principal/DistributorRela
 import { usePrincipalStore } from '@/stores/principalStore'
 import type { PrincipalDistributorRelationship } from '@/services/principalActivityApi'
 
+// Network Connection Interface
+interface NetworkConnection {
+  from: string
+  to: string
+  type: string
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
+
 // ===============================
 // REACTIVE STATE
 // ===============================
 
-const router = useRouter()
+// Router is available but not used in current implementation
 const route = useRoute()
 const principalStore = usePrincipalStore()
 
@@ -550,12 +562,12 @@ const principalsError = computed(() => principalStore.error)
 
 const activeContacts = computed(() => {
   return distributorsData.value.filter(d => 
-    d.relationship_status === 'active' || d.relationship_status === 'strong'
+    d.relationship_type === 'HAS_DISTRIBUTOR'
   ).length
 })
 
 const uniqueTerritories = computed(() => {
-  const territories = new Set(distributorsData.value.map(d => d.territory))
+  const territories = new Set(distributorsData.value.map(d => `${d.distributor_city}, ${d.distributor_state}`))
   return territories.size
 })
 
@@ -563,7 +575,7 @@ const daysSinceLastContact = computed(() => {
   if (!distributorsData.value.length) return 0
   
   const lastContactDates = distributorsData.value
-    .map(d => new Date(d.last_contact_date))
+    .map(d => new Date(d.distributor_last_contact || Date.now()))
     .filter(date => !isNaN(date.getTime()))
   
   if (!lastContactDates.length) return 0
@@ -575,7 +587,7 @@ const daysSinceLastContact = computed(() => {
 })
 
 const territories = computed(() => {
-  const territorySet = new Set(distributorsData.value.map(d => d.territory))
+  const territorySet = new Set(distributorsData.value.map(d => `${d.distributor_city}, ${d.distributor_state}`))
   return Array.from(territorySet).sort()
 })
 
@@ -586,15 +598,15 @@ const filteredDistributors = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(distributor =>
-      distributor.organization_name.toLowerCase().includes(query) ||
-      distributor.territory.toLowerCase().includes(query)
+      distributor.distributor_name?.toLowerCase().includes(query) ||
+      `${distributor.distributor_city}, ${distributor.distributor_state}`.toLowerCase().includes(query)
     )
   }
 
   // Apply territory filter
   if (territoryFilter.value) {
     filtered = filtered.filter(distributor =>
-      distributor.territory === territoryFilter.value
+      `${distributor.distributor_city}, ${distributor.distributor_state}` === territoryFilter.value
     )
   }
 
@@ -622,7 +634,7 @@ const relationshipStats = computed(() => {
 
 const territoryStats = computed(() => {
   const stats = distributorsData.value.reduce((acc, distributor) => {
-    const territory = distributor.territory
+    const territory = `${distributor.distributor_city}, ${distributor.distributor_state}`
     acc[territory] = (acc[territory] || 0) + 1
     return acc
   }, {} as Record<string, number>)
@@ -659,14 +671,14 @@ const networkNodes = computed(() => {
 
     nodes.push({
       id: distributor.distributor_id,
-      name: distributor.organization_name,
+      name: distributor.distributor_name || 'Unknown',
       type: distributor.relationship_type,
       x,
       y,
       size: 18,
       selected: selectedNode.value?.id === distributor.distributor_id,
-      territory: distributor.territory,
-      lastContact: distributor.last_contact_date
+      territory: `${distributor.distributor_city}, ${distributor.distributor_state}`,
+      lastContact: distributor.distributor_last_contact
     })
   })
 
@@ -674,8 +686,8 @@ const networkNodes = computed(() => {
 })
 
 const networkConnections = computed(() => {
-  const connections = []
-  const principalNode = networkNodes.value.find(node => node.type === 'principal')
+  const connections: NetworkConnection[] = []
+  const principalNode = networkNodes.value.find((node: any) => node.type === 'principal')
   
   if (!principalNode) return connections
 
@@ -745,21 +757,27 @@ const loadDistributorsData = async () => {
       'Professional Partners Corp', 'Industry Leaders Alliance', 'Prime Distribution Hub'
     ]
 
-    const territories = ['North America', 'Europe', 'Asia-Pacific', 'Latin America', 'Middle East']
     const relationshipTypes = ['direct', 'indirect', 'strategic', 'partner']
-    const relationshipStatuses = ['active', 'strong', 'developing', 'inactive']
 
     distributorsData.value = organizations.map((name, index) => ({
+      principal_id: selectedPrincipal.value?.id || `principal_${index + 1}`,
+      principal_name: `Principal ${index + 1}`,
+      principal_status: 'Active' as any,
       distributor_id: `dist_${index + 1}`,
-      organization_name: name,
-      relationship_type: relationshipTypes[Math.floor(Math.random() * relationshipTypes.length)],
-      relationship_status: relationshipStatuses[Math.floor(Math.random() * relationshipStatuses.length)],
-      territory: territories[Math.floor(Math.random() * territories.length)],
-      contact_person: `Contact Person ${index + 1}`,
-      last_contact_date: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      relationship_strength: Math.floor(Math.random() * 100),
-      notes: `Notes for ${name}`,
-      created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+      distributor_name: name,
+      distributor_status: 'Active' as any,
+      relationship_type: relationshipTypes[Math.floor(Math.random() * relationshipTypes.length)] as any,
+      principal_city: 'Sample City',
+      principal_state: 'Sample State', 
+      principal_country: 'Sample Country',
+      distributor_city: 'Distributor City',
+      distributor_state: 'Distributor State',
+      distributor_country: 'Distributor Country',
+      principal_lead_score: Math.floor(Math.random() * 100),
+      distributor_lead_score: Math.floor(Math.random() * 100),
+      principal_created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      principal_last_contact: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      distributor_last_contact: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString()
     }))
 
   } catch (err) {
@@ -786,9 +804,7 @@ const formatRelationshipType = (type: string): string => {
   return type.charAt(0).toUpperCase() + type.slice(1)
 }
 
-const formatRelationshipStatus = (status: string): string => {
-  return status.charAt(0).toUpperCase() + status.slice(1)
-}
+// Function removed as it's no longer used after interface updates
 
 const formatNodeType = (type: string): string => {
   const types: Record<string, string> = {
