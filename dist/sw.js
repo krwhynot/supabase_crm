@@ -1,2 +1,453 @@
-if(!self.define){let s,i={};const e=(e,n)=>(e=new URL(e+".js",n).href,i[e]||new Promise(i=>{if("document"in self){const s=document.createElement("script");s.src=e,s.onload=i,document.head.appendChild(s)}else s=e,importScripts(e),i()}).then(()=>{let s=i[e];if(!s)throw new Error(`Module ${e} didn’t register its module`);return s}));self.define=(n,l)=>{const r=s||("document"in self?document.currentScript.src:"")||location.href;if(i[r])return;let o={};const u=s=>e(s,r),t={module:{uri:r},exports:o,require:u};i[r]=Promise.all(n.map(s=>t[s]||u(s))).then(s=>(l(...s),o))}}define(["./workbox-13d12fd3"],function(s){"use strict";self.skipWaiting(),s.clientsClaim(),s.precacheAndRoute([{url:"assets/_plugin-vue_export-helper-DlAUqK2U.js",revision:null},{url:"assets/ArrowDownTrayIcon-CO3_VHAU.js",revision:null},{url:"assets/ArrowLeftIcon-D85BN9I7.js",revision:null},{url:"assets/ArrowPathIcon-CnFwnm_X.js",revision:null},{url:"assets/Bars3Icon-BMAqEN-8.js",revision:null},{url:"assets/BuildingOfficeIcon-DckFZ7iO.js",revision:null},{url:"assets/Button.vue_vue_type_script_setup_true_lang-DSQqAjeF.js",revision:null},{url:"assets/CalendarDaysIcon-DqOrfd2h.js",revision:null},{url:"assets/CalendarIcon-DPP_Fow2.js",revision:null},{url:"assets/ChartBarIcon-DnppHkPB.js",revision:null},{url:"assets/CheckCircleIcon-BMlci5ia.js",revision:null},{url:"assets/CheckIcon-B_41sR31.js",revision:null},{url:"assets/ChevronLeftIcon-Co16s6Lq.js",revision:null},{url:"assets/ChevronRightIcon-BkJhkfUA.js",revision:null},{url:"assets/ChevronUpIcon-OFNtXdQa.js",revision:null},{url:"assets/ClockIcon-DFcbB-sH.js",revision:null},{url:"assets/ContactCreateView-DLQjLJ3l.js",revision:null},{url:"assets/ContactDetailView-4Ekd9tmk.js",revision:null},{url:"assets/ContactEditView-BdaZ3F9F.js",revision:null},{url:"assets/contacts-BrUDII5K.js",revision:null},{url:"assets/contactsApi-ByZ-ToQh.js",revision:null},{url:"assets/ContactsListView-C-l74JJK.js",revision:null},{url:"assets/CurrencyDollarIcon-DIE48oxp.js",revision:null},{url:"assets/DashboardLayout-BpLAtjLm.css",revision:null},{url:"assets/DashboardLayout-vjzyHHak.js",revision:null},{url:"assets/DashboardLayout.vue_vue_type_script_setup_true_lang-CSI_IRkI.js",revision:null},{url:"assets/dashboardStore-BEBNMsxJ.js",revision:null},{url:"assets/DashboardView-D9S-fl8a.css",revision:null},{url:"assets/DashboardView-DjdeINMi.js",revision:null},{url:"assets/DistributorRelationshipTable-HS4SDMhu.js",revision:null},{url:"assets/DistributorRelationshipTable-PsXxCRhE.css",revision:null},{url:"assets/DocumentIcon-BsH_BoVe.js",revision:null},{url:"assets/DocumentTextIcon-BGnHhZUG.js",revision:null},{url:"assets/EllipsisVerticalIcon-2yCn1ZGi.js",revision:null},{url:"assets/EngagementScoreRing-B397Enit.css",revision:null},{url:"assets/EngagementScoreRing-BkhISJFZ.js",revision:null},{url:"assets/ExclamationTriangleIcon-BvwA24I5.js",revision:null},{url:"assets/EyeIcon-DlqmecpP.js",revision:null},{url:"assets/FunnelIcon-DBMyC3nZ.js",revision:null},{url:"assets/GlobeAltIcon-GpEjRPnI.js",revision:null},{url:"assets/index-CtjJHjR0.js",revision:null},{url:"assets/index-DFGl2XFA.css",revision:null},{url:"assets/index.esm-Do0MT1Iq.js",revision:null},{url:"assets/InformationCircleIcon-1Ldx3HPC.js",revision:null},{url:"assets/InteractionCreateView-Bo3rMN6w.js",revision:null},{url:"assets/InteractionDetailView-Bixh1ehU.js",revision:null},{url:"assets/InteractionEditView-C3T3Mx-I.js",revision:null},{url:"assets/InteractionFormWrapper-CdnVAfLO.css",revision:null},{url:"assets/InteractionFormWrapper-CzgIAhOn.js",revision:null},{url:"assets/interactions-BY6_IYFA.js",revision:null},{url:"assets/InteractionsListView-Dt781rnX.js",revision:null},{url:"assets/InteractionsListView-tn0RQdqM.css",revision:null},{url:"assets/interactionStore-BcF9J0uD.js",revision:null},{url:"assets/MagnifyingGlassIcon-C7DlFZAR.js",revision:null},{url:"assets/ManagePrincipalProductsButton-Ck4OGV8a.js",revision:null},{url:"assets/ManagePrincipalProductsButton-Dh5JS5xQ.css",revision:null},{url:"assets/ManagePrincipalProductsButton.vue_vue_type_style_index_0_scoped_f75a9cbf_lang-CgdDeQZV.js",revision:null},{url:"assets/OpportunitiesListView-DV_1TnBV.js",revision:null},{url:"assets/OpportunitiesListView-exFZeTok.css",revision:null},{url:"assets/OpportunityCreateView-B8bsQ8o0.js",revision:null},{url:"assets/OpportunityCreateView-CKNovq_f.css",revision:null},{url:"assets/OpportunityDetailView-6CNcvdG2.css",revision:null},{url:"assets/OpportunityDetailView-ZvODEd36.js",revision:null},{url:"assets/OpportunityEditView-BBjVcOKQ.js",revision:null},{url:"assets/OpportunityEditView-Cm4NQ_W4.css",revision:null},{url:"assets/OpportunityFormWrapper-BAEhQRu6.css",revision:null},{url:"assets/OpportunityFormWrapper-BavdCTUU.js",revision:null},{url:"assets/OpportunityKPICards-B1Alijf1.css",revision:null},{url:"assets/OpportunityKPICards-DXXlokUh.js",revision:null},{url:"assets/OpportunityPipelineChart-BwfMBvfP.js",revision:null},{url:"assets/opportunityStore-B1hLuFtx.js",revision:null},{url:"assets/OpportunityTable-kpDz5_tT.css",revision:null},{url:"assets/OrganizationCreateView-DS815IpB.js",revision:null},{url:"assets/OrganizationDetailView-B-gNHST9.js",revision:null},{url:"assets/OrganizationDetailView-NkvHmH09.css",revision:null},{url:"assets/OrganizationEditView-y2F4rEbL.js",revision:null},{url:"assets/organizationsApi-DotikQjO.js",revision:null},{url:"assets/OrganizationsListView-BLakDDk1.js",revision:null},{url:"assets/organizationStore-nVvH6PxL.js",revision:null},{url:"assets/PencilIcon-CubW_jF-.js",revision:null},{url:"assets/PhoneIcon--NXciUgs.js",revision:null},{url:"assets/PlusIcon-BeWH-K1A.js",revision:null},{url:"assets/PresentationChartLineIcon-BSZNkLfx.js",revision:null},{url:"assets/PrincipalAnalyticsView-Cn5m8Pgh.js",revision:null},{url:"assets/PrincipalAnalyticsView-u4XHqN_Y.css",revision:null},{url:"assets/PrincipalDashboard-C16N74pe.css",revision:null},{url:"assets/PrincipalDashboard.vue_vue_type_style_index_0_scoped_daf2c332_lang-TY93HFqY.js",revision:null},{url:"assets/PrincipalDashboardView-Dkc6vEjG.css",revision:null},{url:"assets/PrincipalDashboardView-DPYG0JHr.js",revision:null},{url:"assets/PrincipalDetailView-Bge_w82x.css",revision:null},{url:"assets/PrincipalDetailView-C9rIIn_8.js",revision:null},{url:"assets/PrincipalDistributorsView-BYnxFquH.js",revision:null},{url:"assets/PrincipalDistributorsView-Csj3vwFu.css",revision:null},{url:"assets/PrincipalKPICards-BaYahjm2.css",revision:null},{url:"assets/PrincipalKPICards-C4i8Q4qK.js",revision:null},{url:"assets/PrincipalProductsView-BCpo2VX9.css",revision:null},{url:"assets/PrincipalProductsView-DAojV4WK.js",revision:null},{url:"assets/PrincipalProductTable-GbfFDXJY.js",revision:null},{url:"assets/PrincipalSelector-B-u_V6T_.css",revision:null},{url:"assets/PrincipalSelector-Bvv7zegO.js",revision:null},{url:"assets/PrincipalsListView-2G-Q9Wyp.js",revision:null},{url:"assets/PrincipalsListView-ke9DoG09.css",revision:null},{url:"assets/principalStore-DHqEcCuF.js",revision:null},{url:"assets/ProbabilityBar-BBN_fsI2.css",revision:null},{url:"assets/ProbabilityBar-DmPSs1Xj.js",revision:null},{url:"assets/ProductDetailView-bSBatLPE.css",revision:null},{url:"assets/ProductDetailView-BZqi16du.js",revision:null},{url:"assets/products-D6Cb96df.js",revision:null},{url:"assets/ProductsListView-BGEJey41.js",revision:null},{url:"assets/ProductsListView-D7ed7G-x.css",revision:null},{url:"assets/productStore-9Dx38iZU.js",revision:null},{url:"assets/SelectField.vue_vue_type_script_setup_true_lang-C5to7vQb.js",revision:null},{url:"assets/StageTag-BnKYElHr.js",revision:null},{url:"assets/StarIcon-67I4Q3JR.js",revision:null},{url:"assets/supabaseClient-Dum322BS.js",revision:null},{url:"assets/TrashIcon-Jq4SZZzt.js",revision:null},{url:"assets/TrendIndicator-BLXHgf9y.css",revision:null},{url:"assets/TrendIndicator-CMQUPBAk.js",revision:null},{url:"assets/TrophyIcon-BzssDnry.js",revision:null},{url:"assets/TruckIcon-DAYK0suW.js",revision:null},{url:"assets/UserGroupIcon-CL3csMZ9.js",revision:null},{url:"assets/UserIcon-tEiQNHk9.js",revision:null},{url:"assets/XMarkIcon-D9bsmxiL.js",revision:null},{url:"index.html",revision:"8ebe2a979453a80c26d0272116617152"},{url:"registerSW.js",revision:"1872c500de691dce40960bb85481de07"},{url:"icons/icon-128x128.png",revision:"1401a3ce51f5f0a00a6ba605fb62a3be"},{url:"icons/icon-128x128.svg",revision:"2a7b07db2b70c05fff8d33a1d51ab12d"},{url:"icons/icon-144x144.png",revision:"fefca22aa0ddf4e45132ca5cfe1e53c1"},{url:"icons/icon-144x144.svg",revision:"29670717f135136ccd2ee091e16ca841"},{url:"icons/icon-152x152.png",revision:"51ace1c6c1d17d3e796f697d59c770a0"},{url:"icons/icon-152x152.svg",revision:"506f9dcdc69c7443b31e72ab899591f6"},{url:"icons/icon-192x192.png",revision:"1d60beeb88ecc982ddf0dcb32044af49"},{url:"icons/icon-192x192.svg",revision:"bb07d1dd95d4176c87fe5183e2d7f459"},{url:"icons/icon-384x384.png",revision:"c759fe9db25040c50b878acb6328d672"},{url:"icons/icon-384x384.svg",revision:"db8d80e994548b0e09b433cd41dc6815"},{url:"icons/icon-512x512.png",revision:"c226bd18c4b2aadfa5e62e85387a3c56"},{url:"icons/icon-512x512.svg",revision:"c41aad0486855202a2ca927137b99ffd"},{url:"icons/icon-72x72.png",revision:"fefca22aa0ddf4e45132ca5cfe1e53c1"},{url:"icons/icon-72x72.svg",revision:"e98c7e2e2baa85406f334d9efd7a4824"},{url:"icons/icon-96x96.png",revision:"fe75bdf61e5cc341b7ea637a14fb45e7"},{url:"icons/icon-96x96.svg",revision:"8fbf697b0dfd2c5116f7c58e668aeedf"},{url:"icons/quick-icon-96x96.png",revision:"fe75bdf61e5cc341b7ea637a14fb45e7"},{url:"icons/quick-icon-96x96.svg",revision:"1b62a0095b4ec5abca1de16f035ed1f8"},{url:"icons/samples-icon-96x96.png",revision:"4c1e107081729542c8495caf95e283a3"},{url:"icons/samples-icon-96x96.svg",revision:"a422f982269e0e25b7e278b6860235a5"},{url:"icons/visit-icon-96x96.png",revision:"0938273d03e37cf6a72dc9085154d4cd"},{url:"icons/visit-icon-96x96.svg",revision:"fe4e3a45074c4da9640081e30a336c3a"},{url:"manifest.webmanifest",revision:"fe2e648519a5e1dcd24f0736a4514eff"}],{}),s.registerRoute(new s.NavigationRoute(s.createHandlerBoundToURL("index.html")))});
-//# sourceMappingURL=sw.js.map
+/**
+ * Service Worker for CRM Mobile PWA
+ * Provides offline functionality, background sync, and caching
+ */
+
+const CACHE_NAME = 'crm-mobile-v1'
+const OFFLINE_CACHE = 'crm-offline-v1'
+const BACKGROUND_SYNC_TAG = 'interaction-sync'
+
+// Core app resources to cache for offline use
+const CORE_RESOURCES = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/src/main.ts',
+  '/src/App.vue',
+  // Add critical CSS and JS files that would be generated by Vite
+]
+
+// API endpoints that support offline caching
+const CACHEABLE_APIS = [
+  '/api/organizations',
+  '/api/opportunities', 
+  '/api/principals',
+  '/api/products',
+  '/api/interactions'
+]
+
+// Offline interaction queue for background sync
+let offlineInteractions = []
+
+/**
+ * Service Worker Installation
+ * Cache core resources for offline functionality
+ */
+self.addEventListener('install', event => {
+  console.log('Service Worker: Installing...')
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Service Worker: Caching core resources')
+        return cache.addAll(CORE_RESOURCES)
+      })
+      .then(() => {
+        console.log('Service Worker: Installation complete')
+        return self.skipWaiting()
+      })
+      .catch(error => {
+        console.error('Service Worker: Installation failed', error)
+      })
+  )
+})
+
+/**
+ * Service Worker Activation
+ * Clean up old caches and take control
+ */
+self.addEventListener('activate', event => {
+  console.log('Service Worker: Activating...')
+  
+  event.waitUntil(
+    caches.keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME && cacheName !== OFFLINE_CACHE) {
+              console.log('Service Worker: Deleting old cache', cacheName)
+              return caches.delete(cacheName)
+            }
+          })
+        )
+      })
+      .then(() => {
+        console.log('Service Worker: Activation complete')
+        return self.clients.claim()
+      })
+  )
+})
+
+/**
+ * Fetch Event Handler
+ * Implements offline-first strategy with cache fallback
+ */
+self.addEventListener('fetch', event => {
+  const { request } = event
+  const url = new URL(request.url)
+  
+  // Handle API requests with cache-first strategy for GET requests
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(handleApiRequest(request))
+    return
+  }
+  
+  // Handle navigation requests (pages)
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigationRequest(request))
+    return
+  }
+  
+  // Handle static assets with cache-first strategy
+  event.respondWith(handleStaticAssets(request))
+})
+
+/**
+ * Handle API requests with intelligent caching
+ */
+async function handleApiRequest(request) {
+  const url = new URL(request.url)
+  
+  try {
+    // For POST/PUT/DELETE requests while offline, queue for background sync
+    if (!navigator.onLine && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+      if (url.pathname.includes('/interactions')) {
+        await queueInteractionForSync(request)
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Interaction queued for sync when online',
+            queued: true
+          }),
+          { 
+            status: 202,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        )
+      }
+    }
+    
+    // Try network first for real-time data
+    const networkResponse = await fetch(request.clone())
+    
+    // Cache successful GET responses
+    if (request.method === 'GET' && networkResponse.ok) {
+      const cache = await caches.open(OFFLINE_CACHE)
+      cache.put(request, networkResponse.clone())
+    }
+    
+    return networkResponse
+    
+  } catch (error) {
+    console.log('Network request failed, trying cache:', error)
+    
+    // Return cached version for GET requests
+    if (request.method === 'GET') {
+      const cachedResponse = await caches.match(request)
+      if (cachedResponse) {
+        return cachedResponse
+      }
+    }
+    
+    // Return offline indicator for failed requests
+    return new Response(
+      JSON.stringify({ 
+        error: 'Offline',
+        message: 'This request requires an internet connection'
+      }),
+      { 
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+  }
+}
+
+/**
+ * Handle navigation requests with offline support
+ */
+async function handleNavigationRequest(request) {
+  try {
+    // Try network first
+    const networkResponse = await fetch(request)
+    return networkResponse
+    
+  } catch (error) {
+    // Fallback to cached index.html for SPA routing
+    const cache = await caches.open(CACHE_NAME)
+    const cachedResponse = await cache.match('/index.html')
+    
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    
+    // Last resort: offline page
+    return new Response(
+      `<!DOCTYPE html>
+      <html>
+        <head>
+          <title>CRM Mobile - Offline</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: system-ui, sans-serif; text-align: center; padding: 2rem; }
+            .offline-icon { font-size: 3rem; margin-bottom: 1rem; }
+          </style>
+        </head>
+        <body>
+          <div class="offline-icon">📱</div>
+          <h1>You're Offline</h1>
+          <p>Check your internet connection and try again.</p>
+          <button onclick="window.location.reload()">Retry</button>
+        </body>
+      </html>`,
+      {
+        status: 200,
+        headers: { 'Content-Type': 'text/html' }
+      }
+    )
+  }
+}
+
+/**
+ * Handle static assets with cache-first strategy
+ */
+async function handleStaticAssets(request) {
+  try {
+    // Try cache first for static assets
+    const cachedResponse = await caches.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    
+    // Fetch from network and cache
+    const networkResponse = await fetch(request)
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME)
+      cache.put(request, networkResponse.clone())
+    }
+    
+    return networkResponse
+    
+  } catch (error) {
+    // Return cached version if available
+    const cachedResponse = await caches.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    
+    throw error
+  }
+}
+
+/**
+ * Queue interaction for background sync
+ */
+async function queueInteractionForSync(request) {
+  const interactionData = await request.json()
+  
+  const queueItem = {
+    id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    method: request.method,
+    url: request.url,
+    data: interactionData,
+    timestamp: Date.now(),
+    headers: Object.fromEntries(request.headers.entries())
+  }
+  
+  // Store in IndexedDB for persistence
+  await storeOfflineInteraction(queueItem)
+  
+  // Register background sync
+  if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    await self.registration.sync.register(BACKGROUND_SYNC_TAG)
+  }
+}
+
+/**
+ * Background Sync Event Handler
+ * Sync queued interactions when connection is restored
+ */
+self.addEventListener('sync', event => {
+  if (event.tag === BACKGROUND_SYNC_TAG) {
+    console.log('Service Worker: Background sync triggered')
+    event.waitUntil(syncQueuedInteractions())
+  }
+})
+
+/**
+ * Sync all queued interactions
+ */
+async function syncQueuedInteractions() {
+  try {
+    const queuedInteractions = await getOfflineInteractions()
+    
+    for (const item of queuedInteractions) {
+      try {
+        const response = await fetch(item.url, {
+          method: item.method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...item.headers
+          },
+          body: JSON.stringify(item.data)
+        })
+        
+        if (response.ok) {
+          console.log('Successfully synced interaction:', item.id)
+          await removeOfflineInteraction(item.id)
+          
+          // Notify app of successful sync
+          await notifyClientsOfSync(item.id, true)
+        } else {
+          console.error('Failed to sync interaction:', item.id, response.status)
+        }
+        
+      } catch (error) {
+        console.error('Error syncing interaction:', item.id, error)
+      }
+    }
+    
+  } catch (error) {
+    console.error('Background sync failed:', error)
+  }
+}
+
+/**
+ * IndexedDB operations for offline interaction storage
+ */
+async function storeOfflineInteraction(item) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('CRMOfflineDB', 1)
+    
+    request.onerror = () => reject(request.error)
+    
+    request.onsuccess = () => {
+      const db = request.result
+      const transaction = db.transaction(['interactions'], 'readwrite')
+      const store = transaction.objectStore('interactions')
+      
+      const addRequest = store.add(item)
+      addRequest.onsuccess = () => resolve()
+      addRequest.onerror = () => reject(addRequest.error)
+    }
+    
+    request.onupgradeneeded = () => {
+      const db = request.result
+      if (!db.objectStoreNames.contains('interactions')) {
+        const store = db.createObjectStore('interactions', { keyPath: 'id' })
+        store.createIndex('timestamp', 'timestamp', { unique: false })
+      }
+    }
+  })
+}
+
+async function getOfflineInteractions() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('CRMOfflineDB', 1)
+    
+    request.onerror = () => reject(request.error)
+    
+    request.onsuccess = () => {
+      const db = request.result
+      const transaction = db.transaction(['interactions'], 'readonly')
+      const store = transaction.objectStore('interactions')
+      
+      const getAllRequest = store.getAll()
+      getAllRequest.onsuccess = () => resolve(getAllRequest.result)
+      getAllRequest.onerror = () => reject(getAllRequest.error)
+    }
+  })
+}
+
+async function removeOfflineInteraction(id) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('CRMOfflineDB', 1)
+    
+    request.onerror = () => reject(request.error)
+    
+    request.onsuccess = () => {
+      const db = request.result
+      const transaction = db.transaction(['interactions'], 'readwrite')
+      const store = transaction.objectStore('interactions')
+      
+      const deleteRequest = store.delete(id)
+      deleteRequest.onsuccess = () => resolve()
+      deleteRequest.onerror = () => reject(deleteRequest.error)
+    }
+  })
+}
+
+/**
+ * Notify app clients of sync results
+ */
+async function notifyClientsOfSync(interactionId, success) {
+  const clients = await self.clients.matchAll()
+  
+  clients.forEach(client => {
+    client.postMessage({
+      type: 'INTERACTION_SYNC_RESULT',
+      interactionId,
+      success,
+      timestamp: Date.now()
+    })
+  })
+}
+
+/**
+ * Push Notification Support
+ */
+self.addEventListener('push', event => {
+  if (event.data) {
+    const data = event.data.json()
+    
+    const options = {
+      body: data.body || 'You have a new notification',
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/badge-72x72.png',
+      tag: data.tag || 'crm-notification',
+      data: data.data || {},
+      actions: data.actions || [],
+      requireInteraction: data.requireInteraction || false
+    }
+    
+    event.waitUntil(
+      self.registration.showNotification(data.title || 'CRM Mobile', options)
+    )
+  }
+})
+
+/**
+ * Notification Click Handler
+ */
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+  
+  const clickAction = event.action
+  const notificationData = event.notification.data
+  
+  let targetUrl = '/'
+  
+  if (clickAction === 'view' && notificationData.interactionId) {
+    targetUrl = `/interactions/${notificationData.interactionId}`
+  } else if (clickAction === 'quick-add') {
+    targetUrl = '/interactions/quick'
+  }
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(clientList => {
+      // Focus existing window if available
+      for (const client of clientList) {
+        if (client.url === new URL(targetUrl, self.location.origin).href && 'focus' in client) {
+          return client.focus()
+        }
+      }
+      
+      // Open new window
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl)
+      }
+    })
+  )
+})
+
+console.log('Service Worker: Loaded and ready for CRM Mobile PWA')

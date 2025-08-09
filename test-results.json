@@ -1,0 +1,4 @@
+
+> supabase-project@0.1.0 test:e2e
+> npx playwright test tests/opportunity-management.spec.ts tests/opportunity-integration.spec.ts tests/opportunity-store.spec.ts --reporter=json
+

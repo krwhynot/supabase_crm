@@ -119,12 +119,14 @@ export type Database = {
         Row: {
           account_manager: string | null
           address: string | null
+          advocacy_status: Database["public"]["Enums"]["advocacy_status"] | null
           city: string | null
           created_at: string | null
           created_by: string | null
           email: string | null
           first_name: string
           id: string
+          is_key_contact: boolean | null
           is_primary: boolean | null
           last_name: string
           notes: string | null
@@ -139,12 +141,14 @@ export type Database = {
         Insert: {
           account_manager?: string | null
           address?: string | null
+          advocacy_status?: Database["public"]["Enums"]["advocacy_status"] | null
           city?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
           first_name: string
           id?: string
+          is_key_contact?: boolean | null
           is_primary?: boolean | null
           last_name: string
           notes?: string | null
@@ -159,12 +163,14 @@ export type Database = {
         Update: {
           account_manager?: string | null
           address?: string | null
+          advocacy_status?: Database["public"]["Enums"]["advocacy_status"] | null
           city?: string | null
           created_at?: string | null
           created_by?: string | null
           email?: string | null
           first_name?: string
           id?: string
+          is_key_contact?: boolean | null
           is_primary?: boolean | null
           last_name?: string
           notes?: string | null
@@ -1376,6 +1382,7 @@ export type Database = {
         Row: {
           account_manager: string | null
           address: string | null
+          advocacy_status: Database["public"]["Enums"]["advocacy_status"] | null
           city: string | null
           created_at: string | null
           created_by: string | null
@@ -1383,6 +1390,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string | null
+          is_key_contact: boolean | null
           is_primary: boolean | null
           last_name: string | null
           notes: string | null
@@ -1925,6 +1933,12 @@ export type Database = {
       }
     }
     Enums: {
+      advocacy_status:
+        | "Champion"
+        | "Supporter"
+        | "Neutral"
+        | "Skeptic"
+        | "Blocker"
       interaction_direction: "Inbound" | "Outbound"
       interaction_outcome:
         | "POSITIVE"
@@ -1986,6 +2000,7 @@ export type Database = {
         | "Dairy"
         | "Bakery"
         | "Other"
+      sentiment: "Positive" | "Neutral" | "Negative"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2113,6 +2128,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      advocacy_status: [
+        "Champion",
+        "Supporter",
+        "Neutral",
+        "Skeptic",
+        "Blocker",
+      ],
       interaction_direction: ["Inbound", "Outbound"],
       interaction_outcome: [
         "POSITIVE",
@@ -2181,6 +2203,7 @@ export const Constants = {
         "Bakery",
         "Other",
       ],
+      sentiment: ["Positive", "Neutral", "Negative"],
     },
   },
 } as const

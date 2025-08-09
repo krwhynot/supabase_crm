@@ -33,6 +33,17 @@ export const POSITION_OPTIONS = [
   'Food Service Director'
 ] as const
 
+/**
+ * Advocacy status options for contact relationships
+ */
+export const ADVOCACY_STATUS_OPTIONS = [
+  'Champion',
+  'Supporter',
+  'Neutral',
+  'Skeptic',
+  'Blocker'
+] as const
+
 
 /**
  * Contact creation validation schema - Updated for Kitchen Pantry CRM
@@ -136,6 +147,17 @@ export const contactCreateSchema = yup.object({
   is_primary: yup
     .boolean()
     .nullable()
+    .default(false),
+
+  advocacy_status: yup
+    .string()
+    .nullable()
+    .oneOf([...ADVOCACY_STATUS_OPTIONS, null], 'Invalid advocacy status')
+    .default('Neutral'),
+
+  is_key_contact: yup
+    .boolean()
+    .nullable()
     .default(false)
 })
 
@@ -234,6 +256,16 @@ export const contactUpdateSchema = yup.object({
   is_primary: yup
     .boolean()
     .nullable()
+    .default(false),
+
+  advocacy_status: yup
+    .string()
+    .nullable()
+    .oneOf([...ADVOCACY_STATUS_OPTIONS, null], 'Invalid advocacy status'),
+
+  is_key_contact: yup
+    .boolean()
+    .nullable()
     .default(false)
 })
 
@@ -277,7 +309,7 @@ export const contactStepOneSchema = contactCreateSchema.pick([
 
 // Step 2: Contact Details (All optional) - formerly Step 3
 export const contactStepThreeSchema = contactCreateSchema.pick([
-  'address', 'city', 'state', 'zip_code', 'website', 'account_manager', 'notes', 'is_primary'
+  'address', 'city', 'state', 'zip_code', 'website', 'account_manager', 'notes', 'is_primary', 'advocacy_status', 'is_key_contact'
 ])
 
 /**
@@ -513,7 +545,9 @@ export class ContactValidator {
       website: form.website,
       account_manager: form.account_manager,
       notes: form.notes,
-      is_primary: form.is_primary || false
+      is_primary: form.is_primary || false,
+      advocacy_status: form.advocacy_status || 'Neutral',
+      is_key_contact: form.is_key_contact || false
     }
   }
 
@@ -537,6 +571,8 @@ export class ContactValidator {
     if (form.account_manager !== undefined) update.account_manager = form.account_manager
     if (form.notes !== undefined) update.notes = form.notes
     if (form.is_primary !== undefined) update.is_primary = form.is_primary
+    if (form.advocacy_status !== undefined) update.advocacy_status = form.advocacy_status
+    if (form.is_key_contact !== undefined) update.is_key_contact = form.is_key_contact
     
     return update
   }
@@ -559,7 +595,9 @@ export class ContactValidator {
       website: contact.website,
       account_manager: contact.account_manager,
       notes: contact.notes,
-      is_primary: contact.is_primary
+      is_primary: contact.is_primary,
+      advocacy_status: contact.advocacy_status,
+      is_key_contact: contact.is_key_contact
     }
   }
 }
@@ -740,3 +778,4 @@ export const contactListUtils = {
 
 // Type exports for external use
 export type PositionOption = typeof POSITION_OPTIONS[number]
+export type AdvocacyStatusOption = typeof ADVOCACY_STATUS_OPTIONS[number]

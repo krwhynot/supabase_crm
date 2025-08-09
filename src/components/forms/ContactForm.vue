@@ -214,13 +214,40 @@
             @blur="validateField('notes')"
           />
 
-          <!-- Primary Contact Checkbox -->
-          <CheckboxField
-            v-model="formData.is_primary"
-            name="is_primary"
-            label="Primary Contact"
-            description="Mark this as the primary contact for the organization"
-          />
+          <!-- Relationship Fields -->
+          <div class="space-y-4 bg-blue-50 rounded-lg p-4">
+            <h5 class="text-base font-semibold text-gray-800">Relationship Management</h5>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Advocacy Status -->
+              <SelectField
+                v-model="formData.advocacy_status"
+                name="advocacy_status"
+                label="Advocacy Status"
+                :options="advocacyStatusOptions"
+                :error="errors.advocacy_status"
+                placeholder="Select advocacy level..."
+                @blur="validateField('advocacy_status')"
+              />
+              
+              <!-- Contact Type Checkboxes -->
+              <div class="space-y-3">
+                <CheckboxField
+                  v-model="formData.is_primary"
+                  name="is_primary"
+                  label="Primary Contact"
+                  description="Main point of contact for this organization"
+                />
+                
+                <CheckboxField
+                  v-model="formData.is_key_contact"
+                  name="is_key_contact"
+                  label="Key Contact"
+                  description="Influences purchasing decisions for Principals"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -282,6 +309,7 @@ import {
   ContactUpdateForm,
   ContactValidator,
   POSITION_OPTIONS,
+  ADVOCACY_STATUS_OPTIONS,
   fieldValidators
 } from '@/types/contacts'
 import { useOrganizationStore } from '@/stores/organizationStore'
@@ -303,6 +331,8 @@ interface ContactFormData {
   account_manager: string
   notes: string
   is_primary: boolean
+  advocacy_status: string
+  is_key_contact: boolean
 }
 
 // Props
@@ -345,7 +375,9 @@ const formData = reactive<ContactFormData>({
   website: '',
   account_manager: '',
   notes: '',
-  is_primary: false
+  is_primary: false,
+  advocacy_status: 'Neutral',
+  is_key_contact: false
 })
 
 // Form errors
@@ -366,6 +398,8 @@ if (props.isEditing && props.contact) {
     website: contactData.website || '',
     account_manager: contactData.account_manager || '',
     notes: contactData.notes || '',
+    advocacy_status: contactData.advocacy_status || 'Neutral',
+    is_key_contact: contactData.is_key_contact || false
   })
 }
 
@@ -389,6 +423,19 @@ const organizationOptions = computed(() => {
 const positionOptions = ref<Array<{value: string, label: string}>>([
   ...POSITION_OPTIONS.map(pos => ({ value: pos, label: pos }))
 ])
+
+// Advocacy status options for dropdown
+const advocacyStatusOptions = computed(() => {
+  return ADVOCACY_STATUS_OPTIONS.map(status => ({
+    value: status,
+    label: status,
+    subtitle: status === 'Champion' ? 'Strong advocate' : 
+              status === 'Supporter' ? 'Generally supportive' :
+              status === 'Neutral' ? 'No strong opinion' :
+              status === 'Skeptic' ? 'Needs convincing' :
+              status === 'Blocker' ? 'Actively opposes' : undefined
+  }))
+})
 
 
 
@@ -415,6 +462,13 @@ const validateField = async (fieldName: string) => {
     } else if (fieldName === 'website') {
       const error = fieldValidators.website(value as string)
       errors[fieldName] = error || ''
+    } else if (fieldName === 'advocacy_status') {
+      // Advocacy status validation
+      if (value && !ADVOCACY_STATUS_OPTIONS.includes(value as any)) {
+        errors[fieldName] = 'Invalid advocacy status'
+      } else {
+        errors[fieldName] = ''
+      }
     } else {
       // For other optional text fields
       const error = fieldValidators.optionalText(value as string, fieldName.replace('_', ' '))
@@ -447,7 +501,9 @@ const handleSubmit = async () => {
       website: formData.website || null,
       account_manager: formData.account_manager || null,
       notes: formData.notes || null,
-      is_primary: formData.is_primary
+      is_primary: formData.is_primary,
+      advocacy_status: formData.advocacy_status,
+      is_key_contact: formData.is_key_contact
     }
     
     // Validate converted data
@@ -499,7 +555,20 @@ onMounted(async () => {
 watch(() => props.contact, (newContact) => {
   if (newContact && props.isEditing) {
     const contactData = ContactValidator.contactToForm(newContact)
-    Object.assign(formData, contactData)
+    Object.assign(formData, {
+      ...contactData,
+      phone: contactData.phone || '',
+      email: contactData.email || '',
+      address: contactData.address || '',
+      city: contactData.city || '',
+      state: contactData.state || '',
+      zip_code: contactData.zip_code || '',
+      website: contactData.website || '',
+      account_manager: contactData.account_manager || '',
+      notes: contactData.notes || '',
+      advocacy_status: contactData.advocacy_status || 'Neutral',
+      is_key_contact: contactData.is_key_contact || false
+    })
   }
 }, { deep: true })
 </script>

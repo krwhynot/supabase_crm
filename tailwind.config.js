@@ -4,6 +4,14 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  // Aggressive purge configuration for smaller CSS bundles
+  safelist: [
+    // Only keep classes that are dynamically generated
+    {
+      pattern: /^(bg|text|border)-(red|green|blue|yellow|gray)-(50|100|500|600|700)$/,
+      variants: ['hover', 'focus', 'active']
+    }
+  ],
   theme: {
     extend: {
       colors: {

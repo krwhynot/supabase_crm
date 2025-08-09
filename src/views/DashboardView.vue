@@ -29,7 +29,7 @@
       <!-- Opportunity KPIs -->
       <div class="mb-6">
         <h3 class="text-lg font-medium text-gray-800 mb-3">Sales Pipeline</h3>
-        <OpportunityKPICards :loading="opportunityStore.isLoading" />
+        <OpportunityKPICardsLazy :loading="opportunityStore.isLoading" />
       </div>
       
       <!-- Interaction KPIs -->
@@ -224,7 +224,7 @@ import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { useOpportunityStore } from '@/stores/opportunityStore'
 import { useInteractionStore } from '@/stores/interactionStore'
-import OpportunityKPICards from '@/components/opportunities/OpportunityKPICards.vue'
+import OpportunityKPICardsLazy from '@/components/opportunities/OpportunityKPICardsLazy.vue'
 // import InteractionKPICards from '@/components/interactions/InteractionKPICards.vue'
 // import RecentInteractionsCard from '@/components/interactions/RecentInteractionsCard.vue'
 import type { OpportunityListView } from '@/types/opportunities'
@@ -315,13 +315,29 @@ const formatRelativeDate = (dateString: string): string => {
   }
 }
 
-// Initialize dashboard
+// Initialize dashboard with optimized loading
 onMounted(async () => {
-  // Initialize stores first
+  // Start non-blocking initialization
   dashboardStore.initializeDashboard()
   
-  // Then refresh all data
-  await refreshDashboard()
+  // Load critical data first (opportunity KPIs) with priority
+  try {
+    await opportunityStore.fetchKPIs()
+  } catch (error) {
+    console.error('Failed to load critical dashboard data:', error)
+  }
+  
+  // Load remaining data asynchronously without blocking UI
+  setTimeout(async () => {
+    try {
+      await Promise.allSettled([
+        interactionStore.fetchKPIs(),
+        dashboardStore.refreshDashboard()
+      ])
+    } catch (error) {
+      console.error('Failed to load secondary dashboard data:', error)
+    }
+  }, 100) // Small delay to allow UI to render first
 })
 </script>
 

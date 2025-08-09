@@ -9,16 +9,17 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'Dashboard',
-        component: () => import('@/views/DashboardView.vue'),
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/DashboardView.vue'),
         meta: {
           title: 'Dashboard',
-          description: 'Your CRM dashboard'
+          description: 'Your CRM dashboard',
+          preload: true
         }
       },
       {
         path: 'contacts',
         name: 'ContactsList',
-        component: () => import('@/views/contacts/ContactsListView.vue'),
+        component: () => import(/* webpackChunkName: "contacts" */ '@/views/contacts/ContactsListView.vue'),
         meta: {
           title: 'Contacts',
           description: 'Manage your professional contacts'
@@ -27,7 +28,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'contacts/new',
         name: 'ContactCreate',
-        component: () => import('@/views/contacts/ContactCreateView.vue'),
+        component: () => import(/* webpackChunkName: "contacts" */ '@/views/contacts/ContactCreateView.vue'),
         meta: {
           title: 'New Contact',
           description: 'Add a new contact to your CRM'
@@ -36,7 +37,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'contacts/:id',
         name: 'ContactDetail',
-        component: () => import('@/views/contacts/ContactDetailView.vue'),
+        component: () => import(/* webpackChunkName: "contacts" */ '@/views/contacts/ContactDetailView.vue'),
         props: true,
         meta: {
           title: 'Contact Details',
@@ -46,7 +47,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'contacts/:id/edit',
         name: 'ContactEdit',
-        component: () => import('@/views/contacts/ContactEditView.vue'),
+        component: () => import(/* webpackChunkName: "contacts" */ '@/views/contacts/ContactEditView.vue'),
         props: true,
         meta: {
           title: 'Edit Contact',
@@ -56,7 +57,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'organizations',
         name: 'OrganizationsList',
-        component: () => import('@/views/organizations/OrganizationsListView.vue'),
+        component: () => import(/* webpackChunkName: "organizations" */ '@/views/organizations/OrganizationsListView.vue'),
         meta: {
           title: 'Organizations',
           description: 'Manage your business organizations'
@@ -65,7 +66,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'organizations/new',
         name: 'OrganizationCreate',
-        component: () => import('@/views/organizations/OrganizationCreateView.vue'),
+        component: () => import(/* webpackChunkName: "organizations" */ '@/views/organizations/OrganizationCreateView.vue'),
         meta: {
           title: 'New Organization',
           description: 'Add a new organization to your CRM'
@@ -74,7 +75,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'organizations/:id',
         name: 'OrganizationDetail',
-        component: () => import('@/views/organizations/OrganizationDetailView.vue'),
+        component: () => import(/* webpackChunkName: "organizations" */ '@/views/organizations/OrganizationDetailView.vue'),
         props: true,
         meta: {
           title: 'Organization Details',
@@ -84,7 +85,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'organizations/:id/edit',
         name: 'OrganizationEdit',
-        component: () => import('@/views/organizations/OrganizationEditView.vue'),
+        component: () => import(/* webpackChunkName: "organizations" */ '@/views/organizations/OrganizationEditView.vue'),
         props: true,
         meta: {
           title: 'Edit Organization',
@@ -94,7 +95,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'opportunities',
         name: 'OpportunitiesList',
-        component: () => import('@/views/opportunities/OpportunitiesListView.vue'),
+        component: () => import(/* webpackChunkName: "opportunities" */ '@/views/opportunities/OpportunitiesListView.vue'),
         meta: {
           title: 'Opportunities',
           description: 'Manage your business opportunities'
@@ -103,7 +104,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'opportunities/new',
         name: 'OpportunityCreate',
-        component: () => import('@/views/opportunities/OpportunityCreateView.vue'),
+        component: () => import(/* webpackChunkName: "opportunities" */ '@/views/opportunities/OpportunityCreateView.vue'),
         meta: {
           title: 'New Opportunity',
           description: 'Add a new opportunity to your CRM'
@@ -112,7 +113,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'opportunities/:id',
         name: 'OpportunityDetail',
-        component: () => import('@/views/opportunities/OpportunityDetailView.vue'),
+        component: () => import(/* webpackChunkName: "opportunities" */ '@/views/opportunities/OpportunityDetailView.vue'),
         props: true,
         meta: {
           title: 'Opportunity Details',
@@ -122,7 +123,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'opportunities/:id/edit',
         name: 'OpportunityEdit',
-        component: () => import('@/views/opportunities/OpportunityEditView.vue'),
+        component: () => import(/* webpackChunkName: "opportunities" */ '@/views/opportunities/OpportunityEditView.vue'),
         props: true,
         meta: {
           title: 'Edit Opportunity',
@@ -132,7 +133,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'interactions',
         name: 'InteractionsList',
-        component: () => import('@/views/interactions/InteractionsListView.vue'),
+        component: () => import(/* webpackChunkName: "interactions" */ '@/views/interactions/InteractionsListView.vue'),
         meta: {
           title: 'Interactions',
           description: 'Track customer interactions and activities'
@@ -141,7 +142,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'interactions/new',
         name: 'InteractionCreate',
-        component: () => import('@/views/interactions/InteractionCreateView.vue'),
+        component: () => import(/* webpackChunkName: "interactions" */ '@/views/interactions/InteractionCreateView.vue'),
         meta: {
           title: 'New Interaction',
           description: 'Record a new customer interaction'
@@ -150,7 +151,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'interactions/:id',
         name: 'InteractionDetail',
-        component: () => import('@/views/interactions/InteractionDetailView.vue'),
+        component: () => import(/* webpackChunkName: "interactions" */ '@/views/interactions/InteractionDetailView.vue'),
         props: true,
         meta: {
           title: 'Interaction Details',
@@ -160,7 +161,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'interactions/:id/edit',
         name: 'InteractionEdit',
-        component: () => import('@/views/interactions/InteractionEditView.vue'),
+        component: () => import(/* webpackChunkName: "interactions" */ '@/views/interactions/InteractionEditView.vue'),
         props: true,
         meta: {
           title: 'Edit Interaction',
@@ -170,7 +171,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals',
         name: 'PrincipalsList',
-        component: () => import('@/views/principals/PrincipalsListView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalsListView.vue'),
         meta: {
           title: 'Principals',
           description: 'Manage principal relationships and activities'
@@ -179,7 +180,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals/dashboard',
         name: 'PrincipalDashboard',
-        component: () => import('@/views/principals/PrincipalDashboardView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalDashboardView.vue'),
         meta: {
           title: 'Principal Dashboard',
           description: 'Comprehensive principal activity analytics and insights'
@@ -188,7 +189,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals/:id',
         name: 'PrincipalDetail',
-        component: () => import('@/views/principals/PrincipalDetailView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalDetailView.vue'),
         props: true,
         meta: {
           title: 'Principal Details',
@@ -198,7 +199,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals/:id/analytics',
         name: 'PrincipalAnalytics',
-        component: () => import('@/views/principals/PrincipalAnalyticsView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalAnalyticsView.vue'),
         props: true,
         meta: {
           title: 'Principal Analytics',
@@ -208,7 +209,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals/:id/products',
         name: 'PrincipalProducts',
-        component: () => import('@/views/principals/PrincipalProductsView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalProductsView.vue'),
         props: true,
         meta: {
           title: 'Principal Products',
@@ -218,7 +219,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'principals/:id/distributors',
         name: 'PrincipalDistributors',
-        component: () => import('@/views/principals/PrincipalDistributorsView.vue'),
+        component: () => import(/* webpackChunkName: "principals" */ '@/views/principals/PrincipalDistributorsView.vue'),
         props: true,
         meta: {
           title: 'Principal Distributors',
@@ -228,7 +229,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'products',
         name: 'ProductsList',
-        component: () => import('@/views/products/ProductsListView.vue'),
+        component: () => import(/* webpackChunkName: "products" */ '@/views/products/ProductsListView.vue'),
         meta: {
           title: 'Products',
           description: 'Manage your product catalog and principal assignments'
@@ -247,7 +248,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'products/:id',
         name: 'ProductDetail',
-        component: () => import('@/views/products/ProductDetailView.vue'),
+        component: () => import(/* webpackChunkName: "products" */ '@/views/products/ProductDetailView.vue'),
         props: true,
         meta: {
           title: 'Product Details',
