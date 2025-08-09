@@ -15,7 +15,7 @@
 import { test, expect } from '@playwright/test'
 
 // Use the correct port from our running development server
-const BASE_URL = 'http://localhost:3002'
+const BASE_URL = 'http://localhost:3000'
 
 test.describe('Comprehensive QA Validation', () => {
   

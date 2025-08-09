@@ -502,7 +502,7 @@ const handleSubmit = async () => {
       account_manager: formData.account_manager || null,
       notes: formData.notes || null,
       is_primary: formData.is_primary,
-      advocacy_status: formData.advocacy_status,
+      advocacy_status: formData.advocacy_status as "Champion" | "Supporter" | "Neutral" | "Skeptic" | "Blocker" | null,
       is_key_contact: formData.is_key_contact
     }
     

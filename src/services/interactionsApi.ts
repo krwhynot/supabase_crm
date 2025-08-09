@@ -163,7 +163,7 @@ class InteractionsApiService {
       }
 
       // Transform data to InteractionListView format
-      const interactions: InteractionListView[] = data?.map(interaction => ({
+      const interactions: InteractionListView[] = data?.map((interaction: any) => ({
         id: interaction.id,
         type: interaction.type as InteractionType,
         subject: interaction.subject,
@@ -260,7 +260,7 @@ class InteractionsApiService {
         }
       }
 
-      const interactions: InteractionListView[] = data?.map(interaction => ({
+      const interactions: InteractionListView[] = data?.map((interaction: any) => ({
         id: interaction.id,
         type: interaction.type as InteractionType,
         subject: interaction.subject,
@@ -622,14 +622,14 @@ class InteractionsApiService {
         .not('rating', 'is', null)
         .is('deleted_at', null)
 
-      const ratings = ratingData?.map(r => r.rating).filter(r => r !== null) || []
-      const durations = ratingData?.map(r => r.duration_minutes).filter(d => d !== null) || []
+      const ratings = ratingData?.map((r: any) => r.rating).filter((r: any) => r !== null) || []
+      const durations = ratingData?.map((r: any) => r.duration_minutes).filter((d: any) => d !== null) || []
 
       const averageRating = ratings.length > 0 ? 
-        ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0
+        ratings.reduce((sum: number, rating: number) => sum + rating, 0) / ratings.length : 0
 
       const averageDuration = durations.length > 0 ? 
-        durations.reduce((sum, duration) => sum + duration, 0) / durations.length : 0
+        durations.reduce((sum: number, duration: number) => sum + duration, 0) / durations.length : 0
 
       // Get most common type
       const { data: typeData } = await supabase
@@ -638,7 +638,7 @@ class InteractionsApiService {
         .is('deleted_at', null)
 
       const typeCounts: { [key: string]: number } = {}
-      typeData?.forEach(item => {
+      typeData?.forEach((item: any) => {
         typeCounts[item.type] = (typeCounts[item.type] || 0) + 1
       })
 
@@ -731,7 +731,7 @@ class InteractionsApiService {
         }
       }
 
-      const interactions: InteractionListView[] = data?.map(interaction => ({
+      const interactions: InteractionListView[] = data?.map((interaction: any) => ({
         id: interaction.id,
         type: interaction.type as InteractionType,
         subject: interaction.subject,
@@ -817,7 +817,7 @@ class InteractionsApiService {
         }
       }
 
-      const interactions: InteractionListView[] = data?.map(interaction => ({
+      const interactions: InteractionListView[] = data?.map((interaction: any) => ({
         id: interaction.id,
         type: interaction.type as InteractionType,
         subject: interaction.subject,

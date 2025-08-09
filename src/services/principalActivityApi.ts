@@ -261,7 +261,7 @@ class PrincipalActivityApiService {
         }
         
         // Transform and validate data safely
-        const validData: PrincipalActivitySummary[] = (data || []).map(item => {
+        const validData: PrincipalActivitySummary[] = (data || []).map((item: any) => {
           // Handle SelectQueryError by providing default values
           if (!item || typeof item !== 'object') {
             return {} as PrincipalActivitySummary

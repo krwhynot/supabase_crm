@@ -381,8 +381,8 @@ export const useOrganizationStore = defineStore('organization', () => {
         } else {
           // Extract organizations from contact relationships
           organizationsFromContacts = (contactPrincipalData || [])
-            .map(cp => (cp.contacts as any)?.organizations)
-            .filter(org => org)
+            .map((cp: any) => (cp.contacts as any)?.organizations)
+            .filter((org: any) => org)
         }
       }
       
@@ -566,7 +566,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform data to OrganizationListItem format using full organization data
-      const transformedData: OrganizationListItem[] = (data || []).map(item => ({
+      const transformedData: OrganizationListItem[] = (data || []).map((item: any) => ({
         id: item.id || '',
         name: item.name || '',
         legal_name: item.legal_name,
@@ -683,13 +683,13 @@ export const useOrganizationStore = defineStore('organization', () => {
         contact_count: contactsResult.data?.length || 0,
         interaction_count: interactionsResult.data?.length || 0,
         document_count: documentsResult.data?.length || 0,
-        recent_interactions: (interactionsResult.data || []).map(interaction => ({
+        recent_interactions: (interactionsResult.data || []).map((interaction: any) => ({
           id: interaction.id,
           type: interaction.type,
           subject: interaction.subject,
           interaction_date: interaction.interaction_date,
-          contact_name: contactsResult.data?.find(c => c.id === interaction.contact_id)
-            ? `${contactsResult.data.find(c => c.id === interaction.contact_id)?.first_name} ${contactsResult.data.find(c => c.id === interaction.contact_id)?.last_name}`
+          contact_name: contactsResult.data?.find((c: any) => c.id === interaction.contact_id)
+            ? `${contactsResult.data.find((c: any) => c.id === interaction.contact_id)?.first_name} ${contactsResult.data.find((c: any) => c.id === interaction.contact_id)?.last_name}`
             : undefined
         }))
       }
@@ -1274,9 +1274,9 @@ export const useOrganizationStore = defineStore('organization', () => {
       const monthResult = await supabase.from('organizations').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString())
       
       // Calculate metrics
-      const totalRevenue = revenueResult.data?.reduce((sum, org) => sum + (org.annual_revenue || 0), 0) || 0
+      const totalRevenue = revenueResult.data?.reduce((sum: number, org: any) => sum + (org.annual_revenue || 0), 0) || 0
       const averageLeadScore = revenueResult.data?.length 
-        ? revenueResult.data.reduce((sum, org) => sum + (org.lead_score || 0), 0) / revenueResult.data.length
+        ? revenueResult.data.reduce((sum: number, org: any) => sum + (org.lead_score || 0), 0) / revenueResult.data.length
         : 0
       
       const metrics: OrganizationMetrics = {
@@ -1350,7 +1350,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       
       if (principalError) throw new Error(principalError.message)
       
-      const result = await Promise.all((principals || []).map(async (principal) => {
+      const result = await Promise.all((principals || []).map(async (principal: any) => {
         let contactCount = 0
         let primaryContact = null
         
@@ -1444,7 +1444,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         principalNames: string[]
       }>()
       
-      orgPrincipalData?.forEach(item => {
+      orgPrincipalData?.forEach((item: any) => {
         const org = (item.contacts as any)?.organizations
         const principal = (item.organizations as any)
         
@@ -1520,28 +1520,28 @@ export const useOrganizationStore = defineStore('organization', () => {
       
       // Count relationships per principal
       const principalRelationshipCounts = new Map<string, number>()
-      contactPrincipalCounts?.forEach(cp => {
+      contactPrincipalCounts?.forEach((cp: any) => {
         const count = principalRelationshipCounts.get(cp.principal_id) || 0
         principalRelationshipCounts.set(cp.principal_id, count + 1)
       })
       
       // Analyze principal-distributor relationships
       const analytics = {
-        principalDistribution: principalOrgs?.filter(org => 
+        principalDistribution: principalOrgs?.filter((org: any) => 
           (org.custom_fields as any)?.is_principal === true
         ).length || 0,
-        distributorDistribution: principalOrgs?.filter(org => 
+        distributorDistribution: principalOrgs?.filter((org: any) => 
           (org.custom_fields as any)?.is_distributor === true
         ).length || 0,
-        totalPrincipalRevenue: principalOrgs?.filter(org => 
+        totalPrincipalRevenue: principalOrgs?.filter((org: any) => 
           (org.custom_fields as any)?.is_principal === true
-        ).reduce((sum, org) => sum + (org.annual_revenue || 0), 0) || 0,
+        ).reduce((sum: number, org: any) => sum + (org.annual_revenue || 0), 0) || 0,
         averagePrincipalLeadScore: (() => {
-          const principals = principalOrgs?.filter(org => 
+          const principals = principalOrgs?.filter((org: any) => 
             (org.custom_fields as any)?.is_principal === true && org.lead_score
           ) || []
           return principals.length > 0 
-            ? principals.reduce((sum, org) => sum + (org.lead_score || 0), 0) / principals.length
+            ? principals.reduce((sum: number, org: any) => sum + (org.lead_score || 0), 0) / principals.length
             : 0
         })(),
         totalContactRelationships: contactPrincipalCounts?.length || 0,
@@ -1549,10 +1549,10 @@ export const useOrganizationStore = defineStore('organization', () => {
           ? Array.from(principalRelationshipCounts.values()).reduce((sum, count) => sum + count, 0) / principalRelationshipCounts.size
           : 0,
         topPrincipalsByRelationships: Array.from(principalRelationshipCounts.entries())
-          .sort(([,a], [,b]) => b - a)
+          .sort(([,a]: any, [,b]: any) => b - a)
           .slice(0, 10)
           .map(([principalId, count]) => {
-            const principal = principalOrgs?.find(org => org.id === principalId)
+            const principal = principalOrgs?.find((org: any) => org.id === principalId)
             return {
               id: principalId,
               name: principal?.name || 'Unknown',
@@ -1630,13 +1630,13 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Build principal summary
-      const result = (principals || []).map(principal => {
+      const result = (principals || []).map((principal: any) => {
         // Count contact relationships
-        const relationships = contactRelationships?.filter(cr => cr.principal_id === principal.id) || []
+        const relationships = contactRelationships?.filter((cr: any) => cr.principal_id === principal.id) || []
         
         // Filter by organization if specified
         const relevantRelationships = options.organizationId 
-          ? relationships.filter(r => (r.contacts as any)?.organization_id === options.organizationId)
+          ? relationships.filter((r: any) => (r.contacts as any)?.organization_id === options.organizationId)
           : relationships
         
         // Count existing opportunities if requested
@@ -1644,7 +1644,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         let lastOpportunityDate: string | null = null
         
         if (options.includeExistingOpportunities) {
-          const orgIds = relationships.map(r => (r.contacts as any)?.organization_id).filter(Boolean)
+          const orgIds = relationships.map((r: any) => (r.contacts as any)?.organization_id).filter(Boolean)
           const principalOpportunities = opportunityData.filter(opp => orgIds.includes(opp.organization_id))
           existingOpportunities = principalOpportunities.length
           
@@ -1670,8 +1670,8 @@ export const useOrganizationStore = defineStore('organization', () => {
           recommended_for_batch: recommendedForBatch
         }
       })
-      .filter(p => p.contact_relationships > 0) // Only include principals with relationships
-      .sort((a, b) => {
+      .filter((p: any) => p.contact_relationships > 0) // Only include principals with relationships
+      .sort((a: any, b: any) => {
         // Sort by recommendation, then by relationship count
         if (a.recommended_for_batch !== b.recommended_for_batch) {
           return a.recommended_for_batch ? -1 : 1
@@ -1712,7 +1712,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform basic organization data to match analytics interface
-      const transformedAnalytics: OrganizationSummaryAnalytics[] = (data || []).map(org => ({
+      const transformedAnalytics: OrganizationSummaryAnalytics[] = (data || []).map((org: any) => ({
         id: `analytics-${org.id}`,
         organization_id: org.id,
         total_opportunities: 0, // TODO: Calculate from opportunities table
@@ -1758,7 +1758,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform raw database data to match MonthlyOrganizationPerformance interface
-      const transformedPerformance: MonthlyOrganizationPerformance[] = (data || []).map((row, index) => ({
+      const transformedPerformance: MonthlyOrganizationPerformance[] = (data || []).map((row: any, index: any) => ({
         id: `perf-${index}-${Date.now()}`,
         organization_id: row.id,
         month: new Date(row.updated_at || new Date()).toISOString().substring(0, 7),
@@ -1803,7 +1803,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform raw database data to match OrganizationLeadScoring interface  
-      const transformedLeadScoring: OrganizationLeadScoring[] = (data || []).map((row, index) => ({
+      const transformedLeadScoring: OrganizationLeadScoring[] = (data || []).map((row: any, index: any) => ({
         id: `lead-${index}-${Date.now()}`,
         organization_id: row.id || `org-${index}`,
         lead_score: row.lead_score || 0,
@@ -1852,7 +1852,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform data to match expected OrganizationInteraction interface
-      const transformedData: OrganizationInteraction[] = (data || []).map(item => ({
+      const transformedData: OrganizationInteraction[] = (data || []).map((item: any) => ({
         id: item.id,
         organization_id: item.organization_id,
         interaction_type: 'Other', // Default since this field doesn't exist in source table
@@ -1958,7 +1958,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       }
       
       // Transform data to match expected OrganizationDocument interface
-      const transformedData: OrganizationDocument[] = (data || []).map(item => ({
+      const transformedData: OrganizationDocument[] = (data || []).map((item: any) => ({
         id: item.id,
         organization_id: item.organization_id,
         document_name: (item as any).title || 'Unnamed Document',

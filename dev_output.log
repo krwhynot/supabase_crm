@@ -3,18 +3,109 @@
 > vite
 
 Port 3000 is in use, trying another one...
-Port 3001 is in use, trying another one...
-Port 3002 is in use, trying another one...
 
-  VITE v5.4.19  ready in 2473 ms
+  VITE v5.4.19  ready in 2547 ms
 
-  ➜  Local:   http://localhost:3003/
+  ➜  Local:   http://localhost:3001/
   ➜  Network: use --host to expose
-5:47:00 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
-5:47:10 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
-5:47:15 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
-5:47:21 PM [vite] page reload src/components/opportunities/OpportunityTable.vue
-5:47:41 PM [vite] page reload src/stores/opportunityStore.ts
-5:48:01 PM [vite] page reload src/stores/opportunityStore.ts
-5:48:12 PM [vite] page reload src/stores/opportunityStore.ts
-5:48:21 PM [vite] page reload src/stores/opportunityStore.ts
+4:51:19 PM [vite] page reload playwright-report/index.html
+4:51:33 PM [vite] page reload playwright-report/index.html
+4:51:33 PM [vite] page reload playwright-report/index.html
+4:53:37 PM [vite] page reload screenshots/.playwright-artifacts-0/traces/resources/5fae834b44cf90f35d7cc8f393035a1317086343.html
+4:53:42 PM [vite] page reload screenshots/.playwright-artifacts-0/traces/resources/5fae834b44cf90f35d7cc8f393035a1317086343.html
+4:53:42 PM [vite] page reload playwright-report/index.html
+4:54:40 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue
+4:54:56 PM [vite] page reload playwright-report/index.html
+4:55:08 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue
+4:55:23 PM [vite] page reload playwright-report/index.html
+4:55:23 PM [vite] page reload playwright-report/index.html
+4:55:47 PM [vite] page reload screenshots/.playwright-artifacts-1/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:55:47 PM [vite] page reload screenshots/.playwright-artifacts-1/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:55:48 PM [vite] page reload screenshots/.playwright-artifacts-0/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:55:55 PM [vite] page reload screenshots/.playwright-artifacts-0/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:55:58 PM [vite] page reload screenshots/.playwright-artifacts-2/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:55:58 PM [vite] page reload screenshots/.playwright-artifacts-2/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:01 PM [vite] page reload screenshots/.playwright-artifacts-1/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:04 PM [vite] page reload screenshots/.playwright-artifacts-2/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:06 PM [vite] page reload screenshots/.playwright-artifacts-3/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:06 PM [vite] page reload screenshots/.playwright-artifacts-3/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:09 PM [vite] page reload screenshots/.playwright-artifacts-4/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:09 PM [vite] page reload screenshots/.playwright-artifacts-4/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:15 PM [vite] page reload screenshots/.playwright-artifacts-4/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:16 PM [vite] page reload screenshots/.playwright-artifacts-3/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:18 PM [vite] page reload screenshots/.playwright-artifacts-5/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:18 PM [vite] page reload screenshots/.playwright-artifacts-5/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:20 PM [vite] page reload screenshots/.playwright-artifacts-6/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:20 PM [vite] page reload screenshots/.playwright-artifacts-6/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:30 PM [vite] page reload screenshots/.playwright-artifacts-5/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:31 PM [vite] page reload screenshots/.playwright-artifacts-6/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:36 PM [vite] page reload screenshots/.playwright-artifacts-7/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:37 PM [vite] page reload screenshots/.playwright-artifacts-8/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:41 PM [vite] page reload screenshots/.playwright-artifacts-7/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:46 PM [vite] page reload screenshots/.playwright-artifacts-9/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:46 PM [vite] page reload screenshots/.playwright-artifacts-9/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:48 PM [vite] page reload screenshots/.playwright-artifacts-8/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:54 PM [vite] page reload screenshots/.playwright-artifacts-10/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:56:54 PM [vite] page reload screenshots/.playwright-artifacts-10/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:57:01 PM [vite] page reload screenshots/.playwright-artifacts-9/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:57:04 PM [vite] page reload screenshots/.playwright-artifacts-10/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:57:05 PM [vite] page reload screenshots/.playwright-artifacts-11/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:57:09 PM [vite] page reload screenshots/.playwright-artifacts-11/traces/resources/3434306baf582aafeeceb6893ddf199333d5c94a.html
+4:57:09 PM [vite] page reload playwright-report/index.html
+4:57:09 PM [vite] page reload playwright-report/index.html
+4:57:09 PM [vite] page reload playwright-report/index.html
+4:57:09 PM [vite] page reload playwright-report/trace/index.html
+4:57:09 PM [vite] page reload playwright-report/trace/snapshot.html
+4:57:09 PM [vite] page reload playwright-report/index.html
+4:57:09 PM [vite] page reload playwright-report/trace/uiMode.html
+[1m[33m[@vue/compiler-sfc][0m[33m `defineEmits` is a compiler macro and no longer needs to be imported.[0m
+
+4:59:23 PM [vite] page reload playwright-report/index.html
+4:59:23 PM [vite] page reload playwright-report/trace/index.html
+4:59:23 PM [vite] page reload playwright-report/trace/snapshot.html
+4:59:23 PM [vite] page reload playwright-report/trace/uiMode.html
+5:07:56 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue, /src/components/opportunities/PrincipalMultiSelect.vue, /src/components/interactions/InteractionListView.vue, /src/components/interactions/InteractionFormWrapper.vue, /src/views/products/ProductsListView.vue, /src/components/products/ProductTable.vue, /src/components/products/ProductKPICards.vue, /src/components/opportunities/ProductSelect.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/views/contacts/ContactsListView.vue, /src/components/forms/ContactFormWrapper.vue
+5:08:05 PM [vite] hmr update /src/assets/styles/index.css, /src/views/contacts/ContactsListView.vue, /src/components/forms/ContactFormWrapper.vue
+5:08:13 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/interactions/InteractionListView.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:08:24 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/interactions/InteractionListView.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:08:35 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/interactions/InteractionListView.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:08:43 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/interactions/InteractionListView.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:08:52 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:09:05 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:09:15 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:09:27 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:09:35 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/opportunities/OpportunitiesListView.vue, /src/components/opportunities/OpportunityKPICards.vue, /src/components/opportunities/OpportunityTable.vue, /src/components/opportunities/OpportunityFormWrapper.vue, /src/components/interactions/InteractionFormWrapper.vue
+5:09:46 PM [vite] page reload src/services/principalActivityApi.ts
+5:09:58 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/products/ProductsListView.vue, /src/components/products/ProductTable.vue, /src/components/products/ProductKPICards.vue, /src/components/opportunities/ProductSelect.vue
+5:10:07 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/products/ProductsListView.vue, /src/components/products/ProductTable.vue, /src/components/products/ProductKPICards.vue, /src/components/opportunities/ProductSelect.vue
+5:10:16 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/products/ProductsListView.vue, /src/components/products/ProductTable.vue, /src/components/products/ProductKPICards.vue, /src/components/opportunities/ProductSelect.vue
+5:10:26 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/products/ProductsListView.vue, /src/components/products/ProductTable.vue, /src/components/products/ProductKPICards.vue, /src/components/opportunities/ProductSelect.vue
+5:10:35 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:10:45 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:10:55 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:11:05 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:14:49 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:19:35 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:19:47 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:19:53 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:19:58 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:20:03 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:20:08 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:20:13 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:20:19 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:20:23 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:23 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:31 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:35 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:39 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:49 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:21:57 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:22:06 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:03 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:12 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:21 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:26 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:34 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:23:42 PM [vite] hmr update /src/assets/styles/index.css, /src/views/DashboardView.vue, /src/components/layout/DashboardLayout.vue, /src/views/organizations/OrganizationsListView.vue, /src/components/forms/ContactStepOne.vue, /src/components/modals/OrganizationCreateModal.vue
+5:25:19 PM [vite] vite.config.ts changed, restarting server...
+5:25:19 PM [vite] server restarted.

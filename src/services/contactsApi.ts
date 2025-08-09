@@ -268,7 +268,7 @@ class ContactsApiService {
         throw orgError
       }
 
-      const uniqueOrganizations = new Set(orgData?.map(item => item.organization_id)).size
+      const uniqueOrganizations = new Set(orgData?.map((item: any) => item.organization_id)).size
 
       const stats: ContactStats = {
         total: total || 0,

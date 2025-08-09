@@ -289,7 +289,9 @@ const form = reactive<ContactCreateForm>({
   website: null,
   account_manager: null,
   notes: null,
-  is_primary: false
+  is_primary: false,
+  advocacy_status: 'Neutral',
+  is_key_contact: false
 })
 
 // Validation and submission state

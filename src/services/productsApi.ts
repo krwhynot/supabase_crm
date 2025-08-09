@@ -86,7 +86,7 @@ class ProductsApiService {
       }
 
       // Transform to ProductWithPrincipals format (simplified for now)
-      const productsWithPrincipals: ProductWithPrincipals[] = (data || []).map(product => ({
+      const productsWithPrincipals: ProductWithPrincipals[] = (data || []).map((product: any) => ({
         ...product,
         is_active: product.is_active ?? true,
         category: product.category as ProductCategory | null,
@@ -132,7 +132,7 @@ class ProductsApiService {
       }
 
       // Transform to ProductOption format
-      const productOptions: ProductOption[] = (data || []).map(product => ({
+      const productOptions: ProductOption[] = (data || []).map((product: any) => ({
         id: product.id,
         name: product.name,
         category: product.category as ProductCategory | null,
@@ -351,7 +351,7 @@ class ProductsApiService {
       }
 
       // Transform the response to match ProductPrincipal interface
-      const productPrincipals: ProductPrincipal[] = (data || []).map(item => ({
+      const productPrincipals: ProductPrincipal[] = (data || []).map((item: any) => ({
         id: item.id,
         product_id: item.product_id,
         principal_id: item.principal_id,
@@ -403,7 +403,7 @@ class ProductsApiService {
       if (categoryError) throw categoryError
 
       // Count by category
-      const categoryCount = (categoryData || []).reduce((acc, item) => {
+      const categoryCount = (categoryData || []).reduce((acc: any, item: any) => {
         const category = item.category as ProductCategory | null
         if (category) {
           acc[category] = (acc[category] || 0) + 1
@@ -420,8 +420,8 @@ class ProductsApiService {
 
       if (priceError) throw priceError
 
-      const prices = (priceData || []).map(item => item.suggested_retail_price).filter(price => price !== null)
-      const averagePrice = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length : 0
+      const prices = (priceData || []).map((item: any) => item.suggested_retail_price).filter((price: any) => price !== null)
+      const averagePrice = prices.length > 0 ? prices.reduce((sum: number, price: number) => sum + price, 0) / prices.length : 0
       const minPrice = prices.length > 0 ? Math.min(...prices) : 0
       const maxPrice = prices.length > 0 ? Math.max(...prices) : 0
 
@@ -518,7 +518,7 @@ class ProductsApiService {
       }
 
       // Transform results and calculate match scores
-      const results: ProductSearchResult[] = (data || []).map(product => {
+      const results: ProductSearchResult[] = (data || []).map((product: any) => {
         const matchScore = this.calculateMatchScore(product, searchTerm)
         const highlightFields = this.getHighlightFields(product, searchTerm)
 

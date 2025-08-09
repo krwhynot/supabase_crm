@@ -148,7 +148,7 @@ export default defineConfig({
     cssMinify: true, // Use default CSS minifier instead of lightningcss
     
     // Advanced build optimizations
-    target: 'es2018', // Modern browsers only for smaller polyfills
+    target: 'esnext', // Latest JS features for modern browsers
     modulePreload: {
       polyfill: false // Disable polyfill for smaller builds
     },

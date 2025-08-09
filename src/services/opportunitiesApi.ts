@@ -105,7 +105,7 @@ class OpportunitiesApiService {
       }
 
       // Transform database result to match OpportunityListView interface
-      const opportunities: OpportunityListView[] = (data || []).map(row => {
+      const opportunities: OpportunityListView[] = (data || []).map((row: any) => {
         const createdDate = new Date(row.created_at || new Date())
         const now = new Date()
         const daysSinceCreated = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -209,7 +209,7 @@ class OpportunitiesApiService {
       }
 
       // Transform data
-      const opportunities: OpportunityListView[] = (data || []).map(row => {
+      const opportunities: OpportunityListView[] = (data || []).map((row: any) => {
         const createdDate = new Date(row.created_at || new Date())
         const now = new Date()
         const daysSinceCreated = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -416,7 +416,7 @@ class OpportunitiesApiService {
         .select('id, name')
         .in('id', formData.principal_ids)
 
-      const principalDataFormatted = (principalData || []).map(p => ({
+      const principalDataFormatted = (principalData || []).map((p: any) => ({
         id: p.id,
         name: p.name
       }))
@@ -513,7 +513,7 @@ class OpportunitiesApiService {
         .select('id, name')
         .in('id', formData.principal_ids)
 
-      const principalDataFormatted = (principalData || []).map(p => ({
+      const principalDataFormatted = (principalData || []).map((p: any) => ({
         id: p.id,
         name: p.name
       }))
@@ -645,15 +645,15 @@ class OpportunitiesApiService {
 
       // Calculate basic metrics
       const totalOpportunities = opportunities?.length || 0
-      const activeOpportunities = opportunities?.filter(opp => !opp.is_won && opp.stage !== 'Closed - Won').length || 0
-      const wonOpportunities = opportunities?.filter(opp => opp.is_won).length || 0
+      const activeOpportunities = opportunities?.filter((opp: any) => !opp.is_won && opp.stage !== 'Closed - Won').length || 0
+      const wonOpportunities = opportunities?.filter((opp: any) => opp.is_won).length || 0
       
       // Calculate average probability
-      const probabilitySum = opportunities?.reduce((sum, opp) => sum + (opp.probability_percent || 0), 0) || 0
+      const probabilitySum = opportunities?.reduce((sum: number, opp: any) => sum + (opp.probability_percent || 0), 0) || 0
       const averageProbability = totalOpportunities > 0 ? probabilitySum / totalOpportunities : 0
 
       // Calculate won this month
-      const wonThisMonth = opportunities?.filter(opp => 
+      const wonThisMonth = opportunities?.filter((opp: any) => 
         opp.is_won && opp.updated_at && new Date(opp.updated_at) >= thisMonth
       ).length || 0
 
@@ -671,20 +671,20 @@ class OpportunitiesApiService {
         'Closed - Won': 0
       } as { [K in OpportunityStage]: number }
 
-      opportunities?.forEach(opp => {
+      opportunities?.forEach((opp: any) => {
         stageDistribution[opp.stage as OpportunityStage]++
       })
 
       // Calculate recent activity
-      const createdThisWeek = opportunities?.filter(opp => 
+      const createdThisWeek = opportunities?.filter((opp: any) => 
         opp.created_at && new Date(opp.created_at) >= thisWeek
       ).length || 0
 
-      const updatedThisWeek = opportunities?.filter(opp => 
+      const updatedThisWeek = opportunities?.filter((opp: any) => 
         opp.updated_at && new Date(opp.updated_at) >= thisWeek
       ).length || 0
 
-      const closedThisWeek = opportunities?.filter(opp => 
+      const closedThisWeek = opportunities?.filter((opp: any) => 
         opp.is_won && opp.updated_at && new Date(opp.updated_at) >= thisWeek
       ).length || 0
 
