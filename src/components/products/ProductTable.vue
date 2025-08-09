@@ -135,7 +135,8 @@
           
           <tbody class="bg-white divide-y divide-gray-200">
             <!-- Loading Skeleton Rows -->
-            <tr v-if="loading && products.length === 0" v-for="n in 3" :key="`skeleton-${n}`" class="skeleton-row">
+            <template v-if="loading && products.length === 0">
+              <tr v-for="n in 3" :key="`skeleton-${n}`" class="skeleton-row">
               <td class="px-4 py-4">
                 <div class="skeleton-checkbox"></div>
               </td>
@@ -171,6 +172,7 @@
                 </div>
               </td>
             </tr>
+            </template>
             
             <!-- Delightful Empty State -->
             <tr v-if="!loading && products.length === 0" class="empty-state-row">

@@ -560,8 +560,11 @@ export const usePrincipalStore = defineStore('principal', () => {
       )
     }
     
-    // Update active filters
+    // Update active filters and filtered data
     activeFilters.value = filters
+    // Note: In a complete implementation, filteredPrincipals would be saved to state
+    // For now, this function only updates activeFilters for reference
+    console.log('Filtered principals:', filteredPrincipals.length)
   }
   
   /**

@@ -5,7 +5,7 @@
  * Analyzes production build output and generates performance metrics
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';

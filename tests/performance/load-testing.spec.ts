@@ -454,7 +454,7 @@ class LoadTestEngine {
 }
 
 test.describe('Load Testing - Concurrent Users', () => {
-  test('should handle sustained user load', async ({ page }) => {
+  test('should handle sustained user load', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Generate sustained load scenarios
@@ -484,7 +484,7 @@ test.describe('Load Testing - Concurrent Users', () => {
     expect(results.errorRate).toBeLessThan(LOAD_TESTING_THRESHOLDS.maxErrorRate)
   })
 
-  test('should handle peak user load', async ({ page }) => {
+  test('should handle peak user load', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Generate peak load scenarios
@@ -511,7 +511,7 @@ test.describe('Load Testing - Concurrent Users', () => {
     expect(results.resourceContention).toBeLessThan(0.8) // Resource contention should be manageable
   })
 
-  test('should demonstrate graceful degradation under overload', async ({ page }) => {
+  test('should demonstrate graceful degradation under overload', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Test with excessive load to trigger degradation
@@ -541,7 +541,7 @@ test.describe('Load Testing - Concurrent Users', () => {
 })
 
 test.describe('Load Testing - Resource Utilization', () => {
-  test('should monitor memory usage under load', async ({ page }) => {
+  test('should monitor memory usage under load', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Run load test with memory monitoring
@@ -575,7 +575,7 @@ test.describe('Load Testing - Resource Utilization', () => {
     }
   })
 
-  test('should validate database connection handling', async ({ page }) => {
+  test('should validate database connection handling', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Test database-intensive scenarios
@@ -607,7 +607,7 @@ test.describe('Load Testing - Resource Utilization', () => {
 })
 
 test.describe('Load Testing - Business Operation Performance', () => {
-  test('should validate critical business operations under load', async ({ page }) => {
+  test('should validate critical business operations under load', async ({ page: _ }) => {
     const engine = new LoadTestEngine(page)
     
     // Create scenarios focused on critical business operations

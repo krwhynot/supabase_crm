@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Contact Multi-Step Form - Basic Tests', () => {
-  test('should load contact creation page', async ({ page }) => {
+  test('should load contact creation page', async ({ page: _ }) => {
     await page.goto('/contacts/new');
     await page.waitForLoadState('networkidle');
     
@@ -20,7 +20,7 @@ test.describe('Contact Multi-Step Form - Basic Tests', () => {
     });
   });
 
-  test('should show form fields in step 1', async ({ page }) => {
+  test('should show form fields in step 1', async ({ page: _ }) => {
     await page.goto('/contacts/new');
     await page.waitForLoadState('networkidle');
     
@@ -36,7 +36,7 @@ test.describe('Contact Multi-Step Form - Basic Tests', () => {
     // await expect(nextButton).toBeDisabled(); // Commented out as it might be enabled by default
   });
 
-  test('should fill basic form fields', async ({ page }) => {
+  test('should fill basic form fields', async ({ page: _ }) => {
     await page.goto('/contacts/new');
     await page.waitForLoadState('networkidle');
     

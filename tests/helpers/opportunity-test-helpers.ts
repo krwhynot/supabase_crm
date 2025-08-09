@@ -374,7 +374,7 @@ export class MockAPIResponses {
     };
   }
 
-  static productsByPrincipals(principalIds: string[]) {
+  static productsByPrincipals(_principalIds: string[]) {
     // Simple logic: return all products for now
     // In real implementation, this would filter based on principal-product relationships
     return {

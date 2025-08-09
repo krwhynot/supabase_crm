@@ -1,4 +1,4 @@
-const { chromium } = require('playwright');
+import { chromium } from 'playwright';
 
 async function measureDashboardPerformance() {
   const browser = await chromium.launch();
@@ -13,7 +13,7 @@ async function measureDashboardPerformance() {
     console.log('🚀 Starting Dashboard Performance Analysis...');
     console.log('=====================================');
     
-    const response = await page.goto('http://localhost:3000', { 
+    await page.goto('http://localhost:3000', { 
       waitUntil: 'networkidle',
       timeout: 30000 
     });
@@ -29,7 +29,7 @@ async function measureDashboardPerformance() {
         largestContentfulPaint: 0
       };
       
-      if (typeof performance \!== 'undefined') {
+      if (typeof performance !== 'undefined') {
         const navigation = performance.getEntriesByType('navigation')[0];
         if (navigation) {
           metrics.domContentLoaded = navigation.domContentLoadedEventEnd - navigation.navigationStart;

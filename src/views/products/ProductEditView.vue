@@ -83,7 +83,7 @@
               enter-from-class="opacity-0 transform -translate-x-4"
               enter-to-class="opacity-100 transform translate-x-0"
             >
-              <div class="breadcrumb-wrapper">
+              <div v-show="!loading" class="breadcrumb-wrapper">
                 <BreadcrumbNavigation :items="breadcrumbItems" />
               </div>
             </Transition>
@@ -157,7 +157,7 @@
             enter-from-class="opacity-0 transform translate-y-6 scale-95"
             enter-to-class="opacity-100 transform translate-y-0 scale-100"
           >
-            <div class="form-wrapper-container bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <div v-show="!loading" class="form-wrapper-container bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
               <!-- Form Population Progress Bar -->
               <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-1">
                 <div 

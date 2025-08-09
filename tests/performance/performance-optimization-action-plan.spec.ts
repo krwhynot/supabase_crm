@@ -481,7 +481,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
   let optimizedAPI: OptimizedAPIImplementation
   let measurer: OptimizedPerformanceMeasurer
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     optimizedAPI = new OptimizedAPIImplementation(page)
     measurer = new OptimizedPerformanceMeasurer(page)
 
@@ -493,7 +493,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     await optimizedAPI.setupOptimizedRLSPolicies()
   })
 
-  test('Optimization 1: JWT Validation with Caching', async ({ page }) => {
+  test('Optimization 1: JWT Validation with Caching', async ({ page: _ }) => {
     console.log('🔐 Testing optimized JWT validation with Ed25519 + caching...')
 
     const jwtPerformance = await measurer.measureOptimizedJWTPerformance()
@@ -512,7 +512,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     expect(jwtPerformance.cacheHitRate).toBeGreaterThan(50) // Should have cache hits on repeated tokens
   })
 
-  test('Optimization 2: Database Query Performance with Indexes', async ({ page }) => {
+  test('Optimization 2: Database Query Performance with Indexes', async ({ page: _ }) => {
     console.log('🗄️ Testing optimized database queries with indexes and caching...')
 
     const dbPerformance = await measurer.measureOptimizedDatabasePerformance()
@@ -531,7 +531,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     expect(dbPerformance.indexUtilization).toBe(true)
   })
 
-  test('Optimization 3: Redis-based Rate Limiting', async ({ page }) => {
+  test('Optimization 3: Redis-based Rate Limiting', async ({ page: _ }) => {
     console.log('⚡ Testing optimized rate limiting with Redis Lua scripts...')
 
     const rateLimitPerformance = await measurer.measureOptimizedRateLimitingPerformance()
@@ -549,7 +549,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     expect(rateLimitPerformance.blockingAccuracy).toBeGreaterThan(80) // Should block excess requests
   })
 
-  test('Optimization 4: Pre-compiled Input Validation', async ({ page }) => {
+  test('Optimization 4: Pre-compiled Input Validation', async ({ page: _ }) => {
     console.log('🔍 Testing optimized input validation with pre-compiled patterns...')
 
     const validationPerformance = await measurer.measureOptimizedValidationPerformance()
@@ -568,7 +568,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     expect(validationPerformance.cacheEffectiveness).toBeGreaterThan(70) // Cache should be effective
   })
 
-  test('Optimization 5: RLS Policy Caching', async ({ page }) => {
+  test('Optimization 5: RLS Policy Caching', async ({ page: _ }) => {
     console.log('🛡️ Testing optimized RLS policies with result caching...')
 
     const rlsPerformance = await measurer.measureOptimizedRLSPerformance()
@@ -586,7 +586,7 @@ test.describe('Performance Optimization Implementation Validation', () => {
     expect(rlsPerformance.cacheHitRate).toBeGreaterThan(60) // Policy results should be cached
   })
 
-  test('Overall Optimization Impact Assessment', async ({ page }) => {
+  test('Overall Optimization Impact Assessment', async ({ page: _ }) => {
     console.log('📊 Measuring overall optimization impact...')
 
     // Collect all optimization metrics

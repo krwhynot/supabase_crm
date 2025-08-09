@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Opportunity Management - Final E2E Report', () => {
-  test('Generate comprehensive test report', async ({ page }) => {
+  test('Generate comprehensive test report', async ({ page: _ }) => {
     const results = {
       routing: {},
       layout: {},

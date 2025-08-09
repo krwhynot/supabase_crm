@@ -10,7 +10,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { writeFileSync, existsSync, readFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 // Performance report interfaces
@@ -565,7 +565,7 @@ ${analysis.recommendations.map(rec => `- ${rec}`).join('\n')}
 }
 
 test.describe('Performance Report Generation', () => {
-  test('should generate comprehensive performance analysis report', async ({ page }) => {
+  test('should generate comprehensive performance analysis report', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     
     console.log('Generating comprehensive performance analysis report...')
@@ -602,7 +602,7 @@ test.describe('Performance Report Generation', () => {
     console.log('Performance report generated successfully with', report.recommendations.length, 'recommendations')
   })
 
-  test('should provide actionable optimization recommendations', async ({ page }) => {
+  test('should provide actionable optimization recommendations', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
     
@@ -629,7 +629,7 @@ test.describe('Performance Report Generation', () => {
     console.log('All recommendations are actionable and properly prioritized')
   })
 
-  test('should establish performance monitoring benchmarks', async ({ page }) => {
+  test('should establish performance monitoring benchmarks', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
     
@@ -654,7 +654,7 @@ test.describe('Performance Report Generation', () => {
     console.log('Performance benchmarks established and validated against current metrics')
   })
 
-  test('should analyze security vs performance trade-offs', async ({ page }) => {
+  test('should analyze security vs performance trade-offs', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
     

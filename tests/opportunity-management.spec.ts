@@ -23,7 +23,8 @@ const testOrganization = {
   business_type: 'B2B'
 };
 
-const testContact = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _testContact = {
   id: 'test-contact-456',
   first_name: 'John',
   last_name: 'Doe',
@@ -352,7 +353,7 @@ class OpportunityTestHelpers {
 }
 
 test.describe('Opportunity Management - Single Opportunity Creation', () => {
-  test('should create opportunity with single principal successfully', async ({ page }) => {
+  test('should create opportunity with single principal successfully', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockOpportunityAPI();
@@ -380,7 +381,7 @@ test.describe('Opportunity Management - Single Opportunity Creation', () => {
     await page.waitForURL(/\/opportunities\/[a-f0-9-]+/);
   });
 
-  test('should validate required fields', async ({ page }) => {
+  test('should validate required fields', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -397,7 +398,7 @@ test.describe('Opportunity Management - Single Opportunity Creation', () => {
     expect(errorText).toContain('required');
   });
 
-  test('should handle manual name override', async ({ page }) => {
+  test('should handle manual name override', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -422,7 +423,7 @@ test.describe('Opportunity Management - Single Opportunity Creation', () => {
 });
 
 test.describe('Opportunity Management - Multiple Principal Batch Creation', () => {
-  test('should create opportunities for multiple principals', async ({ page }) => {
+  test('should create opportunities for multiple principals', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockBatchCreationAPI();
@@ -454,7 +455,7 @@ test.describe('Opportunity Management - Multiple Principal Batch Creation', () =
     await expect(page.locator('[data-testid="created-count"]')).toContainText('2');
   });
 
-  test('should show preview for batch creation', async ({ page }) => {
+  test('should show preview for batch creation', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockNamePreviewAPI();
@@ -479,7 +480,7 @@ test.describe('Opportunity Management - Multiple Principal Batch Creation', () =
 });
 
 test.describe('Opportunity Management - Product Filtering', () => {
-  test('should filter products based on principal selection', async ({ page }) => {
+  test('should filter products based on principal selection', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockProductFilteringAPI();
@@ -504,7 +505,7 @@ test.describe('Opportunity Management - Product Filtering', () => {
     await expect(page.locator('[role="option"]').first()).toContainText('Enterprise Software Suite');
   });
 
-  test('should show empty state when no products match principals', async ({ page }) => {
+  test('should show empty state when no products match principals', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock API to return no products
@@ -531,7 +532,7 @@ test.describe('Opportunity Management - Product Filtering', () => {
 });
 
 test.describe('Opportunity Management - Form Validation', () => {
-  test('should prevent invalid form submissions', async ({ page }) => {
+  test('should prevent invalid form submissions', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -551,7 +552,7 @@ test.describe('Opportunity Management - Form Validation', () => {
     expect(updatedErrors.some(error => error.includes('future') || error.includes('date'))).toBe(true);
   });
 
-  test('should show field-specific validation messages', async ({ page }) => {
+  test('should show field-specific validation messages', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -573,7 +574,7 @@ test.describe('Opportunity Management - Form Validation', () => {
 });
 
 test.describe('Opportunity Management - List View and Table Operations', () => {
-  test('should load opportunities list with KPIs', async ({ page }) => {
+  test('should load opportunities list with KPIs', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockKPIAPI();
@@ -596,7 +597,7 @@ test.describe('Opportunity Management - List View and Table Operations', () => {
     expect(activeValue).toBe('12');
   });
 
-  test('should support table sorting', async ({ page }) => {
+  test('should support table sorting', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToOpportunityList();
@@ -613,7 +614,7 @@ test.describe('Opportunity Management - List View and Table Operations', () => {
     await expect(page.locator('[data-sort="probability_percent"] .sort-indicator')).toBeVisible();
   });
 
-  test('should support search and filtering', async ({ page }) => {
+  test('should support search and filtering', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToOpportunityList();
@@ -635,7 +636,7 @@ test.describe('Opportunity Management - List View and Table Operations', () => {
     await expect(page.locator('[name="search"]')).toHaveValue('');
   });
 
-  test('should handle row interactions', async ({ page }) => {
+  test('should handle row interactions', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock opportunities list
@@ -683,7 +684,7 @@ test.describe('Opportunity Management - List View and Table Operations', () => {
 });
 
 test.describe('Opportunity Management - Edit and Delete Operations', () => {
-  test('should edit opportunity successfully', async ({ page }) => {
+  test('should edit opportunity successfully', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock edit APIs
@@ -741,7 +742,7 @@ test.describe('Opportunity Management - Edit and Delete Operations', () => {
     await helpers.waitForSuccessMessage();
   });
 
-  test('should delete opportunity with confirmation', async ({ page }) => {
+  test('should delete opportunity with confirmation', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock delete API
@@ -792,8 +793,9 @@ test.describe('Opportunity Management - Edit and Delete Operations', () => {
 });
 
 test.describe('Opportunity Management - Contextual Creation', () => {
-  test('should create opportunity from contact detail page', async ({ page }) => {
-    const helpers = new OpportunityTestHelpers(page);
+  test('should create opportunity from contact detail page', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _helpers = new OpportunityTestHelpers(page);
     
     // Mock contact detail page
     await page.route('**/api/contacts/test-contact-123', route => {
@@ -831,8 +833,9 @@ test.describe('Opportunity Management - Contextual Creation', () => {
     await expect(page.locator('[data-testid="creation-context"]')).toContainText('contact');
   });
 
-  test('should create opportunity from organization detail page', async ({ page }) => {
-    const helpers = new OpportunityTestHelpers(page);
+  test('should create opportunity from organization detail page', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _helpers = new OpportunityTestHelpers(page);
     
     // Mock organization detail page
     await page.route('**/api/organizations/test-org-123', route => {
@@ -871,7 +874,7 @@ test.describe('Opportunity Management - Contextual Creation', () => {
 });
 
 test.describe('Opportunity Management - KPI Calculations', () => {
-  test('should display accurate KPI calculations', async ({ page }) => {
+  test('should display accurate KPI calculations', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockKPIAPI();
@@ -890,7 +893,7 @@ test.describe('Opportunity Management - KPI Calculations', () => {
     expect(parseInt(wonThisMonth)).toBeGreaterThanOrEqual(0);
   });
 
-  test('should handle KPI card interactions', async ({ page }) => {
+  test('should handle KPI card interactions', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.mockKPIAPI();
@@ -906,7 +909,7 @@ test.describe('Opportunity Management - KPI Calculations', () => {
 });
 
 test.describe('Opportunity Management - Performance and Error Handling', () => {
-  test('should handle API errors gracefully', async ({ page }) => {
+  test('should handle API errors gracefully', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock API error
@@ -931,7 +934,7 @@ test.describe('Opportunity Management - Performance and Error Handling', () => {
     await expect(page.locator('[data-testid="retry-button"]')).toBeVisible();
   });
 
-  test('should handle network timeouts', async ({ page }) => {
+  test('should handle network timeouts', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     // Mock slow/timeout response
@@ -951,7 +954,7 @@ test.describe('Opportunity Management - Performance and Error Handling', () => {
     await expect(page.locator('[data-testid="error-message"]')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should load list page within performance requirements', async ({ page }) => {
+  test('should load list page within performance requirements', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     const startTime = Date.now();
@@ -969,7 +972,7 @@ test.describe('Opportunity Management - Performance and Error Handling', () => {
 });
 
 test.describe('Opportunity Management - Accessibility', () => {
-  test('should support keyboard navigation', async ({ page }) => {
+  test('should support keyboard navigation', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -991,7 +994,7 @@ test.describe('Opportunity Management - Accessibility', () => {
     await page.waitForTimeout(500);
   });
 
-  test('should have proper ARIA attributes', async ({ page }) => {
+  test('should have proper ARIA attributes', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToCreateOpportunity();
@@ -1009,7 +1012,7 @@ test.describe('Opportunity Management - Accessibility', () => {
     await expect(nameLabel).toBeVisible();
   });
 
-  test('should work with screen readers', async ({ page }) => {
+  test('should work with screen readers', async ({ page: _ }) => {
     const helpers = new OpportunityTestHelpers(page);
     
     await helpers.navigateToOpportunityList();

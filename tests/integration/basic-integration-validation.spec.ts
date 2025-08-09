@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
 const BASE_URL = 'http://localhost:3003'
 
 test.describe('Basic Integration Validation', () => {
-  test('Dashboard loads and displays KPI cards', async ({ page }) => {
+  test('Dashboard loads and displays KPI cards', async ({ page: _ }) => {
     await page.goto(BASE_URL)
     await page.waitForLoadState('networkidle')
     
@@ -28,7 +28,7 @@ test.describe('Basic Integration Validation', () => {
     await expect(page.locator('text=Contacts')).toBeVisible()
   })
 
-  test('Navigation between modules works', async ({ page }) => {
+  test('Navigation between modules works', async ({ page: _ }) => {
     await page.goto(BASE_URL)
     await page.waitForLoadState('networkidle')
     
@@ -54,7 +54,7 @@ test.describe('Basic Integration Validation', () => {
     await expect(page.locator('text=Dashboard')).toBeVisible()
   })
 
-  test('Interactions list displays demo data', async ({ page }) => {
+  test('Interactions list displays demo data', async ({ page: _ }) => {
     await page.goto(`${BASE_URL}/interactions`)
     await page.waitForLoadState('networkidle')
     
@@ -70,7 +70,7 @@ test.describe('Basic Integration Validation', () => {
     console.log(`Found ${rowCount} interaction rows`)
   })
 
-  test('Create interaction form is accessible', async ({ page }) => {
+  test('Create interaction form is accessible', async ({ page: _ }) => {
     await page.goto(`${BASE_URL}/interactions`)
     await page.waitForLoadState('networkidle')
     
@@ -95,7 +95,7 @@ test.describe('Basic Integration Validation', () => {
     }
   })
 
-  test('Responsive design works on mobile viewport', async ({ page }) => {
+  test('Responsive design works on mobile viewport', async ({ page: _ }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
     
@@ -111,7 +111,7 @@ test.describe('Basic Integration Validation', () => {
     console.log('Mobile responsive design validated')
   })
 
-  test('Search functionality works', async ({ page }) => {
+  test('Search functionality works', async ({ page: _ }) => {
     await page.goto(`${BASE_URL}/interactions`)
     await page.waitForLoadState('networkidle')
     
@@ -130,7 +130,7 @@ test.describe('Basic Integration Validation', () => {
     }
   })
 
-  test('Error handling displays user-friendly messages', async ({ page }) => {
+  test('Error handling displays user-friendly messages', async ({ page: _ }) => {
     await page.goto(`${BASE_URL}/interactions`)
     await page.waitForLoadState('networkidle')
     
@@ -149,7 +149,7 @@ test.describe('Basic Integration Validation', () => {
     }
   })
 
-  test('Performance: Page loads within acceptable time', async ({ page }) => {
+  test('Performance: Page loads within acceptable time', async ({ page: _ }) => {
     const startTime = Date.now()
     
     await page.goto(BASE_URL)

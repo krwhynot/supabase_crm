@@ -12,7 +12,7 @@
  * - Modal dialogs and dropdown accessibility
  */
 
-import { test, expect, devices } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
 // Test data for accessibility testing
@@ -192,7 +192,7 @@ class InteractionAccessibilityHelpers {
 
   async runAxeTest(context?: string) {
     const accessibilityResults = await this.page.evaluate(async (context) => {
-      // @ts-ignore
+      // @ts-expect-error - axe is injected by the test setup
       return await axe.run(context ? context : document)
     }, context)
 
@@ -322,13 +322,13 @@ class InteractionAccessibilityHelpers {
 test.describe('Interaction Management Accessibility - Desktop', () => {
   let helpers: InteractionAccessibilityHelpers
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     helpers = new InteractionAccessibilityHelpers(page)
     await helpers.setupAccessibilityMocks()
     await helpers.injectAxeCore()
   })
 
-  test('Interactions List View - WCAG 2.1 AA Compliance', async ({ page }) => {
+  test('Interactions List View - WCAG 2.1 AA Compliance', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -355,7 +355,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     expect(focusedElement).toBeTruthy()
   })
 
-  test('Interaction Table - Accessibility Features', async ({ page }) => {
+  test('Interaction Table - Accessibility Features', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -387,7 +387,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     expect(focusedElement).toBeTruthy()
   })
 
-  test('Interaction Creation Form - Multi-step Wizard Accessibility', async ({ page }) => {
+  test('Interaction Creation Form - Multi-step Wizard Accessibility', async ({ page: _ }) => {
     await page.goto('/interactions/new')
     await page.waitForLoadState('networkidle')
 
@@ -440,7 +440,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     }
   })
 
-  test('Voice Notes Input - Accessibility and ARIA Support', async ({ page }) => {
+  test('Voice Notes Input - Accessibility and ARIA Support', async ({ page: _ }) => {
     await page.goto('/interactions/new')
     await page.waitForLoadState('networkidle')
 
@@ -470,7 +470,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     }
   })
 
-  test('Modal Dialogs - Focus Management and ARIA', async ({ page }) => {
+  test('Modal Dialogs - Focus Management and ARIA', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -502,7 +502,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     }
   })
 
-  test('Color Contrast - WCAG AA Compliance', async ({ page }) => {
+  test('Color Contrast - WCAG AA Compliance', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -536,7 +536,7 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     }
   })
 
-  test('Keyboard Navigation - Complete Workflow', async ({ page }) => {
+  test('Keyboard Navigation - Complete Workflow', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -581,12 +581,12 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
     }
   })
 
-  test('Screen Reader Compatibility', async ({ page }) => {
+  test('Screen Reader Compatibility', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
     // Check ARIA attributes
-    const ariaElements = await helpers.checkAriaAttributes()
+    await helpers.checkAriaAttributes()
     
     // Verify important elements have proper ARIA
     const mainHeading = await page.locator('h1').first()
@@ -632,13 +632,13 @@ test.describe('Interaction Management Accessibility - Desktop', () => {
 test.describe('Interaction Management Accessibility - Mobile iPhone', () => {
   let helpers: InteractionAccessibilityHelpers
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     helpers = new InteractionAccessibilityHelpers(page)
     await helpers.setupAccessibilityMocks()
     await helpers.injectAxeCore()
   })
 
-  test('Mobile Touch Targets - WCAG AA Compliance', async ({ page }) => {
+  test('Mobile Touch Targets - WCAG AA Compliance', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -660,7 +660,7 @@ test.describe('Interaction Management Accessibility - Mobile iPhone', () => {
     }
   })
 
-  test('Mobile Voice Input - Accessibility Features', async ({ page }) => {
+  test('Mobile Voice Input - Accessibility Features', async ({ page: _ }) => {
     await page.goto('/interactions/new')
     await page.waitForLoadState('networkidle')
 
@@ -683,7 +683,7 @@ test.describe('Interaction Management Accessibility - Mobile iPhone', () => {
     }
   })
 
-  test('Mobile Navigation - Accessibility', async ({ page }) => {
+  test('Mobile Navigation - Accessibility', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -711,7 +711,7 @@ test.describe('Interaction Management Accessibility - Mobile iPhone', () => {
     }
   })
 
-  test('Mobile Form Accessibility', async ({ page }) => {
+  test('Mobile Form Accessibility', async ({ page: _ }) => {
     await page.goto('/interactions/new')
     await page.waitForLoadState('networkidle')
 
@@ -741,13 +741,13 @@ test.describe('Interaction Management Accessibility - Mobile iPhone', () => {
 test.describe('Interaction Management Accessibility - iPad', () => {
   let helpers: InteractionAccessibilityHelpers
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     helpers = new InteractionAccessibilityHelpers(page)
     await helpers.setupAccessibilityMocks()
     await helpers.injectAxeCore()
   })
 
-  test('iPad Touch and Voice Input Accessibility', async ({ page }) => {
+  test('iPad Touch and Voice Input Accessibility', async ({ page: _ }) => {
     await page.goto('/interactions/new')
     await page.waitForLoadState('networkidle')
 
@@ -771,7 +771,7 @@ test.describe('Interaction Management Accessibility - iPad', () => {
     expect(focusedElement).toBeTruthy()
   })
 
-  test('iPad Table Interaction Accessibility', async ({ page }) => {
+  test('iPad Table Interaction Accessibility', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 
@@ -799,7 +799,7 @@ test.describe('Interaction Management Accessibility - iPad', () => {
 test.describe('Interaction Management Accessibility - High Contrast', () => {
   let helpers: InteractionAccessibilityHelpers
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     helpers = new InteractionAccessibilityHelpers(page)
     await helpers.setupAccessibilityMocks()
     await helpers.injectAxeCore()
@@ -817,7 +817,7 @@ test.describe('Interaction Management Accessibility - High Contrast', () => {
     })
   })
 
-  test('High Contrast Mode Compatibility', async ({ page }) => {
+  test('High Contrast Mode Compatibility', async ({ page: _ }) => {
     await page.goto('/interactions')
     await page.waitForLoadState('networkidle')
 

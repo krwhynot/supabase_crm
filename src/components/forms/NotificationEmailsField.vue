@@ -23,7 +23,7 @@
             emailInputError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
           ]"
           @keydown.enter.prevent="addEmail"
-          @keydown.comma.prevent="addEmail"
+          @keydown.exact="handleCommaKey"
           @input="handleEmailInput"
           @blur="validateCurrentEmail"
           :aria-invalid="!!emailInputError"
@@ -307,6 +307,13 @@ const addEmail = async () => {
   emailInput.value?.focus()
   
   emitChanges()
+}
+
+const handleCommaKey = (event: KeyboardEvent) => {
+  if (event.key === ',') {
+    event.preventDefault()
+    addEmail()
+  }
 }
 
 const addEmailFromSuggestion = (email: string) => {

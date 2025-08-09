@@ -26,7 +26,7 @@ const BACKGROUND_COLOR = '#ffffff';
 /**
  * Generate SVG icon content
  */
-function generateSVG(size, content, bgColor = BACKGROUND_COLOR, iconColor = THEME_COLOR) {
+function generateSVG(size, content, bgColor = BACKGROUND_COLOR, _iconColor = THEME_COLOR) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${size}" height="${size}" fill="${bgColor}" rx="${size * 0.15}"/>

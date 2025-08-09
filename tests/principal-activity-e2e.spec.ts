@@ -154,7 +154,7 @@ class PrincipalActivityPage {
 test.describe('Principal Activity Management - E2E Tests', () => {
   let principalPage: PrincipalActivityPage
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     principalPage = new PrincipalActivityPage(page)
     
     // Mock API responses for consistent testing
@@ -208,7 +208,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
   // ============================
 
   test.describe('Navigation and Routing', () => {
-    test('should navigate to principal list view', async ({ page }) => {
+    test('should navigate to principal list view', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       await expect(page).toHaveTitle(/Principals/)
@@ -216,21 +216,21 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="principal-table"]')).toBeVisible()
     })
 
-    test('should navigate to principal detail view', async ({ page }) => {
+    test('should navigate to principal detail view', async ({ page: _ }) => {
       await principalPage.navigateToPrincipalDetail('test-principal-1')
       
       await expect(page.locator('[data-testid="principal-detail-header"]')).toBeVisible()
       await expect(page.locator('[data-testid="principal-name"]')).toContainText('Test Principal Organization')
     })
 
-    test('should navigate to dashboard view', async ({ page }) => {
+    test('should navigate to dashboard view', async ({ page: _ }) => {
       await principalPage.navigateToPrincipalDashboard()
       
       await expect(page.locator('[data-testid="principal-dashboard"]')).toBeVisible()
       await expect(page.locator('[data-testid="kpi-cards-container"]')).toBeVisible()
     })
 
-    test('should handle navigation errors gracefully', async ({ page }) => {
+    test('should handle navigation errors gracefully', async ({ page: _ }) => {
       await page.route('**/principal_activity_summary_secure*', async route => {
         await route.fulfill({ status: 500, body: 'Server Error' })
       })
@@ -249,7 +249,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await principalPage.navigateToPrincipals()
     })
 
-    test('should display principal list with correct data', async ({ page }) => {
+    test('should display principal list with correct data', async ({ page: _ }) => {
       await expect(page.locator('[data-testid="principal-row"]')).toHaveCount(2)
       
       const firstRow = page.locator('[data-testid="principal-row"]').first()
@@ -258,7 +258,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(firstRow.locator('[data-testid="activity-status"]')).toContainText('ACTIVE')
     })
 
-    test('should perform search functionality', async ({ page }) => {
+    test('should perform search functionality', async ({ page: _ }) => {
       await principalPage.searchPrincipals('Test Principal')
       
       // Should show loading state during search
@@ -270,7 +270,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="search-results-count"]')).toContainText('1')
     })
 
-    test('should apply and remove filters', async ({ page }) => {
+    test('should apply and remove filters', async ({ page: _ }) => {
       await principalPage.applyFilter('activity-status', 'ACTIVE')
       await principalPage.expectFilterApplied('activity-status')
       
@@ -283,7 +283,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="principal-row"]')).toHaveCount(2)
     })
 
-    test('should sort principals correctly', async ({ page }) => {
+    test('should sort principals correctly', async ({ page: _ }) => {
       await principalPage.sortPrincipals('principal_name', 'asc')
       
       const firstRowName = page.locator('[data-testid="principal-row"]').first().locator('[data-testid="principal-name"]')
@@ -293,7 +293,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(firstRowName).toContainText('Test Principal Organization')
     })
 
-    test('should handle pagination', async ({ page }) => {
+    test('should handle pagination', async ({ page: _ }) => {
       // Mock more data for pagination testing
       await page.route('**/principal_activity_summary_secure*', async route => {
         const url = new URL(route.request().url())
@@ -330,14 +330,14 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await principalPage.navigateToPrincipals()
     })
 
-    test('should select individual principals', async ({ page }) => {
+    test('should select individual principals', async ({ page: _ }) => {
       await principalPage.selectPrincipal('test-principal-1')
       
       await expect(page.locator('[data-testid="selected-count"]')).toContainText('1')
       await expect(page.locator('[data-testid="principal-checkbox-test-principal-1"]')).toBeChecked()
     })
 
-    test('should enable batch mode and perform batch operations', async ({ page }) => {
+    test('should enable batch mode and perform batch operations', async ({ page: _ }) => {
       await principalPage.enableBatchMode()
       
       // Select multiple principals
@@ -361,7 +361,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="batch-success-message"]')).toBeVisible()
     })
 
-    test('should export selected principals', async ({ page }) => {
+    test('should export selected principals', async ({ page: _ }) => {
       await principalPage.enableBatchMode()
       await principalPage.selectPrincipal('test-principal-1')
       
@@ -383,7 +383,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await principalPage.navigateToPrincipalDashboard()
     })
 
-    test('should display KPI cards with correct data', async ({ page }) => {
+    test('should display KPI cards with correct data', async ({ page: _ }) => {
       await principalPage.expectKPIValue('total-principals', '2')
       await principalPage.expectKPIValue('active-principals', '1')
       await principalPage.expectKPIValue('avg-engagement', '66')
@@ -393,7 +393,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="kpi-detail-modal"]')).toBeVisible()
     })
 
-    test('should refresh dashboard data', async ({ page }) => {
+    test('should refresh dashboard data', async ({ page: _ }) => {
       await principalPage.refreshDashboard()
       
       // Should show loading state during refresh
@@ -404,7 +404,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="last-updated"]')).toBeVisible()
     })
 
-    test('should change time range and update data', async ({ page }) => {
+    test('should change time range and update data', async ({ page: _ }) => {
       await principalPage.changeTimeRange('last-30-days')
       
       // Should trigger data refresh
@@ -415,7 +415,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="active-time-range"]')).toContainText('Last 30 Days')
     })
 
-    test('should display analytics charts', async ({ page }) => {
+    test('should display analytics charts', async ({ page: _ }) => {
       await principalPage.viewAnalyticsChart('engagement-distribution')
       await expect(page.locator('[data-testid="engagement-distribution-chart"]')).toBeVisible()
       
@@ -436,7 +436,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await principalPage.navigateToPrincipalDetail('test-principal-1')
     })
 
-    test('should display comprehensive principal information', async ({ page }) => {
+    test('should display comprehensive principal information', async ({ page: _ }) => {
       // Header information
       await expect(page.locator('[data-testid="principal-name"]')).toContainText('Test Principal Organization')
       await expect(page.locator('[data-testid="engagement-score-badge"]')).toContainText('87')
@@ -448,7 +448,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="follow-ups-metric"]')).toContainText('2')
     })
 
-    test('should display activity timeline', async ({ page }) => {
+    test('should display activity timeline', async ({ page: _ }) => {
       await expect(page.locator('[data-testid="activity-timeline"]')).toBeVisible()
       
       // Should show timeline entries
@@ -459,17 +459,17 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="timeline-filter-active"]')).toHaveText('Interactions')
     })
 
-    test('should display product performance', async ({ page }) => {
+    test('should display product performance', async ({ page: _ }) => {
       await page.click('[data-testid="products-tab"]')
       await expect(page.locator('[data-testid="product-performance-table"]')).toBeVisible()
     })
 
-    test('should display distributor relationships', async ({ page }) => {
+    test('should display distributor relationships', async ({ page: _ }) => {
       await page.click('[data-testid="distributors-tab"]')
       await expect(page.locator('[data-testid="distributor-relationships-table"]')).toBeVisible()
     })
 
-    test('should provide action buttons', async ({ page }) => {
+    test('should provide action buttons', async ({ page: _ }) => {
       await expect(page.locator('[data-testid="create-opportunity-button"]')).toBeVisible()
       await expect(page.locator('[data-testid="log-interaction-button"]')).toBeVisible()
       await expect(page.locator('[data-testid="manage-products-button"]')).toBeVisible()
@@ -485,7 +485,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
   // ============================
 
   test.describe('Responsive Design', () => {
-    test('should work correctly on desktop', async ({ page }) => {
+    test('should work correctly on desktop', async ({ page: _ }) => {
       await page.setViewportSize(DESKTOP_VIEWPORT)
       await principalPage.navigateToPrincipals()
       
@@ -494,7 +494,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="filter-panel"]')).toBeVisible()
     })
 
-    test('should adapt layout for tablet', async ({ page }) => {
+    test('should adapt layout for tablet', async ({ page: _ }) => {
       await page.setViewportSize(TABLET_VIEWPORT)
       await principalPage.navigateToPrincipals()
       
@@ -505,7 +505,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="principal-table"]')).toBeVisible()
     })
 
-    test('should work on mobile devices', async ({ page }) => {
+    test('should work on mobile devices', async ({ page: _ }) => {
       await page.setViewportSize(MOBILE_VIEWPORT)
       await principalPage.navigateToPrincipals()
       
@@ -524,7 +524,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
   // ============================
 
   test.describe('Accessibility', () => {
-    test('should be keyboard navigable', async ({ page }) => {
+    test('should be keyboard navigable', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       // Tab through interactive elements
@@ -538,7 +538,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="principal-row"]').first()).toBeFocused()
     })
 
-    test('should have proper ARIA labels and roles', async ({ page }) => {
+    test('should have proper ARIA labels and roles', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       // Check ARIA attributes
@@ -547,7 +547,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="filter-dropdown-trigger"]')).toHaveAttribute('aria-expanded', 'false')
     })
 
-    test('should announce loading states to screen readers', async ({ page }) => {
+    test('should announce loading states to screen readers', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       // Trigger loading state
@@ -557,7 +557,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="loading-announcement"]')).toHaveAttribute('aria-live', 'polite')
     })
 
-    test('should have proper heading structure', async ({ page }) => {
+    test('should have proper heading structure', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       const h1 = page.locator('h1')
@@ -582,7 +582,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
   // ============================
 
   test.describe('Error Handling', () => {
-    test('should handle API errors gracefully', async ({ page }) => {
+    test('should handle API errors gracefully', async ({ page: _ }) => {
       await page.route('**/principal_activity_summary_secure*', async route => {
         await route.fulfill({ status: 500, body: 'Internal Server Error' })
       })
@@ -593,7 +593,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="retry-button"]')).toBeVisible()
     })
 
-    test('should retry failed requests', async ({ page }) => {
+    test('should retry failed requests', async ({ page: _ }) => {
       let attemptCount = 0
       await page.route('**/principal_activity_summary_secure*', async route => {
         attemptCount++
@@ -615,7 +615,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       await expect(page.locator('[data-testid="principal-table"]')).toBeVisible()
     })
 
-    test('should handle network connectivity issues', async ({ page }) => {
+    test('should handle network connectivity issues', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       // Simulate network offline
@@ -636,7 +636,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
   // ============================
 
   test.describe('Performance', () => {
-    test('should load principal list within acceptable time', async ({ page }) => {
+    test('should load principal list within acceptable time', async ({ page: _ }) => {
       const startTime = Date.now()
       await principalPage.navigateToPrincipals()
       const endTime = Date.now()
@@ -645,7 +645,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       expect(loadTime).toBeLessThan(3000) // Should load within 3 seconds
     })
 
-    test('should handle large datasets efficiently', async ({ page }) => {
+    test('should handle large datasets efficiently', async ({ page: _ }) => {
       // Mock large dataset
       const largeMockData = Array.from({ length: 100 }, (_, i) => ({
         ...mockPrincipalData,
@@ -669,7 +669,7 @@ test.describe('Principal Activity Management - E2E Tests', () => {
       expect(loadTime).toBeLessThan(5000) // Should handle large datasets within 5 seconds
     })
 
-    test('should optimize search performance', async ({ page }) => {
+    test('should optimize search performance', async ({ page: _ }) => {
       await principalPage.navigateToPrincipals()
       
       const startTime = Date.now()

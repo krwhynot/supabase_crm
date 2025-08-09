@@ -12,14 +12,14 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Segment Selector Component', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     // Navigate to a page with the segment selector
     await page.goto('/organizations/new');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Basic Functionality', () => {
-    test('should display segment selector with proper initial state', async ({ page }) => {
+    test('should display segment selector with proper initial state', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Should be visible and enabled
@@ -34,7 +34,7 @@ test.describe('Segment Selector Component', () => {
       await expect(segmentInput).toHaveAttribute('aria-expanded', 'false');
     });
 
-    test('should open dropdown when input is clicked', async ({ page }) => {
+    test('should open dropdown when input is clicked', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Click input
@@ -51,7 +51,7 @@ test.describe('Segment Selector Component', () => {
       await expect(dropdown).toContainText('Finance');
     });
 
-    test('should close dropdown when clicking outside', async ({ page }) => {
+    test('should close dropdown when clicking outside', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -66,7 +66,7 @@ test.describe('Segment Selector Component', () => {
       await expect(segmentInput).toHaveAttribute('aria-expanded', 'false');
     });
 
-    test('should select option when clicked', async ({ page }) => {
+    test('should select option when clicked', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown and select Technology
@@ -83,7 +83,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Type-ahead Search', () => {
-    test('should filter options based on search query', async ({ page }) => {
+    test('should filter options based on search query', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Type "Tech"
@@ -101,7 +101,7 @@ test.describe('Segment Selector Component', () => {
       expect(options.some(option => option.includes('Healthcare'))).toBe(false);
     });
 
-    test('should show no results message when no matches found', async ({ page }) => {
+    test('should show no results message when no matches found', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Type non-existent segment
@@ -114,7 +114,7 @@ test.describe('Segment Selector Component', () => {
       await expect(dropdown).toContainText('No segments found');
     });
 
-    test('should debounce search queries', async ({ page }) => {
+    test('should debounce search queries', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       await segmentInput.click();
@@ -130,7 +130,7 @@ test.describe('Segment Selector Component', () => {
       await expect(dropdown).toContainText('Technology');
     });
 
-    test('should search in both label and description', async ({ page }) => {
+    test('should search in both label and description', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Search for "software" which should match Technology description
@@ -145,7 +145,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Add New Segment', () => {
-    test('should show "Add new" option for unique search terms', async ({ page }) => {
+    test('should show "Add new" option for unique search terms', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Type a unique segment name
@@ -160,7 +160,7 @@ test.describe('Segment Selector Component', () => {
       await expect(addNewOption).toContainText('Custom Industry');
     });
 
-    test('should not show "Add new" option for existing segments', async ({ page }) => {
+    test('should not show "Add new" option for existing segments', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Type exact match for existing segment
@@ -174,7 +174,7 @@ test.describe('Segment Selector Component', () => {
       await expect(addNewOption).not.toBeVisible();
     });
 
-    test('should add new segment when "Add new" is clicked', async ({ page }) => {
+    test('should add new segment when "Add new" is clicked', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       const customSegment = 'Custom Industry Segment';
       
@@ -203,7 +203,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Keyboard Navigation', () => {
-    test('should support arrow key navigation', async ({ page }) => {
+    test('should support arrow key navigation', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -231,7 +231,7 @@ test.describe('Segment Selector Component', () => {
       await expect(firstOption).toHaveClass(/bg-primary-50/);
     });
 
-    test('should select highlighted option with Enter key', async ({ page }) => {
+    test('should select highlighted option with Enter key', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown and navigate
@@ -248,7 +248,7 @@ test.describe('Segment Selector Component', () => {
       await page.waitForSelector('[role="listbox"]', { state: 'hidden' });
     });
 
-    test('should close dropdown with Escape key', async ({ page }) => {
+    test('should close dropdown with Escape key', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -266,7 +266,7 @@ test.describe('Segment Selector Component', () => {
       expect(activeElement).not.toBe('INPUT');
     });
 
-    test('should handle Tab key properly', async ({ page }) => {
+    test('should handle Tab key properly', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -286,7 +286,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Accessibility', () => {
-    test('should have proper ARIA attributes', async ({ page }) => {
+    test('should have proper ARIA attributes', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Check initial ARIA attributes
@@ -311,7 +311,7 @@ test.describe('Segment Selector Component', () => {
       await expect(firstOption).toHaveAttribute('aria-selected');
     });
 
-    test('should have proper label association', async ({ page }) => {
+    test('should have proper label association', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       const inputId = await segmentInput.getAttribute('id');
       
@@ -321,7 +321,7 @@ test.describe('Segment Selector Component', () => {
       await expect(label).toContainText('Segment');
     });
 
-    test('should announce errors to screen readers', async ({ page }) => {
+    test('should announce errors to screen readers', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Trigger validation error (if validation is implemented)
@@ -337,7 +337,7 @@ test.describe('Segment Selector Component', () => {
       }
     });
 
-    test('should support screen reader navigation', async ({ page }) => {
+    test('should support screen reader navigation', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -362,7 +362,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Loading and Error States', () => {
-    test('should show loading spinner when loading prop is true', async ({ page }) => {
+    test('should show loading spinner when loading prop is true', async ({ page: _ }) => {
       // This would require mocking the component with loading=true
       // For now, we test that the spinner element exists in the DOM
       const spinner = page.locator('.animate-spin').first();
@@ -373,7 +373,7 @@ test.describe('Segment Selector Component', () => {
       }
     });
 
-    test('should handle network errors gracefully', async ({ page }) => {
+    test('should handle network errors gracefully', async ({ page: _ }) => {
       // Mock network failure for segment search
       await page.route('**/api/segments/search*', route => {
         route.fulfill({
@@ -397,7 +397,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Popular Segments', () => {
-    test('should show popular segments when available', async ({ page }) => {
+    test('should show popular segments when available', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown without typing
@@ -416,7 +416,7 @@ test.describe('Segment Selector Component', () => {
       }
     });
 
-    test('should hide popular segments when searching', async ({ page }) => {
+    test('should hide popular segments when searching', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Type search query
@@ -432,7 +432,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Mobile Interactions', () => {
-    test('should work with touch interactions', async ({ page }) => {
+    test('should work with touch interactions', async ({ page: _ }) => {
       // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
       
@@ -452,7 +452,7 @@ test.describe('Segment Selector Component', () => {
       await page.waitForSelector('[role="listbox"]', { state: 'hidden' });
     });
 
-    test('should handle mobile keyboard', async ({ page }) => {
+    test('should handle mobile keyboard', async ({ page: _ }) => {
       await page.setViewportSize({ width: 375, height: 667 });
       
       const segmentInput = page.locator('input[name="segment"]');
@@ -471,7 +471,7 @@ test.describe('Segment Selector Component', () => {
   });
 
   test.describe('Edge Cases', () => {
-    test('should handle empty search query', async ({ page }) => {
+    test('should handle empty search query', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Open dropdown
@@ -486,7 +486,7 @@ test.describe('Segment Selector Component', () => {
       await expect(dropdown).toContainText('Technology');
     });
 
-    test('should handle special characters in search', async ({ page }) => {
+    test('should handle special characters in search', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       await segmentInput.click();
@@ -499,7 +499,7 @@ test.describe('Segment Selector Component', () => {
       await expect(addNewOption).toContainText('Consulting & Services');
     });
 
-    test('should handle very long segment names', async ({ page }) => {
+    test('should handle very long segment names', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       const longName = 'Very Long Industry Segment Name That Exceeds Normal Expectations';
       
@@ -513,7 +513,7 @@ test.describe('Segment Selector Component', () => {
       await expect(addNewOption).toBeVisible();
     });
 
-    test('should handle rapid open/close operations', async ({ page }) => {
+    test('should handle rapid open/close operations', async ({ page: _ }) => {
       const segmentInput = page.locator('input[name="segment"]');
       
       // Rapidly open and close dropdown

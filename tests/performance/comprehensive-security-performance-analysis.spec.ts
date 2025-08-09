@@ -196,7 +196,7 @@ class UserManagementMockAPI {
 
   async setupInputValidationMocks() {
     await this.page.route('**/api/validate/input', route => {
-      const { input, type } = route.request().postDataJSON()
+      const { input, type: _type } = route.request().postDataJSON()
       const validationTime = 10 + Math.random() * 10 // 10-20ms validation
       
       // Simulate threat detection
@@ -225,7 +225,7 @@ class UserManagementMockAPI {
 
   async setupAuditLoggingMocks() {
     await this.page.route('**/api/audit/log', route => {
-      const auditData = route.request().postDataJSON()
+      const _auditData = route.request().postDataJSON()
       const loggingTime = 15 + Math.random() * 10 // 15-25ms audit logging
       
       setTimeout(() => {
@@ -446,7 +446,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
   let mockAPI: UserManagementMockAPI
   let measurer: SecurityPerformanceMeasurer
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     mockAPI = new UserManagementMockAPI(page)
     measurer = new SecurityPerformanceMeasurer(page)
 
@@ -458,7 +458,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     await mockAPI.setupAuditLoggingMocks()
   })
 
-  test('Phase 1: Authentication Performance Analysis', async ({ page }) => {
+  test('Phase 1: Authentication Performance Analysis', async ({ page: _ }) => {
     console.log('🔐 Phase 1: Analyzing JWT validation and authentication performance...')
 
     const jwtPerformance = await measurer.measureJWTValidationPerformance()
@@ -476,7 +476,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     expect(jwtPerformance.memoryImpact).toBeLessThan(5 * 1024 * 1024) // 5MB limit
   })
 
-  test('Phase 2: Rate Limiting Load Impact Analysis', async ({ page }) => {
+  test('Phase 2: Rate Limiting Load Impact Analysis', async ({ page: _ }) => {
     console.log('⚡ Phase 2: Analyzing rate limiting performance under load...')
 
     const rateLimitPerformance = await measurer.measureRateLimitingPerformance(100)
@@ -497,7 +497,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     expect(rateLimitPerformance.blockingEffectiveness).toBeGreaterThan(50) // Should block heavy usage
   })
 
-  test('Phase 3: RLS Policy Performance Impact', async ({ page }) => {
+  test('Phase 3: RLS Policy Performance Impact', async ({ page: _ }) => {
     console.log('🛡️ Phase 3: Analyzing RLS policy performance impact on queries...')
 
     const rlsPerformance = await measurer.measureRLSPerformance()
@@ -519,7 +519,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     expect(rlsPerformance.policyEvaluationTime).toBeLessThan(PRODUCTION_THRESHOLDS.rlsQuery)
   })
 
-  test('Phase 4: Input Validation Security Overhead', async ({ page }) => {
+  test('Phase 4: Input Validation Security Overhead', async ({ page: _ }) => {
     console.log('🔍 Phase 4: Measuring input sanitization performance overhead...')
 
     const validationPerformance = await measurer.measureInputValidationOverhead()
@@ -541,7 +541,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     expect(validationPerformance.threatDetectionAccuracy).toBeGreaterThan(90)
   })
 
-  test('Security-Performance Optimization Recommendations', async ({ page }) => {
+  test('Security-Performance Optimization Recommendations', async ({ page: _ }) => {
     console.log('📊 Generating comprehensive optimization recommendations...')
 
     // Collect all performance metrics
@@ -648,7 +648,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
 })
 
 test.describe('Production Deployment Readiness', () => {
-  test('should validate complete security-performance balance for production', async ({ page }) => {
+  test('should validate complete security-performance balance for production', async ({ page: _ }) => {
     console.log('🎯 Final Production Readiness Assessment...')
 
     const mockAPI = new UserManagementMockAPI(page)

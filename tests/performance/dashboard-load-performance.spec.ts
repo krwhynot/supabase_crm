@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Dashboard Load Performance', () => {
   
-  test('should load dashboard faster than 2000ms target', async ({ page }) => {
+  test('should load dashboard faster than 2000ms target', async ({ page: _ }) => {
     console.log('🚀 Testing dashboard load performance...')
     
     const startTime = Date.now()
@@ -39,7 +39,7 @@ test.describe('Dashboard Load Performance', () => {
     console.log('📊 Critical dashboard content verified loaded')
   })
 
-  test('should show lazy loading working for KPI components', async ({ page }) => {
+  test('should show lazy loading working for KPI components', async ({ page: _ }) => {
     console.log('🔄 Testing lazy loading implementation...')
     
     await page.goto('/')
@@ -63,7 +63,7 @@ test.describe('Dashboard Load Performance', () => {
     console.log('🎮 Page interactivity confirmed')
   })
 
-  test('should have code splitting evidence in network requests', async ({ page }) => {
+  test('should have code splitting evidence in network requests', async ({ page: _ }) => {
     console.log('📦 Checking for code splitting...')
     
     const jsRequests: string[] = []
@@ -99,7 +99,7 @@ test.describe('Dashboard Load Performance', () => {
     expect(jsRequests.length).toBeGreaterThan(0)
   })
 
-  test('should complete Core Web Vitals measurement', async ({ page }) => {
+  test('should complete Core Web Vitals measurement', async ({ page: _ }) => {
     console.log('📊 Measuring Core Web Vitals...')
     
     await page.goto('/')
@@ -129,7 +129,7 @@ test.describe('Dashboard Load Performance', () => {
     console.log('✅ Basic performance metrics within acceptable ranges')
   })
 
-  test('should maintain functionality during performance optimization', async ({ page }) => {
+  test('should maintain functionality during performance optimization', async ({ page: _ }) => {
     console.log('🔧 Testing that optimization preserves functionality...')
     
     await page.goto('/')
@@ -160,7 +160,7 @@ test.describe('Dashboard Load Performance', () => {
  */
 test.describe('Performance Optimization Results', () => {
   
-  test('should document performance improvements', async ({ page }) => {
+  test('should document performance improvements', async ({ page: _ }) => {
     console.log('📈 Documenting performance optimization results...')
     
     const measurements = []

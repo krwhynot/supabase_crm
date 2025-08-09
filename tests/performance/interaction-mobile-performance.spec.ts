@@ -189,7 +189,7 @@ MOBILE_DEVICES.forEach(deviceName => {
       })
     })
 
-    test('Touch targets meet minimum size requirements', async ({ page }) => {
+    test('Touch targets meet minimum size requirements', async ({ page: _ }) => {
       await page.goto('http://localhost:3004/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
       
@@ -215,7 +215,7 @@ MOBILE_DEVICES.forEach(deviceName => {
       })
     })
 
-    test('Scroll performance maintains smooth 60fps', async ({ page }) => {
+    test('Scroll performance maintains smooth 60fps', async ({ page: _ }) => {
       await page.goto('http://localhost:3004/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
       
@@ -232,7 +232,7 @@ MOBILE_DEVICES.forEach(deviceName => {
       })
     })
 
-    test('Quick interaction templates load and respond quickly', async ({ page }) => {
+    test('Quick interaction templates load and respond quickly', async ({ page: _ }) => {
       const startTime = Date.now()
       
       await page.goto('http://localhost:3004/interactions')
@@ -265,7 +265,7 @@ MOBILE_DEVICES.forEach(deviceName => {
       })
     })
 
-    test('Voice input responds within performance targets', async ({ page }) => {
+    test('Voice input responds within performance targets', async ({ page: _ }) => {
       await page.goto('http://localhost:3004/interactions/new')
       await page.waitForSelector('[data-testid="voice-input"]')
       
@@ -369,7 +369,7 @@ Object.entries(NETWORK_CONDITIONS).forEach(([networkType, conditions]) => {
 test.describe('Mobile Interaction Patterns', () => {
   test.use({ ...devices['iPhone 14'] })
 
-  test('Swipe gestures work correctly on mobile tables', async ({ page }) => {
+  test('Swipe gestures work correctly on mobile tables', async ({ page: _ }) => {
     await page.goto('http://localhost:3004/interactions')
     await page.waitForSelector('[data-testid="interaction-table"]')
     
@@ -389,7 +389,7 @@ test.describe('Mobile Interaction Patterns', () => {
     }
   })
 
-  test('Pull-to-refresh works on mobile', async ({ page }) => {
+  test('Pull-to-refresh works on mobile', async ({ page: _ }) => {
     await page.goto('http://localhost:3004/interactions')
     await page.waitForSelector('[data-testid="interaction-table"]')
     
@@ -434,12 +434,12 @@ test.describe('Mobile Interaction Patterns', () => {
     await expect(page.locator('[data-testid="refresh-indicator"]')).toBeVisible({ timeout: 2000 })
   })
 
-  test('Keyboard appearance does not break layout on mobile', async ({ page }) => {
+  test('Keyboard appearance does not break layout on mobile', async ({ page: _ }) => {
     await page.goto('http://localhost:3004/interactions/new')
     await page.waitForSelector('[data-testid="interaction-form"]')
     
     // Take screenshot before input focus
-    const beforeScreenshot = await page.screenshot({ fullPage: true })
+    const _beforeScreenshot = await page.screenshot({ fullPage: true })
     
     // Focus on input field (simulates keyboard appearance)
     await page.focus('[data-testid="interaction-title"]')
@@ -448,7 +448,7 @@ test.describe('Mobile Interaction Patterns', () => {
     await page.waitForTimeout(500)
     
     // Take screenshot after input focus
-    const afterScreenshot = await page.screenshot({ fullPage: true })
+    const _afterScreenshot = await page.screenshot({ fullPage: true })
     
     // Form should still be usable (submit button visible)
     await expect(page.locator('[data-testid="submit-interaction"]')).toBeVisible()
@@ -463,7 +463,7 @@ test.describe('Mobile Interaction Patterns', () => {
 test.describe('Mobile Resource Usage', () => {
   test.use({ ...devices['Samsung Galaxy A53'] }) // Lower-end device
 
-  test('Memory usage remains stable during extended use', async ({ page }) => {
+  test('Memory usage remains stable during extended use', async ({ page: _ }) => {
     await page.goto('http://localhost:3004/interactions')
     
     // Get initial memory usage
@@ -514,7 +514,7 @@ test.describe('Mobile Resource Usage', () => {
     }
   })
 
-  test('Battery usage optimizations are in place', async ({ page }) => {
+  test('Battery usage optimizations are in place', async ({ page: _ }) => {
     await page.goto('http://localhost:3004/interactions')
     
     // Check for battery-optimized features

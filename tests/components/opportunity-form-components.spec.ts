@@ -263,7 +263,7 @@ class OpportunityFormComponentHelpers {
 }
 
 test.describe('OpportunityNameField Component', () => {
-  test('should toggle between auto-generation and manual input', async ({ page }) => {
+  test('should toggle between auto-generation and manual input', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -287,7 +287,7 @@ test.describe('OpportunityNameField Component', () => {
     await expect(manualInput).toBeDisabled()
   })
 
-  test('should generate name preview when form fields change', async ({ page }) => {
+  test('should generate name preview when form fields change', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -307,7 +307,7 @@ test.describe('OpportunityNameField Component', () => {
     expect(preview).toContain('New Business')
   })
 
-  test('should update preview when principals change', async ({ page }) => {
+  test('should update preview when principals change', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -329,7 +329,7 @@ test.describe('OpportunityNameField Component', () => {
     expect(previewCount).toBe(2)
   })
 
-  test('should allow manual name override', async ({ page }) => {
+  test('should allow manual name override', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -345,7 +345,7 @@ test.describe('OpportunityNameField Component', () => {
     expect(enteredName).toBe(customName)
   })
 
-  test('should validate required name field', async ({ page }) => {
+  test('should validate required name field', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -365,7 +365,7 @@ test.describe('OpportunityNameField Component', () => {
 })
 
 test.describe('StageSelect Component', () => {
-  test('should display all 7 stages', async ({ page }) => {
+  test('should display all 7 stages', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -387,7 +387,7 @@ test.describe('StageSelect Component', () => {
     })
   })
 
-  test('should update selected stage', async ({ page }) => {
+  test('should update selected stage', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -402,7 +402,7 @@ test.describe('StageSelect Component', () => {
     expect(selectedStage).toBe('INITIAL_OUTREACH')
   })
 
-  test('should show stage colors correctly', async ({ page }) => {
+  test('should show stage colors correctly', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -419,7 +419,7 @@ test.describe('StageSelect Component', () => {
     expect(computedStyle).not.toBe('rgba(0, 0, 0, 0)')
   })
 
-  test('should validate required stage selection', async ({ page }) => {
+  test('should validate required stage selection', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -434,7 +434,7 @@ test.describe('StageSelect Component', () => {
 })
 
 test.describe('PrincipalMultiSelect Component', () => {
-  test('should display available principals', async ({ page }) => {
+  test('should display available principals', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -450,7 +450,7 @@ test.describe('PrincipalMultiSelect Component', () => {
     }
   })
 
-  test('should allow multiple principal selection', async ({ page }) => {
+  test('should allow multiple principal selection', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -466,7 +466,7 @@ test.describe('PrincipalMultiSelect Component', () => {
     expect(selectedPrincipals).toEqual(expect.arrayContaining(selectedNames))
   })
 
-  test('should show batch creation preview for multiple principals', async ({ page }) => {
+  test('should show batch creation preview for multiple principals', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -489,7 +489,7 @@ test.describe('PrincipalMultiSelect Component', () => {
     await expect(page.locator('[data-testid="batch-preview-item"]:has-text("Michael Chen")')).toBeVisible()
   })
 
-  test('should remove principals when deselected', async ({ page }) => {
+  test('should remove principals when deselected', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -512,7 +512,7 @@ test.describe('PrincipalMultiSelect Component', () => {
     expect(selectedPrincipals).not.toContain('Alex Johnson')
   })
 
-  test('should validate required principal selection', async ({ page }) => {
+  test('should validate required principal selection', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -530,7 +530,7 @@ test.describe('PrincipalMultiSelect Component', () => {
 })
 
 test.describe('ProductSelect Component', () => {
-  test('should display available products when principals are selected', async ({ page }) => {
+  test('should display available products when principals are selected', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -548,7 +548,7 @@ test.describe('ProductSelect Component', () => {
     expect(availableProducts).toContain('Integration Tools')
   })
 
-  test('should be disabled when no principals are selected', async ({ page }) => {
+  test('should be disabled when no principals are selected', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -569,7 +569,7 @@ test.describe('ProductSelect Component', () => {
     }
   })
 
-  test('should update available products when principals change', async ({ page }) => {
+  test('should update available products when principals change', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -589,7 +589,7 @@ test.describe('ProductSelect Component', () => {
     expect(availableProducts.length).toBeGreaterThanOrEqual(initialProductCount)
   })
 
-  test('should allow product selection', async ({ page }) => {
+  test('should allow product selection', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -605,7 +605,7 @@ test.describe('ProductSelect Component', () => {
     expect(selectedProduct).toContain('Analytics Platform')
   })
 
-  test('should validate required product selection', async ({ page }) => {
+  test('should validate required product selection', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -624,7 +624,7 @@ test.describe('ProductSelect Component', () => {
 })
 
 test.describe('Form Component Integration', () => {
-  test('should handle complete form flow with all components', async ({ page }) => {
+  test('should handle complete form flow with all components', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -663,7 +663,7 @@ test.describe('Form Component Integration', () => {
     await expect(submitButton).toBeEnabled()
   })
 
-  test('should show appropriate validation errors when fields are missing', async ({ page }) => {
+  test('should show appropriate validation errors when fields are missing', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -681,7 +681,7 @@ test.describe('Form Component Integration', () => {
     await expect(page.locator('[data-testid="principals-error"]')).toBeVisible()
   })
 
-  test('should reset form appropriately when switching between single and batch mode', async ({ page }) => {
+  test('should reset form appropriately when switching between single and batch mode', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -704,7 +704,7 @@ test.describe('Form Component Integration', () => {
     expect(previewCount).toBe(2)
   })
 
-  test('should handle form state persistence during navigation', async ({ page }) => {
+  test('should handle form state persistence during navigation', async ({ page: _ }) => {
     const helpers = new OpportunityFormComponentHelpers(page)
     await helpers.setupComponentMocks()
     await helpers.navigateToCreateForm()
@@ -713,11 +713,6 @@ test.describe('Form Component Integration', () => {
     await page.selectOption('[data-testid="organization-select"]', testData.organization.id)
     await helpers.selectStage('DEMO_SCHEDULED')
     await page.fill('[data-testid="probability-input"]', '75')
-
-    // Get current form values
-    const selectedOrg = await page.inputValue('[data-testid="organization-select"]')
-    const selectedStage = await helpers.getSelectedStage()
-    const probabilityValue = await page.inputValue('[data-testid="probability-input"]')
 
     // Navigate away and back (simulating browser back/forward)
     await page.goto('/opportunities')

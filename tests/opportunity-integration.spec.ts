@@ -404,7 +404,7 @@ class OpportunityIntegrationHelpers {
 }
 
 test.describe('Opportunity Management - Complete Integration Workflow', () => {
-  test('should complete end-to-end opportunity creation from organization', async ({ page }) => {
+  test('should complete end-to-end opportunity creation from organization', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -417,7 +417,7 @@ test.describe('Opportunity Management - Complete Integration Workflow', () => {
     await expect(page.locator('h1')).toContainText('Integration Test Corp');
   });
 
-  test('should maintain data consistency across all features', async ({ page }) => {
+  test('should maintain data consistency across all features', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -426,7 +426,7 @@ test.describe('Opportunity Management - Complete Integration Workflow', () => {
     expect(isConsistent).toBe(true);
   });
 
-  test('should support seamless cross-feature navigation', async ({ page }) => {
+  test('should support seamless cross-feature navigation', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -437,7 +437,7 @@ test.describe('Opportunity Management - Complete Integration Workflow', () => {
 });
 
 test.describe('Opportunity Management - Real-World User Scenarios', () => {
-  test('should handle sales manager daily workflow', async ({ page }) => {
+  test('should handle sales manager daily workflow', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -473,7 +473,7 @@ test.describe('Opportunity Management - Real-World User Scenarios', () => {
     await helpers.performCompleteOpportunityFlow();
   });
 
-  test('should handle account executive opportunity management', async ({ page }) => {
+  test('should handle account executive opportunity management', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -507,7 +507,7 @@ test.describe('Opportunity Management - Real-World User Scenarios', () => {
     }
   });
 
-  test('should handle business development representative workflow', async ({ page }) => {
+  test('should handle business development representative workflow', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -536,7 +536,7 @@ test.describe('Opportunity Management - Real-World User Scenarios', () => {
 });
 
 test.describe('Opportunity Management - Performance Integration', () => {
-  test('should meet performance requirements under load', async ({ page }) => {
+  test('should meet performance requirements under load', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -567,8 +567,9 @@ test.describe('Opportunity Management - Performance Integration', () => {
     expect(formTime).toBeLessThan(2000);
   });
 
-  test('should handle large datasets efficiently', async ({ page }) => {
-    const helpers = new OpportunityIntegrationHelpers(page);
+  test('should handle large datasets efficiently', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _helpers = new OpportunityIntegrationHelpers(page);
     
     // Mock large dataset
     const largeOpportunityList = Array.from({ length: 100 }, (_, i) => ({
@@ -616,7 +617,7 @@ test.describe('Opportunity Management - Performance Integration', () => {
 });
 
 test.describe('Opportunity Management - Accessibility Integration', () => {
-  test('should maintain accessibility across complete workflow', async ({ page }) => {
+  test('should maintain accessibility across complete workflow', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -647,7 +648,7 @@ test.describe('Opportunity Management - Accessibility Integration', () => {
     expect(['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(focusedElement)).toBe(true);
   });
 
-  test('should support screen reader workflow', async ({ page }) => {
+  test('should support screen reader workflow', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -674,7 +675,7 @@ test.describe('Opportunity Management - Accessibility Integration', () => {
     await page.waitForSelector('[role="status"], [aria-live="polite"]');
   });
 
-  test('should work with high contrast mode', async ({ page }) => {
+  test('should work with high contrast mode', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     
@@ -706,8 +707,9 @@ test.describe('Opportunity Management - Accessibility Integration', () => {
 });
 
 test.describe('Opportunity Management - Error Handling Integration', () => {
-  test('should gracefully handle API failures across the workflow', async ({ page }) => {
-    const helpers = new OpportunityIntegrationHelpers(page);
+  test('should gracefully handle API failures across the workflow', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _helpers = new OpportunityIntegrationHelpers(page);
     
     // Mock API failures
     await page.route('**/api/opportunities**', route => {
@@ -735,8 +737,9 @@ test.describe('Opportunity Management - Error Handling Integration', () => {
     await expect(page.locator('[role="navigation"]')).toBeVisible();
   });
 
-  test('should handle partial data failures', async ({ page }) => {
-    const helpers = new OpportunityIntegrationHelpers(page);
+  test('should handle partial data failures', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _helpers = new OpportunityIntegrationHelpers(page);
     
     // Mock successful opportunities but failed KPIs
     await page.route('**/api/opportunities/kpis', route => {
@@ -778,7 +781,7 @@ test.describe('Opportunity Management - Error Handling Integration', () => {
     await page.waitForURL(/\/opportunities\/new/);
   });
 
-  test('should recover from network interruptions', async ({ page }) => {
+  test('should recover from network interruptions', async ({ page: _ }) => {
     const helpers = new OpportunityIntegrationHelpers(page);
     await helpers.setupFullMockEnvironment();
     

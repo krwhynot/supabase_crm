@@ -433,7 +433,7 @@ class SecurityPerformanceMeasurement {
 }
 
 test.describe('Security vs Performance Analysis', () => {
-  test('should compare nested queries vs separate queries performance', async ({ page }) => {
+  test('should compare nested queries vs separate queries performance', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
     const testDataset = SecurityTestDataGenerator.generateLargeDataset(20)
 
@@ -466,7 +466,7 @@ test.describe('Security vs Performance Analysis', () => {
     expect(securityBenefit / Math.abs(performanceImpact)).toBeGreaterThan(0.5) // At least 2:1 benefit ratio
   })
 
-  test('should measure input validation performance overhead', async ({ page }) => {
+  test('should measure input validation performance overhead', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Test malicious inputs (should be slower due to detection)
@@ -490,7 +490,7 @@ test.describe('Security vs Performance Analysis', () => {
     expect(maliciousResults.successRate).toBeLessThan(10) // Most malicious inputs should be caught
   })
 
-  test('should assess RLS function performance under load', async ({ page }) => {
+  test('should assess RLS function performance under load', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
     const principalId = SecurityTestDataGenerator.generateValidUUIDs()[0]
 
@@ -513,7 +513,7 @@ test.describe('Security vs Performance Analysis', () => {
     expect(largeScale.scalabilityImpact).toBeLessThan(5) // Should scale reasonably (less than 5x degradation)
   })
 
-  test('should validate UUID validation performance', async ({ page }) => {
+  test('should validate UUID validation performance', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Test valid UUIDs
@@ -539,7 +539,7 @@ test.describe('Security vs Performance Analysis', () => {
 })
 
 test.describe('Load Testing with Security Measures', () => {
-  test('should handle concurrent users with security validation', async ({ page }) => {
+  test('should handle concurrent users with security validation', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Test with different user loads
@@ -564,7 +564,7 @@ test.describe('Load Testing with Security Measures', () => {
     expect(heavyLoad.throughput).toBeGreaterThan(SECURITY_PERFORMANCE_THRESHOLDS.requestsPerSecond)
   })
 
-  test('should measure security overhead in real business operations', async ({ page }) => {
+  test('should measure security overhead in real business operations', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Mock real business scenarios with security measures
@@ -645,7 +645,7 @@ test.describe('Load Testing with Security Measures', () => {
 })
 
 test.describe('Security-Performance Optimization Recommendations', () => {
-  test('should generate optimization recommendations', async ({ page }) => {
+  test('should generate optimization recommendations', async ({ page: _ }) => {
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Collect performance metrics across different scenarios

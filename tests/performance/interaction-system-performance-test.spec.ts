@@ -8,7 +8,7 @@
  * Phase 4: Optimization & Reporting
  */
 
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 // Performance thresholds
 const PERFORMANCE_THRESHOLDS = {
@@ -20,7 +20,7 @@ const PERFORMANCE_THRESHOLDS = {
 }
 
 // Test data
-const TEST_INTERACTION = {
+const _TEST_INTERACTION = {
   type: 'CALL',
   subject: 'Performance Test Interaction',
   description: 'Testing interaction system performance',
@@ -31,7 +31,7 @@ const TEST_INTERACTION = {
 test.describe('Interaction System Performance Validation', () => {
   const performanceMetrics: any = {}
   
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     // Enable performance monitoring
     await page.addInitScript(() => {
       window.performance.mark('test-start')
@@ -60,7 +60,7 @@ test.describe('Interaction System Performance Validation', () => {
   // PHASE 1: API TESTING & NAVIGATION
   // ===============================
   
-  test('Phase 1: Navigation Testing - Base Routes', async ({ page }) => {
+  test('Phase 1: Navigation Testing - Base Routes', async ({ page: _ }) => {
     console.log('🚀 Phase 1: Testing Navigation Performance')
     
     const startTime = performance.now()
@@ -92,7 +92,7 @@ test.describe('Interaction System Performance Validation', () => {
     performanceMetrics.navigationTime = navTime
   })
 
-  test('Phase 1: Interactions List Performance', async ({ page }) => {
+  test('Phase 1: Interactions List Performance', async ({ page: _ }) => {
     console.log('🚀 Phase 1: Testing Interactions List Performance')
     
     const startTime = performance.now()
@@ -120,7 +120,7 @@ test.describe('Interaction System Performance Validation', () => {
     performanceMetrics.interactionsListLoad = loadTime
   })
 
-  test('Phase 1: New Interaction Form Navigation', async ({ page }) => {
+  test('Phase 1: New Interaction Form Navigation', async ({ page: _ }) => {
     console.log('🚀 Phase 1: Testing New Interaction Form Navigation')
     
     await page.goto('http://localhost:3000/interactions')
@@ -152,7 +152,7 @@ test.describe('Interaction System Performance Validation', () => {
   // PHASE 2: LOAD TESTING & COMPONENT INTEGRATION
   // ===============================
   
-  test('Phase 2: Component Integration Testing', async ({ page }) => {
+  test('Phase 2: Component Integration Testing', async ({ page: _ }) => {
     console.log('🚀 Phase 2: Testing Component Integration Performance')
     
     await page.goto('http://localhost:3000/interactions')
@@ -192,7 +192,7 @@ test.describe('Interaction System Performance Validation', () => {
     performanceMetrics.sortPerformance = sortTime
   })
 
-  test('Phase 2: Form Functionality Performance', async ({ page }) => {
+  test('Phase 2: Form Functionality Performance', async ({ page: _ }) => {
     console.log('🚀 Phase 2: Testing Form Functionality Performance')
     
     await page.goto('http://localhost:3000/interactions/new')
@@ -236,7 +236,7 @@ test.describe('Interaction System Performance Validation', () => {
   // PHASE 3: PERFORMANCE ANALYSIS & ERROR VALIDATION
   // ===============================
   
-  test('Phase 3: Error Validation and Console Monitoring', async ({ page }) => {
+  test('Phase 3: Error Validation and Console Monitoring', async ({ page: _ }) => {
     console.log('🚀 Phase 3: Testing Error Validation and Console Monitoring')
     
     const consoleMessages: string[] = []
@@ -296,7 +296,7 @@ test.describe('Interaction System Performance Validation', () => {
     performanceMetrics.criticalErrors = criticalErrors.length
   })
 
-  test('Phase 3: Route and Component Validation', async ({ page }) => {
+  test('Phase 3: Route and Component Validation', async ({ page: _ }) => {
     console.log('🚀 Phase 3: Testing Route and Component Validation')
     
     // Test all interaction routes
@@ -337,7 +337,7 @@ test.describe('Interaction System Performance Validation', () => {
   // PHASE 4: OPTIMIZATION & REPORTING
   // ===============================
   
-  test('Phase 4: Performance Metrics Collection and Reporting', async ({ page }) => {
+  test('Phase 4: Performance Metrics Collection and Reporting', async ({ page: _ }) => {
     console.log('🚀 Phase 4: Performance Metrics Collection and Reporting')
     
     // Collect comprehensive performance data
@@ -391,7 +391,7 @@ test.describe('Interaction System Performance Validation', () => {
     performanceMetrics.bundleSize = totalJSSize
   })
 
-  test('Phase 4: Final Performance Report', async ({ page }) => {
+  test('Phase 4: Final Performance Report', async ({ page: _ }) => {
     console.log('🚀 Phase 4: Generating Final Performance Report')
     
     // Generate comprehensive performance report
@@ -470,7 +470,7 @@ test.describe('Interaction System Performance Validation', () => {
 // Additional utility tests for Stage 5.2 validation
 test.describe('Interaction System Stage 5.2 Validation', () => {
   
-  test('Database Integration - Demo Mode Handling', async ({ page }) => {
+  test('Database Integration - Demo Mode Handling', async ({ page: _ }) => {
     await page.goto('http://localhost:3000/interactions')
     await page.waitForLoadState('networkidle')
     
@@ -485,7 +485,7 @@ test.describe('Interaction System Stage 5.2 Validation', () => {
     console.log('✅ Demo mode handling validated')
   })
   
-  test('API Calls - Demo Mode Fallback', async ({ page }) => {
+  test('API Calls - Demo Mode Fallback', async ({ page: _ }) => {
     // Monitor network requests
     const apiCalls: string[] = []
     page.on('request', request => {
@@ -506,7 +506,7 @@ test.describe('Interaction System Stage 5.2 Validation', () => {
     console.log('✅ API fallback handling validated')
   })
   
-  test('Production Readiness Check', async ({ page }) => {
+  test('Production Readiness Check', async ({ page: _ }) => {
     const issues: string[] = []
     
     // Check for missing alt attributes

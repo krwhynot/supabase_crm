@@ -21,5 +21,6 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-explicit-any': 'warn',
+    'vue/no-deprecated-filter': 'off', // Disabled due to false positives with TypeScript union types
   },
 }

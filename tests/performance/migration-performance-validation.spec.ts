@@ -389,7 +389,7 @@ class MigrationPerformanceTester {
 }
 
 test.describe('Migration Performance Validation', () => {
-  test('Phase 1: Migration Execution Performance', async ({ page }) => {
+  test('Phase 1: Migration Execution Performance', async ({ page: _ }) => {
     console.log('🚀 Phase 1: Testing migration execution performance...')
     
     const tester = new MigrationPerformanceTester(page)
@@ -409,7 +409,7 @@ test.describe('Migration Performance Validation', () => {
     console.log('✅ Phase 1: Migration execution performance validated')
   })
 
-  test('Phase 2: Index Effectiveness Analysis', async ({ page }) => {
+  test('Phase 2: Index Effectiveness Analysis', async ({ page: _ }) => {
     console.log('🔍 Phase 2: Analyzing index effectiveness...')
     
     const tester = new MigrationPerformanceTester(page)
@@ -428,7 +428,7 @@ test.describe('Migration Performance Validation', () => {
     console.log('✅ Phase 2: Index effectiveness validated')
   })
 
-  test('Phase 3: Query Performance Impact Assessment', async ({ page }) => {
+  test('Phase 3: Query Performance Impact Assessment', async ({ page: _ }) => {
     console.log('⚡ Phase 3: Assessing query performance impact...')
     
     const tester = new MigrationPerformanceTester(page)
@@ -458,7 +458,7 @@ test.describe('Migration Performance Validation', () => {
     console.log('✅ Phase 3: Query performance impact validated')
   })
 
-  test('Phase 4: Rollback Performance Validation', async ({ page }) => {
+  test('Phase 4: Rollback Performance Validation', async ({ page: _ }) => {
     console.log('🔄 Phase 4: Validating rollback performance...')
     
     const tester = new MigrationPerformanceTester(page)
@@ -479,7 +479,7 @@ test.describe('Migration Performance Validation', () => {
 })
 
 test.describe('Migration Safety and Monitoring', () => {
-  test('should validate migration safety procedures', async ({ page }) => {
+  test('should validate migration safety procedures', async ({ page: _ }) => {
     console.log('🛡️ Validating migration safety procedures...')
 
     const tester = new MigrationPerformanceTester(page)
@@ -514,7 +514,7 @@ test.describe('Migration Safety and Monitoring', () => {
     console.log('✅ Migration safety procedures validated')
   })
 
-  test('should validate monitoring and alerting readiness', async ({ page }) => {
+  test('should validate monitoring and alerting readiness', async ({ page: _ }) => {
     console.log('📊 Validating monitoring readiness...')
 
     // Simulate monitoring metrics collection

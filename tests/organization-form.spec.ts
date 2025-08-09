@@ -184,7 +184,7 @@ class OrganizationFormHelpers {
 }
 
 test.describe('Organization Form - Happy Path Tests', () => {
-  test('should complete full form submission successfully', async ({ page }) => {
+  test('should complete full form submission successfully', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -217,7 +217,7 @@ test.describe('Organization Form - Happy Path Tests', () => {
     await expect(page.locator('main h1')).toContainText(validOrganizationData.name);
   });
 
-  test('should allow navigation between steps', async ({ page }) => {
+  test('should allow navigation between steps', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -251,7 +251,7 @@ test.describe('Organization Form - Happy Path Tests', () => {
 });
 
 test.describe('Organization Form - Validation Tests', () => {
-  test('should validate required fields in Step 1', async ({ page }) => {
+  test('should validate required fields in Step 1', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -273,7 +273,7 @@ test.describe('Organization Form - Validation Tests', () => {
     )).toBe(true);
   });
 
-  test('should validate field formats and lengths', async ({ page }) => {
+  test('should validate field formats and lengths', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -293,7 +293,7 @@ test.describe('Organization Form - Validation Tests', () => {
     // Step 2 now only has address fields, phone, and notes - all optional
   });
 
-  test('should show global form errors', async ({ page }) => {
+  test('should show global form errors', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -338,7 +338,7 @@ test.describe('Organization Form - Validation Tests', () => {
 });
 
 test.describe('Organization Form - Segment Selector Tests', () => {
-  test('should support type-ahead search functionality', async ({ page }) => {
+  test('should support type-ahead search functionality', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -357,7 +357,7 @@ test.describe('Organization Form - Segment Selector Tests', () => {
     await expect(dropdown).toContainText('Add new segment');
   });
 
-  test('should allow adding new segments', async ({ page }) => {
+  test('should allow adding new segments', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -384,7 +384,7 @@ test.describe('Organization Form - Segment Selector Tests', () => {
     expect(inputValue).toBe(newSegment);
   });
 
-  test('should show popular segments when no search query', async ({ page }) => {
+  test('should show popular segments when no search query', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -405,7 +405,7 @@ test.describe('Organization Form - Segment Selector Tests', () => {
 });
 
 test.describe('Organization Form - Auto-save Tests', () => {
-  test('should auto-save form draft', async ({ page }) => {
+  test('should auto-save form draft', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -427,7 +427,7 @@ test.describe('Organization Form - Auto-save Tests', () => {
 });
 
 test.describe('Organization Form - Accessibility Tests', () => {
-  test('should support keyboard navigation', async ({ page }) => {
+  test('should support keyboard navigation', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -451,7 +451,7 @@ test.describe('Organization Form - Accessibility Tests', () => {
     expect(await helpers.getCurrentStep()).toBe(2);
   });
 
-  test('should have proper ARIA attributes', async ({ page }) => {
+  test('should have proper ARIA attributes', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -478,7 +478,7 @@ test.describe('Organization Form - Accessibility Tests', () => {
     await expect(progressIndicator.first()).toBeVisible();
   });
 
-  test('should announce errors to screen readers', async ({ page }) => {
+  test('should announce errors to screen readers', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -554,7 +554,7 @@ test.describe('Organization Form - Mobile Tests', () => {
 });
 
 test.describe('Organization Form - Error Handling Tests', () => {
-  test('should handle network errors gracefully', async ({ page }) => {
+  test('should handle network errors gracefully', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -601,7 +601,7 @@ test.describe('Organization Form - Error Handling Tests', () => {
     expect(errorFound).toBe(true);
   });
 
-  test('should handle validation errors from server', async ({ page }) => {
+  test('should handle validation errors from server', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -648,7 +648,7 @@ test.describe('Organization Form - Error Handling Tests', () => {
 });
 
 test.describe('Organization Form - Performance Tests', () => {
-  test('should load form quickly', async ({ page }) => {
+  test('should load form quickly', async ({ page: _ }) => {
     const startTime = Date.now();
     
     await page.goto('/organizations/new');
@@ -663,7 +663,7 @@ test.describe('Organization Form - Performance Tests', () => {
     await expect(nameInput).toBeEnabled();
   });
 
-  test('should handle rapid typing in segment selector', async ({ page }) => {
+  test('should handle rapid typing in segment selector', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -685,7 +685,7 @@ test.describe('Organization Form - Performance Tests', () => {
 });
 
 test.describe('Organization Form - Contact Status Warning', () => {
-  test('should show contact warning when organization has no contacts', async ({ page }) => {
+  test('should show contact warning when organization has no contacts', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -721,7 +721,7 @@ test.describe('Organization Form - Contact Status Warning', () => {
 
 // Utility test for debugging
 test.describe('Organization Form - Debug Tests', () => {
-  test.skip('debug form state', async ({ page }) => {
+  test.skip('debug form state', async ({ page: _ }) => {
     const helpers = new OrganizationFormHelpers(page);
     
     await helpers.navigateToCreatePage();

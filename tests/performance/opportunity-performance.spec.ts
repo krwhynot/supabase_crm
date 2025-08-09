@@ -96,8 +96,8 @@ class PerformanceMeasurement {
   }> {
     const startTime = Date.now()
     let domContentLoadedTime = 0
-    const firstContentfulPaint = 0
-    const largestContentfulPaint = 0
+    const _firstContentfulPaint = 0
+    const _largestContentfulPaint = 0
     let networkRequestCount = 0
 
     // Set up performance monitoring
@@ -224,7 +224,7 @@ class PerformanceMeasurement {
 }
 
 test.describe('Opportunity List - Performance', () => {
-  test('should load within performance thresholds', async ({ page }) => {
+  test('should load within performance thresholds', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
     
     // Mock normal dataset
@@ -273,7 +273,7 @@ test.describe('Opportunity List - Performance', () => {
     console.log('Opportunity List Performance Metrics:', metrics)
   })
 
-  test('should handle large datasets efficiently', async ({ page }) => {
+  test('should handle large datasets efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
     
     // Mock large dataset (100+ opportunities)
@@ -319,7 +319,7 @@ test.describe('Opportunity List - Performance', () => {
     console.log('Large Dataset Performance Metrics:', { metrics, memoryUsage })
   })
 
-  test('should perform search operations efficiently', async ({ page }) => {
+  test('should perform search operations efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
     
     // Mock search API with realistic response time
@@ -373,7 +373,7 @@ test.describe('Opportunity List - Performance', () => {
     console.log('Search Performance:', { searchTimes, averageSearchTime })
   })
 
-  test('should filter data quickly', async ({ page }) => {
+  test('should filter data quickly', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
     
     await page.route('**/api/opportunities**', route => {
@@ -418,7 +418,7 @@ test.describe('Opportunity List - Performance', () => {
 })
 
 test.describe('Opportunity Form - Performance', () => {
-  test('should load form within performance thresholds', async ({ page }) => {
+  test('should load form within performance thresholds', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
 
     // Mock form dependencies
@@ -463,7 +463,7 @@ test.describe('Opportunity Form - Performance', () => {
     console.log('Form Load Performance:', metrics)
   })
 
-  test('should handle form submission efficiently', async ({ page }) => {
+  test('should handle form submission efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
 
     // Mock APIs
@@ -543,7 +543,7 @@ test.describe('Opportunity Form - Performance', () => {
     console.log('Form Submission Performance:', submissionMetrics)
   })
 
-  test('should handle batch creation efficiently', async ({ page }) => {
+  test('should handle batch creation efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
 
     // Mock APIs for batch creation
@@ -650,7 +650,7 @@ test.describe('Opportunity Form - Performance', () => {
 })
 
 test.describe('Memory and Resource Usage', () => {
-  test('should maintain reasonable memory usage', async ({ page }) => {
+  test('should maintain reasonable memory usage', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
 
     // Mock heavy dataset
@@ -706,7 +706,7 @@ test.describe('Memory and Resource Usage', () => {
     }
   })
 
-  test('should optimize network requests', async ({ page }) => {
+  test('should optimize network requests', async ({ page: _ }) => {
     let requestCount = 0
     const requestUrls: string[] = []
 
@@ -742,8 +742,8 @@ test.describe('Memory and Resource Usage', () => {
 })
 
 test.describe('Stress Testing', () => {
-  test('should handle rapid user interactions', async ({ page }) => {
-    const perf = new PerformanceMeasurement(page)
+  test('should handle rapid user interactions', async ({ page: _ }) => {
+    const _perf = new PerformanceMeasurement(page)
 
     await page.route('**/api/opportunities**', route => {
       route.fulfill({

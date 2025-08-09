@@ -309,7 +309,7 @@ class OptimizedMigrationTester {
 }
 
 test.describe('Optimized Migration Validation', () => {
-  test('should validate optimized migration execution performance', async ({ page }) => {
+  test('should validate optimized migration execution performance', async ({ page: _ }) => {
     console.log('🚀 Testing optimized migration execution...')
     
     const tester = new OptimizedMigrationTester(page)
@@ -333,7 +333,7 @@ test.describe('Optimized Migration Validation', () => {
     console.log('✅ Optimized migration execution performance validated')
   })
 
-  test('should validate optimized query performance', async ({ page }) => {
+  test('should validate optimized query performance', async ({ page: _ }) => {
     console.log('⚡ Testing optimized query performance...')
     
     const tester = new OptimizedMigrationTester(page)
@@ -356,7 +356,7 @@ test.describe('Optimized Migration Validation', () => {
     console.log('✅ Optimized query performance validated')
   })
 
-  test('should validate optimized index effectiveness', async ({ page }) => {
+  test('should validate optimized index effectiveness', async ({ page: _ }) => {
     console.log('🔍 Testing optimized index effectiveness...')
     
     const tester = new OptimizedMigrationTester(page)
@@ -376,7 +376,7 @@ test.describe('Optimized Migration Validation', () => {
     console.log('✅ Optimized index effectiveness validated')
   })
 
-  test('should validate optimized rollback performance', async ({ page }) => {
+  test('should validate optimized rollback performance', async ({ page: _ }) => {
     console.log('🔄 Testing optimized rollback performance...')
     
     const tester = new OptimizedMigrationTester(page)
@@ -398,7 +398,7 @@ test.describe('Optimized Migration Validation', () => {
 })
 
 test.describe('Production Readiness Validation', () => {
-  test('should validate production deployment readiness', async ({ page }) => {
+  test('should validate production deployment readiness', async ({ page: _ }) => {
     console.log('🛡️ Validating production deployment readiness...')
 
     const tester = new OptimizedMigrationTester(page)
@@ -427,7 +427,7 @@ test.describe('Production Readiness Validation', () => {
     console.log('✅ Production deployment readiness validated')
   })
 
-  test('should validate monitoring and alerting readiness', async ({ page }) => {
+  test('should validate monitoring and alerting readiness', async ({ page: _ }) => {
     console.log('📊 Validating monitoring readiness...')
 
     // Simulate monitoring metrics
@@ -456,7 +456,7 @@ test.describe('Production Readiness Validation', () => {
 })
 
 test.describe('Performance Regression Prevention', () => {
-  test('should prevent identified performance regressions', async ({ page }) => {
+  test('should prevent identified performance regressions', async ({ page: _ }) => {
     console.log('🔒 Testing performance regression prevention...')
 
     const tester = new OptimizedMigrationTester(page)

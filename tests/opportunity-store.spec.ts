@@ -65,7 +65,8 @@ const mockKPIs = {
   conversion_rate: 25.5
 };
 
-const mockFormData = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _mockFormData = {
   name: '',
   organization_id: 'test-org-123',
   context: 'NEW_BUSINESS',
@@ -101,7 +102,8 @@ class OpportunityStoreTestHelpers {
   async setupMockAPIs() {
     // Mock opportunity list API
     await this.page.route('**/api/opportunities**', route => {
-      const url = route.request().url();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _url = route.request().url();
       
       if (route.request().method() === 'GET') {
         // Handle filtered/paginated requests
@@ -285,7 +287,7 @@ class OpportunityStoreTestHelpers {
 }
 
 test.describe('Opportunity Store - State Management', () => {
-  test('should initialize with correct default state', async ({ page }) => {
+  test('should initialize with correct default state', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -304,7 +306,7 @@ test.describe('Opportunity Store - State Management', () => {
     expect(state.totalCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('should update loading states correctly', async ({ page }) => {
+  test('should update loading states correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock delayed API response to test loading state
@@ -335,7 +337,7 @@ test.describe('Opportunity Store - State Management', () => {
     expect(finalState.isLoading).toBe(false);
   });
 
-  test('should handle error states properly', async ({ page }) => {
+  test('should handle error states properly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock API error
@@ -362,7 +364,7 @@ test.describe('Opportunity Store - State Management', () => {
 });
 
 test.describe('Opportunity Store - CRUD Operations', () => {
-  test('should fetch opportunities list successfully', async ({ page }) => {
+  test('should fetch opportunities list successfully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -380,7 +382,7 @@ test.describe('Opportunity Store - CRUD Operations', () => {
     expect(state.totalCount).toBe(mockOpportunities.length);
   });
 
-  test('should fetch individual opportunity details', async ({ page }) => {
+  test('should fetch individual opportunity details', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -399,7 +401,7 @@ test.describe('Opportunity Store - CRUD Operations', () => {
     expect(state.selectedOpportunity.name).toBe(mockOpportunities[0].name);
   });
 
-  test('should create new opportunity successfully', async ({ page }) => {
+  test('should create new opportunity successfully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -427,7 +429,7 @@ test.describe('Opportunity Store - CRUD Operations', () => {
     expect(state.opportunities).toBeTruthy();
   });
 
-  test('should update opportunity successfully', async ({ page }) => {
+  test('should update opportunity successfully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -452,7 +454,7 @@ test.describe('Opportunity Store - CRUD Operations', () => {
     expect(state.selectedOpportunity.name).toContain('Updated');
   });
 
-  test('should delete opportunity successfully', async ({ page }) => {
+  test('should delete opportunity successfully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -479,7 +481,7 @@ test.describe('Opportunity Store - CRUD Operations', () => {
 });
 
 test.describe('Opportunity Store - Batch Operations', () => {
-  test('should create batch opportunities successfully', async ({ page }) => {
+  test('should create batch opportunities successfully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -509,7 +511,7 @@ test.describe('Opportunity Store - Batch Operations', () => {
     await expect(page.locator('[data-testid="failed-count"]')).toContainText('0');
   });
 
-  test('should generate name previews correctly', async ({ page }) => {
+  test('should generate name previews correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -540,7 +542,7 @@ test.describe('Opportunity Store - Batch Operations', () => {
     await expect(page.locator('[data-testid="name-preview-item"]').nth(1)).toContainText('Principal Two');
   });
 
-  test('should handle batch creation errors gracefully', async ({ page }) => {
+  test('should handle batch creation errors gracefully', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock batch creation error
@@ -591,7 +593,7 @@ test.describe('Opportunity Store - Batch Operations', () => {
 });
 
 test.describe('Opportunity Store - KPIs and Analytics', () => {
-  test('should fetch and display KPIs correctly', async ({ page }) => {
+  test('should fetch and display KPIs correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -616,7 +618,7 @@ test.describe('Opportunity Store - KPIs and Analytics', () => {
     await expect(page.locator('[data-testid="kpi-won-this-month"] .kpi-value')).toContainText('3');
   });
 
-  test('should calculate computed KPIs correctly', async ({ page }) => {
+  test('should calculate computed KPIs correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -645,7 +647,7 @@ test.describe('Opportunity Store - KPIs and Analytics', () => {
     expect(computedAverage).toBe(expectedAverage);
   });
 
-  test('should fetch stage distribution correctly', async ({ page }) => {
+  test('should fetch stage distribution correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     
@@ -668,7 +670,7 @@ test.describe('Opportunity Store - KPIs and Analytics', () => {
 });
 
 test.describe('Opportunity Store - Filtering and Pagination', () => {
-  test('should apply filters correctly', async ({ page }) => {
+  test('should apply filters correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock filtered API response
@@ -708,7 +710,7 @@ test.describe('Opportunity Store - Filtering and Pagination', () => {
     expect(rows).toBe(1); // Only one opportunity has NEW_LEAD stage in mock data
   });
 
-  test('should handle search functionality', async ({ page }) => {
+  test('should handle search functionality', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock search API response
@@ -757,7 +759,7 @@ test.describe('Opportunity Store - Filtering and Pagination', () => {
     });
   });
 
-  test('should handle pagination correctly', async ({ page }) => {
+  test('should handle pagination correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     
     // Mock paginated API response
@@ -798,7 +800,7 @@ test.describe('Opportunity Store - Filtering and Pagination', () => {
     }
   });
 
-  test('should reset filters correctly', async ({ page }) => {
+  test('should reset filters correctly', async ({ page: _ }) => {
     const helpers = new OpportunityStoreTestHelpers(page);
     await helpers.setupMockAPIs();
     

@@ -24,7 +24,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Database Schema & Data Integrity', () => {
-    test('Dashboard loads with proper data structure', async ({ page }) => {
+    test('Dashboard loads with proper data structure', async ({ page: _ }) => {
       await page.goto(BASE_URL)
       await page.waitForLoadState('networkidle')
       
@@ -44,7 +44,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log(`✓ Database integrity: Found ${kpiCount} KPI values`)
     })
 
-    test('Opportunities list displays proper schema fields', async ({ page }) => {
+    test('Opportunities list displays proper schema fields', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities`)
       await page.waitForLoadState('networkidle')
       
@@ -75,7 +75,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Frontend Components & User Interface', () => {
-    test('Navigation sidebar works correctly', async ({ page }) => {
+    test('Navigation sidebar works correctly', async ({ page: _ }) => {
       await page.goto(BASE_URL)
       await page.waitForLoadState('networkidle')
       
@@ -103,7 +103,7 @@ test.describe('Comprehensive QA Validation', () => {
       }
     })
 
-    test('Opportunity creation form components work', async ({ page }) => {
+    test('Opportunity creation form components work', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities/new`)
       await page.waitForLoadState('networkidle')
       
@@ -133,7 +133,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log('✓ Frontend: Opportunity creation form components working')
     })
 
-    test('Principal activity dashboard components', async ({ page }) => {
+    test('Principal activity dashboard components', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/principals`)
       await page.waitForLoadState('networkidle')
       
@@ -162,7 +162,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('API & Service Layer Validation', () => {
-    test('KPI data loading and error handling', async ({ page }) => {
+    test('KPI data loading and error handling', async ({ page: _ }) => {
       await page.goto(BASE_URL)
       
       // Wait for KPI data to load
@@ -187,7 +187,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log('✓ API: KPI data loading and error handling working')
     })
 
-    test('Interaction data service integration', async ({ page }) => {
+    test('Interaction data service integration', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/interactions`)
       await page.waitForLoadState('networkidle')
       
@@ -215,7 +215,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Navigation & User Experience', () => {
-    test('Breadcrumb navigation system', async ({ page }) => {
+    test('Breadcrumb navigation system', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities/new`)
       await page.waitForLoadState('networkidle')
       
@@ -234,7 +234,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log('✓ UX: Breadcrumb navigation working')
     })
 
-    test('Mobile responsive design', async ({ page }) => {
+    test('Mobile responsive design', async ({ page: _ }) => {
       // Test tablet viewport
       await page.setViewportSize({ width: 768, height: 1024 })
       await page.goto(BASE_URL)
@@ -264,7 +264,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Business Logic & Workflow Validation', () => {
-    test('Auto-naming system functionality', async ({ page }) => {
+    test('Auto-naming system functionality', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities/new`)
       await page.waitForLoadState('networkidle')
       
@@ -288,7 +288,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log('✓ Business Logic: Auto-naming system working')
     })
 
-    test('Opportunity stage progression validation', async ({ page }) => {
+    test('Opportunity stage progression validation', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities`)
       await page.waitForLoadState('networkidle')
       
@@ -316,7 +316,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Performance & Integration Testing', () => {
-    test('Page load performance benchmarks', async ({ page }) => {
+    test('Page load performance benchmarks', async ({ page: _ }) => {
       // Dashboard performance
       const dashboardStart = Date.now()
       await page.goto(BASE_URL)
@@ -336,7 +336,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log(`✓ Performance: Navigation completed in ${navLoad}ms`)
     })
 
-    test('Cross-component integration', async ({ page }) => {
+    test('Cross-component integration', async ({ page: _ }) => {
       await page.goto(BASE_URL)
       await page.waitForLoadState('networkidle')
       
@@ -367,7 +367,7 @@ test.describe('Comprehensive QA Validation', () => {
   // ===============================
   
   test.describe('Accessibility Compliance', () => {
-    test('ARIA attributes and semantic structure', async ({ page }) => {
+    test('ARIA attributes and semantic structure', async ({ page: _ }) => {
       await page.goto(BASE_URL)
       await page.waitForLoadState('networkidle')
       
@@ -391,7 +391,7 @@ test.describe('Comprehensive QA Validation', () => {
       console.log(`✓ Accessibility: Found ${interactiveCount} interactive elements`)
     })
 
-    test('Form accessibility validation', async ({ page }) => {
+    test('Form accessibility validation', async ({ page: _ }) => {
       await page.goto(`${BASE_URL}/opportunities/new`)
       await page.waitForLoadState('networkidle')
       

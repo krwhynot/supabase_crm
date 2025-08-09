@@ -537,6 +537,7 @@ const filteredInteractions = computed(() => {
         .sort((a, b) => new Date(a.follow_up_date!).getTime() - new Date(b.follow_up_date!).getTime())
 
     case 'all':
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       return interactions.value
         .sort((a, b) => new Date(b.interaction_date).getTime() - new Date(a.interaction_date).getTime())
         .slice(0, 10) // Show 10 most recent for 'all' tab

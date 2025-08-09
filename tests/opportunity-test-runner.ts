@@ -5,7 +5,7 @@
  * Provides organized test execution with detailed reporting and validation.
  */
 
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 // Test execution configuration
 const TEST_CONFIG = {
@@ -120,7 +120,7 @@ class TestExecutionSummary {
 test.describe('Opportunity Management Test Suite Execution', () => {
   const summary = new TestExecutionSummary();
   
-  test('Execute Phase 9.1 Functionality Testing', async ({ page }) => {
+  test('Execute Phase 9.1 Functionality Testing', async ({ page: _ }) => {
     console.log('🚀 Starting Opportunity Management Functionality Testing...\n');
     
     // Simulate test category execution
@@ -203,7 +203,7 @@ async function simulateTestExecution(category: string): Promise<Array<{ name: st
 
 // Test configuration validation
 test.describe('Test Environment Validation', () => {
-  test('Validate test environment setup', async ({ page }) => {
+  test('Validate test environment setup', async ({ page: _ }) => {
     console.log('🔧 Validating test environment...');
     
     // Check if application is accessible
@@ -249,7 +249,7 @@ test.describe('Test Environment Validation', () => {
 
 // Performance benchmarking
 test.describe('Performance Benchmarking', () => {
-  test('Measure opportunity management performance', async ({ page }) => {
+  test('Measure opportunity management performance', async ({ page: _ }) => {
     console.log('⚡ Running performance benchmarks...');
     
     const benchmarks: Array<{ name: string; url: string; maxTime: number }> = [
@@ -306,7 +306,7 @@ test.describe('Performance Benchmarking', () => {
 
 // Accessibility validation
 test.describe('Accessibility Validation', () => {
-  test('Validate WCAG 2.1 AA compliance', async ({ page }) => {
+  test('Validate WCAG 2.1 AA compliance', async ({ page: _ }) => {
     console.log('♿ Running accessibility validation...');
     
     const pagesToTest = [

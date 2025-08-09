@@ -211,7 +211,7 @@ class ContactFormHelpers {
 }
 
 test.describe('Contact Multi-Step Form - Navigation Tests', () => {
-  test('should navigate through all 2 steps successfully', async ({ page }) => {
+  test('should navigate through all 2 steps successfully', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -231,7 +231,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     await expect(submitButton).toBeVisible();
   });
 
-  test('should prevent progression with missing required fields', async ({ page }) => {
+  test('should prevent progression with missing required fields', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -258,7 +258,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     expect(await helpers.isSubmitButtonDisabled()).toBe(false);
   });
 
-  test('should maintain form data when navigating back and forward', async ({ page }) => {
+  test('should maintain form data when navigating back and forward', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -292,7 +292,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
     expect(addressValue).toBe(validContactData.address);
   });
 
-  test('should update step progress indicator correctly', async ({ page }) => {
+  test('should update step progress indicator correctly', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -313,7 +313,7 @@ test.describe('Contact Multi-Step Form - Navigation Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
-  test('should work properly on iPad viewport without scrolling', async ({ page }) => {
+  test('should work properly on iPad viewport without scrolling', async ({ page: _ }) => {
     // Set iPad viewport
     await page.setViewportSize({ width: 768, height: 1024 });
     
@@ -350,7 +350,7 @@ test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
     await expect(page.locator('textarea[name="notes"]')).toBeVisible();
   });
 
-  test('should have touch-friendly button sizes on iPad', async ({ page }) => {
+  test('should have touch-friendly button sizes on iPad', async ({ page: _ }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
     
     const helpers = new ContactFormHelpers(page);
@@ -376,7 +376,7 @@ test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
     expect(await helpers.getCurrentStep()).toBe(1);
   });
 
-  test('should handle responsive layout switches', async ({ page }) => {
+  test('should handle responsive layout switches', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     // Start with desktop viewport
@@ -410,7 +410,7 @@ test.describe('Contact Multi-Step Form - iPad Viewport Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - Validation Tests', () => {
-  test('should validate Step 1 required fields', async ({ page }) => {
+  test('should validate Step 1 required fields', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -435,7 +435,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     // For now, we'll assume the form handles missing org gracefully
   });
 
-  test('should validate Step 2 - all fields optional', async ({ page }) => {
+  test('should validate Step 2 - all fields optional', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -454,7 +454,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     expect(await helpers.isSubmitButtonDisabled()).toBe(false);
   });
 
-  test('should validate field formats', async ({ page }) => {
+  test('should validate field formats', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -482,7 +482,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     )).toBe(false);
   });
 
-  test('should validate Step 2 optional field formats', async ({ page }) => {
+  test('should validate Step 2 optional field formats', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -514,7 +514,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
     )).toBe(false);
   });
 
-  test('should show real-time validation on field blur', async ({ page }) => {
+  test('should show real-time validation on field blur', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -538,7 +538,7 @@ test.describe('Contact Multi-Step Form - Validation Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - Organization Creation Modal Tests', () => {
-  test('should open organization creation modal', async ({ page }) => {
+  test('should open organization creation modal', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -556,7 +556,7 @@ test.describe('Contact Multi-Step Form - Organization Creation Modal Tests', () 
     await expect(page.locator('input[name="name"]')).toBeVisible();
   });
 
-  test('should close organization creation modal', async ({ page }) => {
+  test('should close organization creation modal', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -580,7 +580,7 @@ test.describe('Contact Multi-Step Form - Organization Creation Modal Tests', () 
 });
 
 test.describe('Contact Multi-Step Form - Auto-save Tests', () => {
-  test('should show auto-save status indicators', async ({ page }) => {
+  test('should show auto-save status indicators', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -599,7 +599,7 @@ test.describe('Contact Multi-Step Form - Auto-save Tests', () => {
     }
   });
 
-  test('should restore form data after page reload', async ({ page }) => {
+  test('should restore form data after page reload', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -626,7 +626,7 @@ test.describe('Contact Multi-Step Form - Auto-save Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - Submission Tests', () => {
-  test('should complete full form submission successfully', async ({ page }) => {
+  test('should complete full form submission successfully', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -653,7 +653,7 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     expect(hasSuccessMessage || isDetailPage).toBe(true);
   });
 
-  test('should create contact with only required fields', async ({ page }) => {
+  test('should create contact with only required fields', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -687,7 +687,7 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
     expect(hasSuccessMessage || isDetailPage).toBe(true);
   });
 
-  test('should handle form submission errors gracefully', async ({ page }) => {
+  test('should handle form submission errors gracefully', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -722,7 +722,7 @@ test.describe('Contact Multi-Step Form - Submission Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - Accessibility Tests', () => {
-  test('should support keyboard navigation', async ({ page }) => {
+  test('should support keyboard navigation', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -743,7 +743,7 @@ test.describe('Contact Multi-Step Form - Accessibility Tests', () => {
     expect(await helpers.getCurrentStep()).toBe(2);
   });
 
-  test('should have proper ARIA attributes', async ({ page }) => {
+  test('should have proper ARIA attributes', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -763,7 +763,7 @@ test.describe('Contact Multi-Step Form - Accessibility Tests', () => {
     expect(ariaLabel).toContain('Step');
   });
 
-  test('should announce errors to screen readers', async ({ page }) => {
+  test('should announce errors to screen readers', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();
@@ -783,7 +783,7 @@ test.describe('Contact Multi-Step Form - Accessibility Tests', () => {
 });
 
 test.describe('Contact Multi-Step Form - Performance Tests', () => {
-  test('should load form quickly', async ({ page }) => {
+  test('should load form quickly', async ({ page: _ }) => {
     const startTime = Date.now();
     
     await page.goto('/contacts/new');
@@ -798,7 +798,7 @@ test.describe('Contact Multi-Step Form - Performance Tests', () => {
     await expect(firstNameInput).toBeEnabled();
   });
 
-  test('should handle rapid form interactions', async ({ page }) => {
+  test('should handle rapid form interactions', async ({ page: _ }) => {
     const helpers = new ContactFormHelpers(page);
     
     await helpers.navigateToCreatePage();

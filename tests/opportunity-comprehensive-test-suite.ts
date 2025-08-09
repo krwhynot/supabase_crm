@@ -14,7 +14,8 @@
 import { test, expect } from '@playwright/test'
 
 // Test suite configuration
-const TEST_SUITE_CONFIG = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _TEST_SUITE_CONFIG = {
   timeout: 60000, // 60 seconds per test
   parallel: false, // Run sequentially for comprehensive reporting
   retries: 1,
@@ -342,7 +343,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     })
   }
 
-  test('Unit Tests - Auto-naming Service', async ({ page }) => {
+  test('Unit Tests - Auto-naming Service', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -376,7 +377,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Unit Tests', 'Auto-naming Service', passed, duration, error)
   })
 
-  test('Unit Tests - Store Reactivity', async ({ page }) => {
+  test('Unit Tests - Store Reactivity', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -404,7 +405,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Unit Tests', 'Store Reactivity', passed, duration, error)
   })
 
-  test('Component Integration - Form Validation', async ({ page }) => {
+  test('Component Integration - Form Validation', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -443,7 +444,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Component Integration Tests', 'Form Validation', passed, duration, error)
   })
 
-  test('Component Integration - Principal Multi-Select', async ({ page }) => {
+  test('Component Integration - Principal Multi-Select', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -477,7 +478,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Component Integration Tests', 'Principal Multi-Select', passed, duration, error)
   })
 
-  test('End-to-End - Complete Opportunity Creation Flow', async ({ page }) => {
+  test('End-to-End - Complete Opportunity Creation Flow', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -526,7 +527,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('End-to-End Workflow Tests', 'Complete Opportunity Creation Flow', passed, duration, error)
   })
 
-  test('End-to-End - List Operations', async ({ page }) => {
+  test('End-to-End - List Operations', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -572,7 +573,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('End-to-End Workflow Tests', 'List Operations', passed, duration, error)
   })
 
-  test('Accessibility - WCAG Compliance', async ({ page }) => {
+  test('Accessibility - WCAG Compliance', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -620,7 +621,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Accessibility Tests', 'WCAG Compliance', passed, duration, error)
   })
 
-  test('Accessibility - iPad Viewport', async ({ page }) => {
+  test('Accessibility - iPad Viewport', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -670,7 +671,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Accessibility Tests', 'iPad Viewport', passed, duration, error)
   })
 
-  test('Performance - Page Load Times', async ({ page }) => {
+  test('Performance - Page Load Times', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''
@@ -707,7 +708,7 @@ test.describe('Comprehensive Opportunity Management Test Suite', () => {
     executor.recordResult('Performance Tests', 'Page Load Times', passed, duration, error)
   })
 
-  test('Cross-Feature Integration - Contextual Creation', async ({ page }) => {
+  test('Cross-Feature Integration - Contextual Creation', async ({ page: _ }) => {
     const startTime = Date.now()
     let passed = true
     let error = ''

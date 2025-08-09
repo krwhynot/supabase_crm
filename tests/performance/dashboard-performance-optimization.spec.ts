@@ -9,14 +9,14 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Dashboard Performance Optimization', () => {
   
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     // Enable performance monitoring
     await page.addInitScript(() => {
       window.performance.mark('test-start')
     })
   })
 
-  test('should load dashboard under 2000ms target after optimizations', async ({ page }) => {
+  test('should load dashboard under 2000ms target after optimizations', async ({ page: _ }) => {
     console.log('🚀 Testing optimized dashboard load performance...')
     
     const startTime = Date.now()
@@ -45,7 +45,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Dashboard performance optimization successful!')
   })
 
-  test('should lazy load KPI components without blocking initial render', async ({ page }) => {
+  test('should lazy load KPI components without blocking initial render', async ({ page: _ }) => {
     console.log('🔍 Testing lazy loading of KPI components...')
     
     const startTime = Date.now()
@@ -75,7 +75,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Lazy loading working correctly!')
   })
 
-  test('should have improved bundle size with code splitting', async ({ page }) => {
+  test('should have improved bundle size with code splitting', async ({ page: _ }) => {
     console.log('📦 Testing bundle size optimization...')
     
     // Monitor network requests to verify code splitting
@@ -120,7 +120,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Bundle optimization verified!')
   })
 
-  test('should demonstrate improved Time to Interactive (TTI)', async ({ page }) => {
+  test('should demonstrate improved Time to Interactive (TTI)', async ({ page: _ }) => {
     console.log('⚡ Testing Time to Interactive optimization...')
     
     await page.goto('/')
@@ -151,7 +151,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Time to Interactive optimization successful!')
   })
 
-  test('should cache static assets effectively', async ({ page }) => {
+  test('should cache static assets effectively', async ({ page: _ }) => {
     console.log('💾 Testing service worker caching...')
     
     // First visit - assets should be cached
@@ -179,7 +179,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Caching strategy working!')
   })
 
-  test('should maintain accessibility during performance optimizations', async ({ page }) => {
+  test('should maintain accessibility during performance optimizations', async ({ page: _ }) => {
     console.log('♿ Verifying accessibility is maintained...')
     
     await page.goto('/')
@@ -209,7 +209,7 @@ test.describe('Dashboard Performance Optimization', () => {
     console.log('✅ Accessibility maintained during optimization!')
   })
 
-  test('should show performance metrics in development console', async ({ page }) => {
+  test('should show performance metrics in development console', async ({ page: _ }) => {
     console.log('📊 Checking performance metrics logging...')
     
     const consoleMessages: string[] = []
@@ -269,7 +269,7 @@ test.describe('Dashboard Performance Optimization', () => {
  */
 test.describe('Performance Regression Prevention', () => {
   
-  test('should prevent performance regression - load time threshold', async ({ page }) => {
+  test('should prevent performance regression - load time threshold', async ({ page: _ }) => {
     console.log('🛡️  Running performance regression check...')
     
     const measurements: number[] = []
@@ -301,7 +301,7 @@ test.describe('Performance Regression Prevention', () => {
     console.log('✅ Performance regression check passed!')
   })
 
-  test('should monitor Core Web Vitals', async ({ page }) => {
+  test('should monitor Core Web Vitals', async ({ page: _ }) => {
     console.log('🔍 Monitoring Core Web Vitals...')
     
     await page.goto('/')

@@ -47,11 +47,11 @@ class OpportunityE2ETestHelper {
     }
   }
 
-  async navigateAndValidate(url: string, expectedTitle: string) {
+  async navigateAndValidate(url: string, _expectedTitle: string) {
     console.log(`Navigating to: ${url}`);
     await this.page.goto(url);
     await this.waitForPageLoad();
-    await this.takeScreenshot(url.replace(/[\/\:]/g, '-'));
+    await this.takeScreenshot(url.replace(/[/:\\]/g, '-'));
     
     // Check for console errors
     const errors = await this.checkConsoleErrors();
@@ -70,14 +70,14 @@ class OpportunityE2ETestHelper {
 test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
   let helper: OpportunityE2ETestHelper;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     helper = new OpportunityE2ETestHelper(page);
     
     // Set base URL to match running server
     page.setDefaultTimeout(10000);
   });
 
-  test('01 - Navigate to /opportunities page - verify layout renders correctly', async ({ page }) => {
+  test('01 - Navigate to /opportunities page - verify layout renders correctly', async ({ page: _ }) => {
     const result = await helper.navigateAndValidate('http://localhost:3001/opportunities', 'Opportunities');
     
     // Check main layout elements
@@ -116,7 +116,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     expect(layoutResults.filter(r => r.visible).length).toBeGreaterThan(2);
   });
 
-  test('02 - Check if KPI cards are displaying', async ({ page }) => {
+  test('02 - Check if KPI cards are displaying', async ({ page: _ }) => {
     await helper.navigateAndValidate('http://localhost:3001/opportunities', 'Opportunities');
     
     const kpiCards = [
@@ -157,7 +157,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     expect(kpiResults.filter(k => k.visible).length).toBeGreaterThan(0);
   });
 
-  test('03 - Test opportunity table rendering and data', async ({ page }) => {
+  test('03 - Test opportunity table rendering and data', async ({ page: _ }) => {
     await helper.navigateAndValidate('http://localhost:3001/opportunities', 'Opportunities');
     
     // Check table structure
@@ -216,7 +216,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     expect(tableResults.filter(r => r.visible).length).toBeGreaterThan(2);
   });
 
-  test('04 - Navigate to /opportunities/new - test create form', async ({ page }) => {
+  test('04 - Navigate to /opportunities/new - test create form', async ({ page: _ }) => {
     const result = await helper.navigateAndValidate('http://localhost:3001/opportunities/new', 'New Opportunity');
     
     // Check form structure
@@ -260,7 +260,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     expect(formResults.filter(f => f.visible).length).toBeGreaterThan(5);
   });
 
-  test('05 - Test form components interaction', async ({ page }) => {
+  test('05 - Test form components interaction', async ({ page: _ }) => {
     await helper.navigateAndValidate('http://localhost:3001/opportunities/new', 'New Opportunity');
     
     // Test Organization Select
@@ -324,7 +324,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     await helper.takeScreenshot('form-components-interaction');
   });
 
-  test('06 - Test navigation back to list', async ({ page }) => {
+  test('06 - Test navigation back to list', async ({ page: _ }) => {
     await helper.navigateAndValidate('http://localhost:3001/opportunities/new', 'New Opportunity');
     
     // Look for navigation elements
@@ -364,7 +364,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     await helper.takeScreenshot('navigation-back-test');
   });
 
-  test('07 - Test opportunity detail view', async ({ page }) => {
+  test('07 - Test opportunity detail view', async ({ page: _ }) => {
     // First, try to find an existing opportunity ID or create a mock
     await helper.navigateAndValidate('http://localhost:3001/opportunities', 'Opportunities');
     
@@ -386,7 +386,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
       }
     }
 
-    const result = await helper.navigateAndValidate(`http://localhost:3001/opportunities/${testId}`, 'Opportunity');
+    await helper.navigateAndValidate(`http://localhost:3001/opportunities/${testId}`, 'Opportunity');
     
     // Check detail view elements
     const detailElements = [
@@ -422,9 +422,9 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     }
   });
 
-  test('08 - Test opportunity edit view', async ({ page }) => {
+  test('08 - Test opportunity edit view', async ({ page: _ }) => {
     const testId = 'test-opportunity-123';
-    const result = await helper.navigateAndValidate(`http://localhost:3001/opportunities/${testId}/edit`, 'Edit Opportunity');
+    await helper.navigateAndValidate(`http://localhost:3001/opportunities/${testId}/edit`, 'Edit Opportunity');
     
     // Check edit form elements
     const editFormElements = [
@@ -466,7 +466,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     }
   });
 
-  test('09 - Test mobile/tablet compatibility', async ({ page }) => {
+  test('09 - Test mobile/tablet compatibility', async ({ page: _ }) => {
     const viewports = [
       { width: 375, height: 667, name: 'Mobile' },
       { width: 768, height: 1024, name: 'Tablet' },
@@ -505,7 +505,7 @@ test.describe('Opportunity Management - Comprehensive E2E Testing', () => {
     }
   });
 
-  test('10 - Error states and loading states comprehensive test', async ({ page }) => {
+  test('10 - Error states and loading states comprehensive test', async ({ page: _ }) => {
     console.log('Testing loading states...');
     
     // Test loading states by intercepting network requests

@@ -1298,7 +1298,7 @@ export function usePrincipalTimeline(
           month: 'long', 
           day: 'numeric' 
         })
-      case 'relative':
+      case 'relative': {
         const now = new Date()
         const diffMs = now.getTime() - activityDate.getTime()
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
@@ -1309,6 +1309,7 @@ export function usePrincipalTimeline(
         if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
         if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
         return `${Math.floor(diffDays / 365)} years ago`
+      }
       default:
         return activityDate.toLocaleDateString()
     }

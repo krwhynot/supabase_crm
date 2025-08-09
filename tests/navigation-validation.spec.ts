@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Navigation Component Validation', () => {
-  test('Navigation Item meets design standards after repair', async ({ page }) => {
+  test('Navigation Item meets design standards after repair', async ({ page: _ }) => {
     // Navigate to dashboard
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -64,7 +64,7 @@ test.describe('Navigation Component Validation', () => {
     console.log('🎉 All navigation component validations passed!');
   });
 
-  test('Navigation component passes comprehensive design evaluation', async ({ page }) => {
+  test('Navigation component passes comprehensive design evaluation', async ({ page: _ }) => {
     // Navigate to dashboard
     await page.goto('/');
     await page.waitForLoadState('networkidle');

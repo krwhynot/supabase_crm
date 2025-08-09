@@ -507,7 +507,7 @@ interface PerformanceValidationResult {
 }
 
 test.describe('Performance Test Orchestration', () => {
-  test('should execute complete 4-phase performance validation', async ({ page }) => {
+  test('should execute complete 4-phase performance validation', async ({ page: _ }) => {
     const orchestrator = new PerformanceTestOrchestrator()
     
     // Execute the complete performance validation process
@@ -539,7 +539,7 @@ test.describe('Performance Test Orchestration', () => {
     console.log(`   Production Ready: ${result.readyForProduction}`)
   })
   
-  test('should provide actionable recommendations for optimization', async ({ page }) => {
+  test('should provide actionable recommendations for optimization', async ({ page: _ }) => {
     const orchestrator = new PerformanceTestOrchestrator()
     const result = await orchestrator.executeCompletePerformanceValidation()
     
@@ -562,7 +562,7 @@ test.describe('Performance Test Orchestration', () => {
     console.log(`   Total recommendations: ${result.overallRecommendations.length}`)
   })
   
-  test('should validate against handoff performance requirements', async ({ page }) => {
+  test('should validate against handoff performance requirements', async ({ page: _ }) => {
     const orchestrator = new PerformanceTestOrchestrator()
     const result = await orchestrator.executeCompletePerformanceValidation()
     

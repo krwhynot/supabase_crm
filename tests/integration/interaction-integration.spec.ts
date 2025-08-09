@@ -6,11 +6,11 @@
  * and user experience journeys for the interaction management system.
  */
 
-import { test, expect, type Page, type Locator } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
 // Test Configuration
 const BASE_URL = 'http://localhost:3003'
-const TEST_TIMEOUT = 30000
+// const TEST_TIMEOUT = 30000 // Currently not used
 
 // User Workflow Data
 const testUserData = {
@@ -141,12 +141,12 @@ class IntegrationTestHelper {
  * Test Suite: End-to-End User Workflow Testing
  */
 test.describe('User Workflow Integration Tests', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _ }) => {
     await page.goto(BASE_URL)
     await page.waitForLoadState('networkidle')
   })
 
-  test('WF1: New User Onboarding Flow', async ({ page }) => {
+  test('WF1: New User Onboarding Flow', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Step 1: Dashboard Overview
@@ -168,7 +168,7 @@ test.describe('User Workflow Integration Tests', () => {
     await expect(page.locator('[data-testid="follow-up-indicator"]')).toBeVisible()
   })
 
-  test('WF2: Daily Usage Pattern', async ({ page }) => {
+  test('WF2: Daily Usage Pattern', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Step 1: Dashboard Review
@@ -188,7 +188,7 @@ test.describe('User Workflow Integration Tests', () => {
     console.log(`Found ${followUpCount} overdue follow-ups`)
   })
 
-  test('WF3: Mobile Field Worker Simulation', async ({ page }) => {
+  test('WF3: Mobile Field Worker Simulation', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Simulate mobile viewport
@@ -212,7 +212,7 @@ test.describe('User Workflow Integration Tests', () => {
     await helper.waitForPageTransition()
   })
 
-  test('WF4: Manager Review Workflow', async ({ page }) => {
+  test('WF4: Manager Review Workflow', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Step 1: Dashboard Analytics
@@ -230,7 +230,7 @@ test.describe('User Workflow Integration Tests', () => {
     await expect(page.locator('[data-testid="bulk-actions-menu"]')).toBeVisible()
   })
 
-  test('WF5: Opportunity Follow-up Integration', async ({ page }) => {
+  test('WF5: Opportunity Follow-up Integration', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Step 1: Navigate to Opportunities
@@ -263,7 +263,7 @@ test.describe('User Workflow Integration Tests', () => {
  * Test Suite: Cross-Component Integration Testing
  */
 test.describe('Cross-Component Integration Tests', () => {
-  test('CC1: Navigation Between Modules', async ({ page }) => {
+  test('CC1: Navigation Between Modules', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     const modules = ['dashboard', 'interactions', 'opportunities', 'contacts']
     
@@ -277,7 +277,7 @@ test.describe('Cross-Component Integration Tests', () => {
     }
   })
 
-  test('CC2: Data Consistency Across Views', async ({ page }) => {
+  test('CC2: Data Consistency Across Views', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Create interaction in one view
@@ -320,7 +320,7 @@ test.describe('Cross-Component Integration Tests', () => {
     await secondPage.close()
   })
 
-  test('CC4: KPI Calculations and Dashboard Integration', async ({ page }) => {
+  test('CC4: KPI Calculations and Dashboard Integration', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Record initial KPI values
@@ -343,7 +343,7 @@ test.describe('Cross-Component Integration Tests', () => {
     expect(parseInt(newWeek || '0')).toBeGreaterThanOrEqual(parseInt(initialWeek || '0'))
   })
 
-  test('CC5: Search and Filtering Integration', async ({ page }) => {
+  test('CC5: Search and Filtering Integration', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -373,7 +373,7 @@ test.describe('Cross-Component Integration Tests', () => {
  * Test Suite: User Experience Journey Testing
  */
 test.describe('User Experience Journey Tests', () => {
-  test('UX1: Error Handling and Recovery', async ({ page }) => {
+  test('UX1: Error Handling and Recovery', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -392,7 +392,7 @@ test.describe('User Experience Journey Tests', () => {
     await expect(page.locator('text=Interaction created successfully')).toBeVisible()
   })
 
-  test('UX2: Loading States and Progressive Enhancement', async ({ page }) => {
+  test('UX2: Loading States and Progressive Enhancement', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Simulate slow network
@@ -410,7 +410,7 @@ test.describe('User Experience Journey Tests', () => {
     await expect(page.locator('[data-testid="loading-spinner"]')).not.toBeVisible()
   })
 
-  test('UX3: Responsive Behavior Across Device Transitions', async ({ page }) => {
+  test('UX3: Responsive Behavior Across Device Transitions', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Start desktop
@@ -432,7 +432,7 @@ test.describe('User Experience Journey Tests', () => {
     await expect(page.locator('[data-testid="mobile-quick-actions"]')).toBeVisible()
   })
 
-  test('UX4: User Feedback and Notifications', async ({ page }) => {
+  test('UX4: User Feedback and Notifications', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Test success notifications
@@ -448,7 +448,7 @@ test.describe('User Experience Journey Tests', () => {
     await expect(page.locator('[data-testid="success-toast"]')).not.toBeVisible()
   })
 
-  test('UX5: Accessibility and Keyboard Navigation', async ({ page }) => {
+  test('UX5: Accessibility and Keyboard Navigation', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -472,7 +472,7 @@ test.describe('User Experience Journey Tests', () => {
  * Test Suite: Data Flow Integration Testing
  */
 test.describe('Data Flow Integration Tests', () => {
-  test('DF1: Data Persistence Across Page Refreshes', async ({ page }) => {
+  test('DF1: Data Persistence Across Page Refreshes', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Create interaction
@@ -490,7 +490,7 @@ test.describe('Data Flow Integration Tests', () => {
     }
   })
 
-  test('DF2: Form State Management and Recovery', async ({ page }) => {
+  test('DF2: Form State Management and Recovery', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -510,7 +510,7 @@ test.describe('Data Flow Integration Tests', () => {
     console.log('Form recovery test - Subject value:', subject)
   })
 
-  test('DF3: Real-time Data Synchronization', async ({ page }) => {
+  test('DF3: Real-time Data Synchronization', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // Subscribe to real-time updates
@@ -529,7 +529,7 @@ test.describe('Data Flow Integration Tests', () => {
     await expect(page.locator('[data-testid="interactions-list"]')).toBeVisible()
   })
 
-  test('DF4: Caching and Optimization Effectiveness', async ({ page }) => {
+  test('DF4: Caching and Optimization Effectiveness', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     // First load
@@ -552,7 +552,7 @@ test.describe('Data Flow Integration Tests', () => {
  * Test Suite: Performance Integration Testing
  */
 test.describe('Performance Integration Tests', () => {
-  test('PERF1: Page Transition Performance', async ({ page }) => {
+  test('PERF1: Page Transition Performance', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     const modules = ['dashboard', 'interactions', 'opportunities', 'contacts']
     
@@ -567,7 +567,7 @@ test.describe('Performance Integration Tests', () => {
     }
   })
 
-  test('PERF2: Form Submission Performance', async ({ page }) => {
+  test('PERF2: Form Submission Performance', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -589,7 +589,7 @@ test.describe('Performance Integration Tests', () => {
     console.log(`Form submission: ${submissionTime.toFixed(2)}ms`)
   })
 
-  test('PERF3: Search Performance', async ({ page }) => {
+  test('PERF3: Search Performance', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('interactions')
@@ -610,7 +610,7 @@ test.describe('Performance Integration Tests', () => {
     }
   })
 
-  test('PERF4: KPI Update Performance', async ({ page }) => {
+  test('PERF4: KPI Update Performance', async ({ page: _ }) => {
     const helper = new IntegrationTestHelper(page)
     
     await helper.navigateToSection('dashboard')
@@ -626,8 +626,8 @@ test.describe('Performance Integration Tests', () => {
     console.log(`KPI update: ${updateTime.toFixed(2)}ms`)
   })
 
-  test('PERF5: Concurrent User Simulation', async ({ page, context }) => {
-    const helper = new IntegrationTestHelper(page)
+  test('PERF5: Concurrent User Simulation', async ({ context }) => {
+    // const helper = new IntegrationTestHelper(page) // Currently not needed
     
     // Create multiple tabs to simulate concurrent users
     const tabs = []
@@ -663,8 +663,8 @@ test.describe('Performance Integration Tests', () => {
  * Test Suite: Integration Report Generation
  */
 test.describe('Integration Report Generation', () => {
-  test('Generate Comprehensive Integration Report', async ({ page }) => {
-    const helper = new IntegrationTestHelper(page)
+  test('Generate Comprehensive Integration Report', async () => {
+    // const helper = new IntegrationTestHelper(page) // Currently not needed
     const report = {
       timestamp: new Date().toISOString(),
       testResults: {

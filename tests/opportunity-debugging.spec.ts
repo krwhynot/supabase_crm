@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Opportunity Management - Debug Routes', () => {
-  test('Check what happens when navigating to /opportunities', async ({ page }) => {
+  test('Check what happens when navigating to /opportunities', async ({ page: _ }) => {
     console.log('Starting debug test...');
     
     // Navigate to opportunities route
@@ -68,7 +68,7 @@ test.describe('Opportunity Management - Debug Routes', () => {
     }
   });
   
-  test('Check if opportunity routes exist in Vue Router', async ({ page }) => {
+  test('Check if opportunity routes exist in Vue Router', async ({ page: _ }) => {
     // Go to the root first
     await page.goto('http://localhost:3000/');
     await page.waitForLoadState('networkidle');
@@ -101,7 +101,7 @@ test.describe('Opportunity Management - Debug Routes', () => {
     console.log('Vue Router info:', vueApp);
   });
   
-  test('Test navigation to opportunity create form', async ({ page }) => {
+  test('Test navigation to opportunity create form', async ({ page: _ }) => {
     await page.goto('http://localhost:3000/opportunities/new');
     await page.waitForLoadState('networkidle');
     

@@ -439,7 +439,7 @@ class APIPerformanceMeasurement {
 }
 
 test.describe('API Endpoint Performance', () => {
-  test('should validate contacts API performance', async ({ page }) => {
+  test('should validate contacts API performance', async ({ page: _ }) => {
     const measurement = new APIPerformanceMeasurement(page)
 
     // Test all contacts endpoints
@@ -476,7 +476,7 @@ test.describe('API Endpoint Performance', () => {
     expect(createPerf.databaseTime).toBeLessThan(API_PERFORMANCE_THRESHOLDS.databaseQueries.insert)
   })
 
-  test('should validate opportunities API performance', async ({ page }) => {
+  test('should validate opportunities API performance', async ({ page: _ }) => {
     const measurement = new APIPerformanceMeasurement(page)
 
     // Test opportunities endpoints
@@ -512,7 +512,7 @@ test.describe('API Endpoint Performance', () => {
     expect(batchCreatePerf.throughput).toBeGreaterThan(2) // At least 2 items per second
   })
 
-  test('should validate interactions API performance', async ({ page }) => {
+  test('should validate interactions API performance', async ({ page: _ }) => {
     const measurement = new APIPerformanceMeasurement(page)
 
     // Test interactions endpoints
@@ -541,7 +541,7 @@ test.describe('API Endpoint Performance', () => {
 })
 
 test.describe('Database Query Performance', () => {
-  test('should analyze database query execution times', async ({ page }) => {
+  test('should analyze database query execution times', async ({ page: _ }) => {
     const measurement = new APIPerformanceMeasurement(page)
 
     // Test different query types
@@ -583,7 +583,7 @@ test.describe('Database Query Performance', () => {
 })
 
 test.describe('Network and Resource Optimization', () => {
-  test('should analyze network waterfall performance', async ({ page }) => {
+  test('should analyze network waterfall performance', async ({ page: _ }) => {
     const measurement = new APIPerformanceMeasurement(page)
 
     // Measure network waterfall for a typical page load
@@ -601,8 +601,9 @@ test.describe('Network and Resource Optimization', () => {
     expect(parallelizationRatio).toBeGreaterThan(0.6) // At least 60% of API requests should be parallelizable
   })
 
-  test('should measure error handling performance', async ({ page }) => {
-    const measurement = new APIPerformanceMeasurement(page)
+  test('should measure error handling performance', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _measurement = new APIPerformanceMeasurement(page)
 
     // Test error scenarios
     await page.route('**/api/test-errors**', route => {
