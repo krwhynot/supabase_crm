@@ -1,5 +1,5 @@
 <template>
-  <div class="principal-multi-select">
+  <div class="principal-multi-select" ref="containerRef" :class="delightClasses">
     <label class="block text-sm font-medium text-gray-700 mb-2">
       {{ label }}
       <span v-if="required" class="text-red-500 ml-1">*</span>
@@ -77,7 +77,10 @@
         <div
           v-for="principal in filteredPrincipals"
           :key="principal.id"
-          class="principal-item flex items-center p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+          class="principal-item delight-multiselect-item flex items-center p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+          :class="{
+            'selected': selectedPrincipals.includes(principal.id)
+          }"
         >
           <input
             :id="`principal-${principal.id}`"
@@ -144,6 +147,24 @@
         <p class="text-sm text-gray-500">Loading principals...</p>
       </div>
 
+      <!-- Delight Message -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 transform translate-y-2 scale-95"
+        enter-to-class="opacity-100 transform translate-y-0 scale-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 transform translate-y-0 scale-100"
+        leave-to-class="opacity-0 transform translate-y-2 scale-95"
+      >
+        <div v-if="currentMessage" class="mt-3 delight-message success">
+          <span v-if="currentMessage.emoji" class="delight-message-emoji">{{ currentMessage.emoji }}</span>
+          <div>
+            <div class="font-medium">{{ currentMessage.title }}</div>
+            <div class="text-sm opacity-90">{{ currentMessage.message }}</div>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Selected Principals Summary -->
       <div v-if="selectedPrincipals.length > 0" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <div class="flex items-center justify-between mb-2">
@@ -207,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import {
   MagnifyingGlassIcon,
   BuildingOfficeIcon,
@@ -215,6 +236,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 import { usePrincipalStore } from '@/stores/principalStore'
+import { useMultiSelectDelight } from '@/composables/useFormDelight'
 
 interface Principal {
   id: string
@@ -262,11 +284,25 @@ const principalStore = usePrincipalStore()
 // REACTIVE STATE
 // ===============================
 
+const containerRef = ref<HTMLElement>()
 const selectedPrincipals = ref<string[]>([...props.modelValue])
 const internalPrincipalRequired = ref(props.principalRequired)
 const searchQuery = ref('')
 const loading = ref(false)
 const showSummary = ref(false)
+
+// ===============================
+// DELIGHT SYSTEM
+// ===============================
+
+const {
+  currentMessage,
+  delightClasses,
+  celebrateSelection,
+  celebrateBulkOperation,
+  showValidationFeedback,
+  updateCompletionScore
+} = useMultiSelectDelight({ level: 'standard' })
 
 // ===============================
 // COMPUTED PROPERTIES
@@ -333,7 +369,7 @@ const emitChanges = () => {
   emitValidation()
 }
 
-const emitValidation = () => {
+const emitValidation = async () => {
   const valid = isValid.value
   let error: string | undefined
   
@@ -341,6 +377,11 @@ const emitValidation = () => {
     error = 'Principal access setting is required'
   } else if (internalPrincipalRequired.value && selectedPrincipals.value.length === 0) {
     error = 'At least one principal must be selected when principal access is required'
+  }
+  
+  // Show validation feedback with delight
+  if (containerRef.value) {
+    await showValidationFeedback(containerRef.value, valid, error, 'Principal Assignment')
   }
   
   emit('validation-changed', valid, error)
@@ -358,20 +399,32 @@ const handlePrincipalRequiredChange = () => {
   emitChanges()
 }
 
-const togglePrincipal = (principalId: string) => {
+const togglePrincipal = async (principalId: string) => {
   const index = selectedPrincipals.value.indexOf(principalId)
-  if (index > -1) {
+  const wasSelected = index > -1
+  
+  if (wasSelected) {
     selectedPrincipals.value.splice(index, 1)
   } else {
     if (props.maxSelection && selectedPrincipals.value.length >= props.maxSelection) {
       return // Don't add if at max selection
     }
     selectedPrincipals.value.push(principalId)
+    
+    // Celebrate new selection
+    if (containerRef.value) {
+      await nextTick()
+      await celebrateSelection(containerRef.value, selectedPrincipals.value.length)
+    }
   }
+  
+  // Update completion score based on selection progress
+  updateCompletionScore(Math.min(100, (selectedPrincipals.value.length / Math.max(1, filteredPrincipals.value.length)) * 100))
+  
   emitChanges()
 }
 
-const selectAll = () => {
+const selectAll = async () => {
   const newSelections = filteredPrincipals.value
     .filter(p => !selectedPrincipals.value.includes(p.id))
     .map(p => p.id)
@@ -382,11 +435,28 @@ const selectAll = () => {
   }
   
   selectedPrincipals.value.push(...newSelections)
+  updateCompletionScore(100)
+  
+  // Celebrate bulk selection
+  if (containerRef.value && newSelections.length > 0) {
+    await nextTick()
+    await celebrateBulkOperation(containerRef.value, 'selectAll')
+  }
+  
   emitChanges()
 }
 
-const selectNone = () => {
+const selectNone = async () => {
+  const hadSelections = selectedPrincipals.value.length > 0
   selectedPrincipals.value = []
+  updateCompletionScore(0)
+  
+  // Celebrate clearing (fresh start)
+  if (containerRef.value && hadSelections) {
+    await nextTick()
+    await celebrateBulkOperation(containerRef.value, 'clearAll')
+  }
+  
   emitChanges()
 }
 

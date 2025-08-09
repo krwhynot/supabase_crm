@@ -1,0 +1,687 @@
+/**
+ * Form Delight CSS - Comprehensive Animation System
+ * 
+ * This stylesheet provides all the animations and visual effects for the
+ * form delight system, with performance optimizations and accessibility
+ * considerations built-in.
+ * 
+ * Features:
+ * - SpringY validation animations with proper easing
+ * - Celebration particles and micro-interactions  
+ * - Progressive disclosure transitions
+ * - High contrast and reduced motion support
+ * - GPU-accelerated animations for performance
+ */
+
+/* ===============================
+   BASE DELIGHT CLASSES
+   =============================== */
+
+.delight-validating {
+  position: relative;
+}
+
+.delight-validating::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: delight-spin 1s linear infinite;
+}
+
+.delight-valid {
+  border-color: #10b981 !important;
+  background-color: #f0fdf4;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delight-invalid {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delight-focused {
+  transform: scale(1.01);
+  box-shadow: 
+    0 0 0 3px rgba(59, 130, 246, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.delight-completed {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  box-shadow: inset 0 1px 0 rgba(16, 185, 129, 0.1);
+}
+
+.delight-celebrating {
+  animation: delight-celebration 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===============================
+   SPRING ANIMATIONS
+   =============================== */
+
+.delight-spring-success {
+  animation: delight-spring-success 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.delight-spring-error {
+  animation: delight-spring-error 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.delight-spring-celebration {
+  animation: delight-spring-celebration 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Success spring animation */
+@keyframes delight-spring-success {
+  0% { 
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% { 
+    transform: scale(1.05) rotate(1deg);
+    filter: hue-rotate(10deg);
+  }
+  50% { 
+    transform: scale(1.02) rotate(-0.5deg);
+    filter: hue-rotate(20deg);
+  }
+  75% { 
+    transform: scale(1.01) rotate(0.25deg);
+    filter: hue-rotate(10deg);
+  }
+  100% { 
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* Error shake animation with spring */
+@keyframes delight-spring-error {
+  0% { 
+    transform: translateX(0) scale(1);
+  }
+  10% { 
+    transform: translateX(-4px) scale(1.02);
+  }
+  20% { 
+    transform: translateX(4px) scale(1.02);
+  }
+  30% { 
+    transform: translateX(-3px) scale(1.01);
+  }
+  40% { 
+    transform: translateX(3px) scale(1.01);
+  }
+  50% { 
+    transform: translateX(-2px) scale(1);
+  }
+  60% { 
+    transform: translateX(2px) scale(1);
+  }
+  70% { 
+    transform: translateX(-1px) scale(1);
+  }
+  80% { 
+    transform: translateX(1px) scale(1);
+  }
+  100% { 
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Celebration bounce with spring */
+@keyframes delight-spring-celebration {
+  0% { 
+    transform: scale(1) translateY(0) rotate(0deg);
+    filter: brightness(1) saturate(1);
+  }
+  20% { 
+    transform: scale(1.1) translateY(-8px) rotate(2deg);
+    filter: brightness(1.1) saturate(1.2);
+  }
+  40% { 
+    transform: scale(1.05) translateY(-4px) rotate(-1deg);
+    filter: brightness(1.05) saturate(1.1);
+  }
+  60% { 
+    transform: scale(1.08) translateY(-6px) rotate(1deg);
+    filter: brightness(1.08) saturate(1.15);
+  }
+  80% { 
+    transform: scale(1.02) translateY(-2px) rotate(-0.5deg);
+    filter: brightness(1.02) saturate(1.05);
+  }
+  100% { 
+    transform: scale(1) translateY(0) rotate(0deg);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* General celebration animation */
+@keyframes delight-celebration {
+  0% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.3);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Spinner animation */
+@keyframes delight-spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ===============================
+   PARTICLE EFFECTS
+   =============================== */
+
+.delight-particles {
+  font-size: 20px;
+  letter-spacing: 4px;
+  animation: delight-particle-burst 1s ease-out forwards;
+  pointer-events: none;
+  user-select: none;
+  z-index: 9999;
+}
+
+@keyframes delight-particle-burst {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  50% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 0.8;
+    filter: blur(0.5px);
+  }
+  100% {
+    transform: translateY(-60px) scale(0.8);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+/* Individual particle animations */
+.delight-particles::before {
+  content: '✨';
+  position: absolute;
+  left: -20px;
+  animation: delight-particle-left 1s ease-out forwards;
+}
+
+.delight-particles::after {
+  content: '🌟';
+  position: absolute;
+  right: -20px;
+  animation: delight-particle-right 1s ease-out forwards;
+}
+
+@keyframes delight-particle-left {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-40px, -40px) rotate(-180deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes delight-particle-right {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(40px, -40px) rotate(180deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* ===============================
+   PROGRESSIVE DISCLOSURE
+   =============================== */
+
+.delight-progressive-enter {
+  animation: delight-slide-down 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.delight-progressive-leave {
+  animation: delight-slide-up 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+}
+
+@keyframes delight-slide-down {
+  0% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-5px);
+  }
+  100% {
+    max-height: 200px; /* Adjust based on content */
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes delight-slide-up {
+  0% {
+    max-height: 200px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-5px);
+  }
+  100% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ===============================
+   MULTI-SELECT DELIGHT
+   =============================== */
+
+.delight-multiselect-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delight-multiselect-item:hover {
+  transform: translateX(4px);
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border-left: 3px solid #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.delight-multiselect-item.selected {
+  animation: delight-item-select 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
+  border-left: 3px solid #10b981;
+}
+
+.delight-multiselect-item.deselected {
+  animation: delight-item-deselect 0.2s ease-in-out;
+}
+
+@keyframes delight-item-select {
+  0% {
+    transform: scale(1);
+    background-color: white;
+  }
+  50% {
+    transform: scale(1.02);
+    background-color: #f0fdf4;
+  }
+  100% {
+    transform: scale(1);
+    background-color: #f0fdf4;
+  }
+}
+
+@keyframes delight-item-deselect {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Bulk action celebrations */
+.delight-bulk-select-all {
+  animation: delight-bulk-celebration 0.6s ease-out;
+}
+
+.delight-bulk-clear-all {
+  animation: delight-bulk-clear 0.4s ease-out;
+}
+
+@keyframes delight-bulk-celebration {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  25% {
+    transform: scale(1.02);
+    filter: brightness(1.1) saturate(1.2);
+  }
+  50% {
+    transform: scale(1.01);
+    filter: brightness(1.05) saturate(1.1);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes delight-bulk-clear {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.98);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===============================
+   CATEGORY SELECT DELIGHT
+   =============================== */
+
+.delight-category-select {
+  position: relative;
+  overflow: visible;
+}
+
+.delight-category-select::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.delight-category-select.category-selected::after {
+  border-color: #10b981;
+  opacity: 1;
+  animation: delight-category-glow 0.6s ease-out;
+}
+
+@keyframes delight-category-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Category info card animations */
+.delight-category-info {
+  animation: delight-info-slide-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes delight-info-slide-in {
+  0% {
+    transform: translateY(-10px) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===============================
+   SUCCESS/ERROR ICONS
+   =============================== */
+
+.delight-success-icon {
+  animation: delight-icon-success 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.delight-error-icon {
+  animation: delight-icon-error 0.4s ease-out;
+}
+
+@keyframes delight-icon-success {
+  0% {
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes delight-icon-error {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(-10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ===============================
+   MESSAGE COMPONENTS
+   =============================== */
+
+.delight-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: delight-message-appear 0.4s ease-out;
+  backdrop-filter: blur(8px);
+}
+
+.delight-message.success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #065f46;
+}
+
+.delight-message.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #7f1d1d;
+}
+
+.delight-message.celebration {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #1e40af;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
+}
+
+@keyframes delight-message-appear {
+  0% {
+    transform: translateY(10px) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.delight-message-emoji {
+  font-size: 18px;
+  animation: delight-emoji-bounce 0.6s ease-out 0.2s;
+}
+
+@keyframes delight-emoji-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY & PERFORMANCE
+   =============================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .delight-valid {
+    border-width: 3px;
+    background-color: transparent;
+  }
+  
+  .delight-invalid {
+    border-width: 3px;
+    background-color: transparent;
+  }
+  
+  .delight-message {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .delight-spring-success,
+  .delight-spring-error,
+  .delight-spring-celebration,
+  .delight-celebrating,
+  .delight-particles,
+  .delight-multiselect-item,
+  .delight-category-select,
+  .delight-success-icon,
+  .delight-error-icon,
+  .delight-message,
+  .delight-progressive-enter,
+  .delight-progressive-leave {
+    animation: none !important;
+    transition: opacity 0.2s ease, color 0.2s ease !important;
+  }
+  
+  .delight-focused {
+    transform: none !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5) !important;
+  }
+  
+  .delight-particles {
+    display: none;
+  }
+  
+  /* Maintain essential feedback with reduced motion */
+  .delight-valid {
+    border-color: #10b981 !important;
+    outline: 2px solid #10b981;
+  }
+  
+  .delight-invalid {
+    border-color: #ef4444 !important;
+    outline: 2px solid #ef4444;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.delight-spring-success,
+.delight-spring-error,
+.delight-spring-celebration,
+.delight-celebrating,
+.delight-focused,
+.delight-particles,
+.delight-multiselect-item {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* ===============================
+   MOBILE OPTIMIZATIONS
+   =============================== */
+
+@media (max-width: 768px) {
+  .delight-particles {
+    font-size: 16px;
+  }
+  
+  .delight-focused {
+    transform: scale(1.005); /* Reduced scale for mobile */
+  }
+  
+  .delight-message {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  /* Reduce animation intensity on mobile for performance */
+  .delight-spring-success,
+  .delight-spring-error,
+  .delight-spring-celebration {
+    animation-duration: 0.4s;
+  }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+  .delight-multiselect-item:hover {
+    transform: none; /* Remove hover transforms on touch devices */
+  }
+  
+  .delight-multiselect-item:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+
+@media print {
+  .delight-particles,
+  .delight-message {
+    display: none;
+  }
+  
+  .delight-valid,
+  .delight-invalid,
+  .delight-completed {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}

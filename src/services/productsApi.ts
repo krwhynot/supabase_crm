@@ -52,7 +52,7 @@ class ProductsApiService {
       }
 
       // Apply category filter
-      if (options.category) {
+      if (options.category && typeof options.category === 'string' && options.category.trim() !== '') {
         query = query.eq('category', options.category as ProductCategory)
       }
 

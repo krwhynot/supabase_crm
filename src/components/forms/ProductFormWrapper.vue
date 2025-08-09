@@ -4,23 +4,54 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <h2 class="text-xl font-semibold text-gray-900">
-            {{ isEditing ? 'Edit Product' : 'Create New Product' }}
+          <h2 class="text-xl font-semibold text-gray-900 header-sparkle">
+            <span class="inline-flex items-center">
+              {{ isEditing ? 'Edit Product' : 'Create New Product' }}
+              <svg v-if="!isEditing" class="ml-2 h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              <svg v-else class="ml-2 h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </span>
           </h2>
-          <div v-if="!isEditing" class="text-sm text-gray-500">
-            Step {{ currentStep }} of {{ totalSteps }}
+          <div v-if="!isEditing" class="text-sm text-gray-500 step-counter">
+            <span class="font-medium">Step {{ currentStep }}</span> 
+            <span class="text-gray-400 mx-1">of</span> 
+            <span class="font-medium">{{ totalSteps }}</span>
+            <svg v-if="currentStep === totalSteps" class="ml-2 h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
           </div>
         </div>
         
         <!-- Form Status Indicator -->
-        <div v-if="formStatus !== ProductFormSubmissionState.IDLE" class="flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium"
-             :class="getStatusClasses()">
-          <div v-if="formStatus === ProductFormSubmissionState.SUBMITTING" class="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full"></div>
-          <CheckIcon v-else-if="formStatus === ProductFormSubmissionState.SUCCESS" class="h-3 w-3" />
-          <ExclamationTriangleIcon v-else-if="formStatus === ProductFormSubmissionState.ERROR" class="h-3 w-3" />
-          <ClockIcon v-else-if="formStatus === ProductFormSubmissionState.DRAFT_SAVING" class="h-3 w-3" />
-          <span>{{ getStatusText() }}</span>
-        </div>
+        <Transition
+          enter-active-class="transition-all duration-500 ease-out"
+          enter-from-class="opacity-0 scale-75 translate-x-8 rotate-12"
+          enter-to-class="opacity-100 scale-100 translate-x-0 rotate-0"
+          leave-active-class="transition-all duration-300 ease-in"
+          leave-from-class="opacity-100 scale-100 translate-x-0 rotate-0"
+          leave-to-class="opacity-0 scale-75 translate-x-8 rotate-12"
+        >
+          <div v-if="formStatus !== ProductFormSubmissionState.IDLE" 
+               class="flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-medium shadow-lg status-indicator hover:scale-105 transition-transform duration-200"
+               :class="getStatusClasses()">
+            <div v-if="formStatus === ProductFormSubmissionState.SUBMITTING" 
+                 class="relative">
+              <div class="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full celebration-spin"></div>
+              <div class="absolute inset-0 animate-ping h-4 w-4 border-2 border-current rounded-full opacity-30"></div>
+            </div>
+            <CheckIcon v-else-if="formStatus === ProductFormSubmissionState.SUCCESS" 
+                      class="h-4 w-4 text-white" />
+            <ExclamationTriangleIcon v-else-if="formStatus === ProductFormSubmissionState.ERROR" 
+                                   class="h-4 w-4 text-red-500" />
+            <ClockIcon v-else-if="formStatus === ProductFormSubmissionState.DRAFT_SAVING" 
+                      class="h-4 w-4 text-blue-500" />
+            <span class="status-text font-medium">{{ getStatusText() }}</span>
+          </div>
+        </Transition>
       </div>
       
       <!-- Progress Bar (only for creation) -->
@@ -34,35 +65,48 @@
             <!-- Step Circle -->
             <div
               :class="[
-                'step-circle flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium transition-all duration-300 ease-in-out',
+                'step-circle relative flex items-center justify-center w-10 h-10 rounded-full border-2 text-sm font-medium transition-all duration-500 ease-out cursor-pointer hover:shadow-xl group',
                 step < currentStep 
-                  ? 'bg-primary-600 border-primary-600 text-white scale-100 shadow-md step-completed' 
+                  ? 'bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 border-primary-600 text-white scale-100 shadow-lg step-completed hover:scale-110 hover:rotate-3 hover:shadow-xl' 
                   : step === currentStep
-                    ? 'bg-white border-primary-600 text-primary-600 scale-110 shadow-lg ring-2 ring-primary-200 step-active'
-                    : 'bg-white border-gray-300 text-gray-400 scale-95 step-pending'
+                    ? 'bg-white border-primary-600 text-primary-600 scale-110 shadow-lg ring-2 ring-primary-200 step-active hover:ring-primary-300'
+                    : 'bg-white border-gray-300 text-gray-400 scale-95 step-pending hover:border-primary-400 hover:text-primary-500 hover:scale-105 hover:shadow-md'
               ]"
+              @click="step <= currentStep ? goToStep(step) : null"
+              @mouseenter="handleStepHover(step)"
             >
               <Transition
-                enter-active-class="transition-all duration-300 ease-out"
-                enter-from-class="scale-0 rotate-180"
-                enter-to-class="scale-100 rotate-0"
-                leave-active-class="transition-all duration-200 ease-in"
-                leave-from-class="scale-100 rotate-0"
-                leave-to-class="scale-0 rotate-180"
+                enter-active-class="transition-all duration-600 ease-out"
+                enter-from-class="scale-0 rotate-360 opacity-0"
+                enter-to-class="scale-100 rotate-0 opacity-100"
+                leave-active-class="transition-all duration-300 ease-in"
+                leave-from-class="scale-100 rotate-0 opacity-100"
+                leave-to-class="scale-0 rotate-360 opacity-0"
               >
-                <CheckIcon v-if="step < currentStep" class="w-4 h-4 animate-bounce-once" />
-                <span v-else class="transition-transform duration-200" :class="{ 'scale-110 font-bold': step === currentStep }">{{ step }}</span>
+                <CheckIcon v-if="step < currentStep" class="w-5 h-5 text-white drop-shadow-sm" />
+                <span v-else class="transition-all duration-300 step-number" :class="{ 
+                  'scale-110 font-bold text-primary-700': step === currentStep,
+                  'group-hover:scale-105 group-hover:font-semibold transition-all duration-200': step > currentStep 
+                }">{{ step }}</span>
               </Transition>
+              
+              <!-- Professional completion indicator -->
+              <div v-if="step < currentStep" class="absolute inset-0 ring-2 ring-green-200 ring-opacity-50 rounded-full"></div>
             </div>
             
             <!-- Step Connector -->
             <div
               v-if="step < totalSteps"
-              class="step-connector relative w-16 h-0.5 mx-2 bg-gray-300 overflow-hidden rounded-full"
+              class="step-connector relative w-20 h-1 mx-3 bg-gray-200 overflow-hidden rounded-full shadow-inner"
             >
               <div
-                class="absolute top-0 left-0 h-full bg-primary-600 rounded-full transition-all duration-500 ease-in-out"
+                class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-700 ease-out shadow-sm"
                 :style="{ width: step < currentStep ? '100%' : '0%' }"
+              ></div>
+              <!-- Shimmer effect on progress -->
+              <div
+                v-if="step < currentStep"
+                class="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20"
               ></div>
             </div>
           </div>
@@ -81,7 +125,7 @@
                 (index + 1) < currentStep 
                   ? 'text-primary-600 transform scale-105' 
                   : (index + 1) === currentStep
-                    ? 'text-primary-700 font-bold transform scale-110 animate-pulse'
+                    ? 'text-primary-700 font-bold transform scale-105'
                     : 'text-gray-400 transform scale-95'
               ]"
             >
@@ -119,17 +163,17 @@
       >
         <div v-if="currentStep === 1 || isEditing" class="step-section step-animation">
           <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 step-card">
-          <h3 class="text-lg font-medium text-gray-900 mb-6">
-            <span class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
-              <span>Basic Information</span>
-            </span>
-          </h3>
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Product Name -->
-            <div class="lg:col-span-2">
-              <ProductNameField
+            <h3 class="text-lg font-medium text-gray-900 mb-6">
+              <span class="flex items-center space-x-2">
+                <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
+                <span>Basic Information</span>
+              </span>
+            </h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Product Name -->
+              <div class="lg:col-span-2">
+                <ProductNameField
                 name="product-name"
                 label="Product Name"
                 v-model="formData.name"
@@ -222,12 +266,12 @@
       >
         <div v-if="currentStep === 2 || isEditing" class="step-section step-animation">
           <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 step-card">
-          <h3 class="text-lg font-medium text-gray-900 mb-6">
-            <span class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
-              <span>Product Details & Pricing</span>
-            </span>
-          </h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-6">
+              <span class="flex items-center space-x-2">
+                <span class="w-2 h-2 bg-primary-500 rounded-full"></span>
+                <span>Product Details & Pricing</span>
+              </span>
+            </h3>
           
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Pricing Section -->
@@ -313,6 +357,7 @@
               />
             </div>
           </div>
+          </div>
         </div>
       </Transition>
 
@@ -379,6 +424,7 @@
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </Transition>
@@ -450,6 +496,7 @@
               />
             </div>
           </div>
+          </div>
         </div>
       </Transition>
 
@@ -508,34 +555,55 @@
               type="button"
               @click="nextStep"
               :disabled="!canProceedToNext"
-              class="next-button inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:transform hover:scale-105 hover:shadow-lg"
+              class="next-button group relative inline-flex items-center px-8 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl transform-gpu"
             >
-              <span class="flex items-center">
-                Next
-                <ArrowRightIcon class="ml-2 -mr-1 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+              <span class="relative z-10 flex items-center">
+                <span class="mr-2">Next Step</span>
+                <ArrowRightIcon class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-2 group-hover:scale-110" />
               </span>
+              <!-- Button glow effect -->
+              <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-primary-400 to-primary-500 opacity-0 group-hover:opacity-50 transition-opacity duration-300 blur-sm"></div>
             </button>
 
             <button
               v-else
               type="submit"
               :disabled="isSubmitting || !isFormValid"
-              class="submit-button inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:transform hover:scale-105 hover:shadow-lg"
+              class="submit-button group relative inline-flex items-center px-8 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out hover:scale-105 hover:shadow-xl transform-gpu"
             >
               <Transition
-                enter-active-class="transition-all duration-200 ease-out"
-                enter-from-class="scale-0 rotate-180"
-                enter-to-class="scale-100 rotate-0"
+                enter-active-class="transition-all duration-300 ease-out"
+                enter-from-class="scale-0 rotate-180 opacity-0"
+                enter-to-class="scale-100 rotate-0 opacity-100"
                 leave-active-class="transition-all duration-200 ease-in"
-                leave-from-class="scale-100 rotate-0"
-                leave-to-class="scale-0 rotate-180"
+                leave-from-class="scale-100 rotate-0 opacity-100"
+                leave-to-class="scale-0 rotate-180 opacity-0"
               >
-                <div v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <div v-if="isSubmitting" class="relative mr-3">
+                  <div class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <div class="absolute inset-0 animate-ping h-4 w-4 border-2 border-white rounded-full opacity-20"></div>
+                </div>
               </Transition>
-              <span class="flex items-center">
-                {{ isSubmitting ? 'Creating Product...' : isEditing ? 'Update Product' : getSubmitButtonText() }}
-                <span v-if="!isSubmitting" class="ml-2 text-lg">✨</span>
+              <span class="relative z-10 flex items-center">
+                <span>{{ isSubmitting ? 'Creating Product...' : isEditing ? 'Update Product' : getSubmitButtonText() }}</span>
+                <svg v-if="!isSubmitting && !isEditing" class="ml-2 h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <svg v-if="!isSubmitting && isEditing" class="ml-2 h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <div v-if="isSubmitting" class="ml-2 flex items-center">
+                  <svg class="h-4 w-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
               </span>
+              <!-- Success celebration overlay -->
+              <div v-if="formStatus === ProductFormSubmissionState.SUCCESS" 
+                   class="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 to-emerald-400 animate-pulse opacity-75"></div>
+              <!-- Button glow effect -->
+              <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm"></div>
             </button>
           </div>
         </div>
@@ -844,27 +912,37 @@ const validateForm = (): boolean => {
 // STEP NAVIGATION
 // ===============================
 
-const nextStep = () => {
+const nextStep = async () => {
   if (validateCurrentStep() && currentStep.value < totalSteps) {
-    // Add step completion celebration
+    // Professional step completion with subtle feedback
     const currentStepElement = document.querySelector(`.step-circle:nth-child(${currentStep.value * 2 - 1})`)
     if (currentStepElement) {
+      // Subtle completion transition
       currentStepElement.classList.add('step-completing')
+      
+      // Brief professional feedback
+      showFloatingMessage(`Step ${currentStep.value} completed`, 'success')
+      
+      // Cleanup animation classes
       setTimeout(() => {
         currentStepElement.classList.remove('step-completing')
       }, 300)
     }
     
+    // Brief transition delay for smooth UX
+    await new Promise(resolve => setTimeout(resolve, 150))
+    
     currentStep.value++
     
-    // Trigger step entrance animation for new step
+    // Subtle entrance for new step
     nextTick(() => {
       const newStepElement = document.querySelector(`.step-circle:nth-child(${currentStep.value * 2 - 1})`)
       if (newStepElement) {
         newStepElement.classList.add('step-entering')
+        
         setTimeout(() => {
           newStepElement.classList.remove('step-entering')
-        }, 500)
+        }, 300)
       }
     })
   }
@@ -881,6 +959,72 @@ const goToStep = (step: number) => {
     currentStep.value = step
   }
 }
+
+// ===============================
+// DELIGHT & INTERACTION HELPERS
+// ===============================
+
+/**
+ * Play a subtle success sound for step completion
+ */
+// Sound function removed for professional enterprise environment
+
+/**
+ * Play hover sound for interactive buttons
+ */
+// Sound function removed for professional enterprise environment
+
+/**
+ * Show floating success/info messages
+ */
+const showFloatingMessage = (message: string, type: 'success' | 'info' | 'warning' = 'info') => {
+  const messageElement = document.createElement('div')
+  messageElement.textContent = message
+  messageElement.className = `
+    fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg font-medium text-sm
+    transform transition-all duration-500 ease-out
+    ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+      type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+      'bg-blue-100 text-blue-800 border border-blue-200'}
+  `
+  
+  // Initial state (hidden)
+  messageElement.style.transform = 'translateX(100%) scale(0.8)'
+  messageElement.style.opacity = '0'
+  
+  document.body.appendChild(messageElement)
+  
+  // Animate in
+  requestAnimationFrame(() => {
+    messageElement.style.transform = 'translateX(0) scale(1)'
+    messageElement.style.opacity = '1'
+  })
+  
+  // Animate out and remove
+  setTimeout(() => {
+    messageElement.style.transform = 'translateX(100%) scale(0.8)'
+    messageElement.style.opacity = '0'
+    
+    setTimeout(() => {
+      document.body.removeChild(messageElement)
+    }, 500)
+  }, 2500)
+}
+
+/**
+ * Handle step hover with preview tooltip
+ */
+const handleStepHover = (step: number) => {
+  if (step <= currentStep.value) {
+    const stepInfo = stepLabels[step - 1]
+    showFloatingMessage(`${stepInfo.label}: ${stepInfo.description}`, 'info')
+  }
+}
+
+/**
+ * Create celebration confetti burst
+ */
+// Confetti function removed for professional enterprise environment
 
 // ===============================
 // EVENT HANDLERS
@@ -927,12 +1071,16 @@ const handleBulkAssignToggled = (enabled: boolean) => {
 
 const handleSubmit = async () => {
   if (!validateForm()) {
+    showFloatingMessage('Please complete all required fields', 'warning')
     return
   }
   
   isSubmitting.value = true
   submitError.value = null
   formStatus.value = ProductFormSubmissionState.SUBMITTING
+  
+  // Show encouraging message during submission
+  showFloatingMessage('Creating your product...', 'info')
   
   try {
     const apiData = transformToApiFormat()
@@ -957,6 +1105,22 @@ const handleSubmit = async () => {
     if (success) {
       formStatus.value = ProductFormSubmissionState.SUCCESS
       
+      // Celebration sequence
+      setTimeout(() => {
+        // Professional success feedback - visual only
+        
+        // Professional visual feedback only (no sound effects)
+        
+        // Show success message
+        const productName = formData.name
+        const assignedCount = formData.selectedPrincipals.length
+        const successMessage = props.isEditing 
+          ? `${productName} updated successfully`
+          : `${productName} created with ${assignedCount} principal${assignedCount !== 1 ? 's' : ''} assigned`
+        
+        showFloatingMessage(successMessage, 'success')
+      }, 500)
+      
       const assignedPrincipals = formData.selectedPrincipals.length
       
       emit('success', { 
@@ -968,6 +1132,7 @@ const handleSubmit = async () => {
       const error = productStore.error || (props.isEditing ? 'Failed to update product' : 'Failed to create product')
       formStatus.value = ProductFormSubmissionState.ERROR
       submitError.value = error
+      showFloatingMessage('Update failed. Please try again.', 'warning')
       emit('error', error)
     }
   } catch (error) {
@@ -975,6 +1140,7 @@ const handleSubmit = async () => {
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
     formStatus.value = ProductFormSubmissionState.ERROR
     submitError.value = errorMessage
+    showFloatingMessage('Error occurred. Please check your connection.', 'warning')
     emit('error', errorMessage)
   } finally {
     isSubmitting.value = false
@@ -1088,23 +1254,41 @@ defineExpose({
   @apply max-w-4xl mx-auto;
 }
 
-/* Step transition animations */
+/* Professional Step Transitions */
 .step-section {
-  @apply transition-all duration-300;
+  @apply transition-all duration-300 ease-out;
 }
 
 .step-animation {
-  animation: step-entrance 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: step-entrance 0.4s ease-out;
 }
 
 @keyframes step-entrance {
   0% {
     opacity: 0;
-    transform: translateX(20px) scale(0.98);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateY(0);
+  }
+}
+
+/* Professional Completion Feedback */
+@keyframes animate-completion-burst {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes animate-step-entrance {
+  0% { 
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% { 
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -1125,26 +1309,26 @@ defineExpose({
 }
 
 .step-circle.step-active {
-  animation: step-pulse 2s ease-in-out infinite;
+  animation: step-pulse 3s ease-in-out infinite;
 }
 
 @keyframes step-pulse {
   0%, 100% { 
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.2);
   }
   50% { 
-    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
   }
 }
 
 .step-circle.step-completed {
-  animation: step-completion 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: step-completion 0.3s ease-out;
 }
 
 @keyframes step-completion {
   0% { transform: scale(1); }
-  50% { transform: scale(1.3) rotate(10deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .step-circle.step-completing {
@@ -1152,18 +1336,17 @@ defineExpose({
 }
 
 @keyframes step-completing {
-  0% { transform: scale(1); background-color: theme('colors.primary.600'); }
-  50% { transform: scale(1.2); background-color: theme('colors.green.500'); }
-  100% { transform: scale(1); background-color: theme('colors.primary.600'); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .step-circle.step-entering {
-  animation: step-entering 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: step-entering 0.3s ease-out;
 }
 
 @keyframes step-entering {
-  0% { transform: scale(0.8); opacity: 0.5; }
-  60% { transform: scale(1.1); }
+  0% { transform: scale(0.95); opacity: 0.8; }
   100% { transform: scale(1); opacity: 1; }
 }
 
@@ -1192,15 +1375,39 @@ defineExpose({
   100% { transform: scaleX(1); }
 }
 
-/* Button hover enhancements */
-.next-button:hover,
-.submit-button:hover {
-  animation: button-excitement 0.3s ease-in-out;
+/* Removed excessive confetti animations for professional environment */
+
+/* Removed excessive sparkle animations for professional environment */
+
+/* Subtle connector transition */
+@keyframes animate-flow {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
 }
 
-@keyframes button-excitement {
+/* Removed shimmer effect for professional environment */
+
+/* Professional subtle animations */
+@keyframes animate-bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes animate-pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* Removed confetti animation for professional environment */
+
+/* Professional button hover */
+.next-button:hover,
+.submit-button:hover {
+  animation: button-hover 0.2s ease-out;
+}
+
+@keyframes button-hover {
   0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
   100% { transform: scale(1.02); }
 }
 
@@ -1232,22 +1439,17 @@ defineExpose({
   transform: translateY(-1px);
 }
 
-/* Status indicator animations */
-.bg-blue-50 {
-  animation: status-pulse 2s ease-in-out infinite;
-}
+/* Removed excessive status pulse animation for professional environment */
 
-@keyframes status-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-
-/* Loading spinner enhancement */
+/* Professional loading spinner */
 .animate-spin {
-  animation: enhanced-spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes enhanced-spin {
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   0% { transform: rotate(0deg) scale(1); }
   50% { transform: rotate(180deg) scale(1.1); }
   100% { transform: rotate(360deg) scale(1); }
@@ -1301,25 +1503,167 @@ textarea:focus {
   }
 }
 
-/* Accessibility - Reduced motion */
+/* Confetti particle base styles */
+.confetti-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.confetti-1 {
+  background: linear-gradient(45deg, #3B82F6, #1D4ED8);
+  top: 20%;
+  left: 20%;
+  animation-duration: 1.2s;
+}
+
+.confetti-2 {
+  background: linear-gradient(45deg, #10B981, #059669);
+  top: 80%;
+  right: 20%;
+  animation-duration: 1.4s;
+}
+
+.confetti-3 {
+  background: linear-gradient(45deg, #F59E0B, #D97706);
+  bottom: 20%;
+  left: 70%;
+  animation-duration: 1.1s;
+}
+
+.confetti-4 {
+  background: linear-gradient(45deg, #8B5CF6, #7C3AED);
+  top: 40%;
+  right: 40%;
+  animation-duration: 1.3s;
+}
+
+/* Enhanced pulse ring animation */
+@keyframes animate-pulse-ring {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-ring {
+  animation: animate-pulse-ring 2s ease-in-out infinite;
+}
+
+/* Celebration confetti overlay */
+.celebration-confetti {
+  position: relative;
+  display: inline-block;
+}
+
+.celebration-confetti::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: celebration-glow 1s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes celebration-glow {
+  0%, 100% { 
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% { 
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+/* Status indicator enhanced animations */
+.status-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease-in-out;
+}
+
+.status-indicator:hover::before {
+  left: 100%;
+}
+
+/* Enhanced form card interactions */
+.step-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease-out;
+}
+
+.step-card:hover::before {
+  transform: translateX(100%);
+}
+
+/* Accessibility - Enhanced reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
+  /* All complex animations already removed for professional environment */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-delay: -1ms !important;
   }
   
-  .step-circle,
+  /* Reduce complex transitions */
+  .step-section,
+  .step-animation,
   .step-card,
-  .next-button,
-  .submit-button {
-    transform: none !important;
+  .step-circle {
+    transition: opacity 0.2s ease, transform 0.2s ease !important;
+    animation: none !important;
   }
   
-  /* Still allow basic hover states for better UX */
+  /* Preserve essential interactive feedback */
+  .step-circle:hover,
+  .next-button:hover,
+  .submit-button:hover {
+    transform: scale(1.05) !important;
+    transition: transform 0.1s ease !important;
+  }
+  
   .step-card:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  /* Keep status changes visible */
+  .status-indicator {
+    transition: background-color 0.3s ease !important;
   }
 }
 
