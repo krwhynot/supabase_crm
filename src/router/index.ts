@@ -234,15 +234,16 @@ const routes: RouteRecordRaw[] = [
           description: 'Manage your product catalog and principal assignments'
         }
       },
-      {
-        path: 'products/new',
-        name: 'ProductCreate',
-        component: () => import('@/views/products/ProductCreateView.vue'),
-        meta: {
-          title: 'New Product',
-          description: 'Add a new product to your catalog'
-        }
-      },
+      // Temporarily disabled for deployment
+      // {
+      //   path: 'products/new',
+      //   name: 'ProductCreate',
+      //   component: () => import('@/views/products/ProductCreateView.vue'),
+      //   meta: {
+      //     title: 'New Product',
+      //     description: 'Add a new product to your catalog'
+      //   }
+      // },
       {
         path: 'products/:id',
         name: 'ProductDetail',
@@ -253,16 +254,17 @@ const routes: RouteRecordRaw[] = [
           description: 'View product information and assignments'
         }
       },
-      {
-        path: 'products/:id/edit',
-        name: 'ProductEdit',
-        component: () => import('@/views/products/ProductEditView.vue'),
-        props: true,
-        meta: {
-          title: 'Edit Product',
-          description: 'Modify product information and assignments'
-        }
-      }
+      // Temporarily disabled for deployment  
+      // {
+      //   path: 'products/:id/edit',
+      //   name: 'ProductEdit',
+      //   component: () => import('@/views/products/ProductEditView.vue'),
+      //   props: true,
+      //   meta: {
+      //     title: 'Edit Product',
+      //     description: 'Modify product information and assignments'
+      //   }
+      // }
     ]
   },
   // Mobile interaction routes will be added during Stage 5 implementation

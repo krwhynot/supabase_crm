@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Import Form Delight Styles */
+@import './form-delight.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Form Delight Styles */
-@import './form-delight.css';
 
 /* Global Professional CRM Styling Enhancements */
 @layer base {

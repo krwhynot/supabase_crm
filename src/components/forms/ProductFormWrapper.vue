@@ -173,14 +173,21 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <!-- Product Name -->
               <div class="lg:col-span-2">
-                <ProductNameField
-                name="product-name"
-                label="Product Name"
-                v-model="formData.name"
-                :error="validationErrors.name"
-                :required="true"
-                description="Enter a unique and descriptive name for your product"
-              />
+                <div class="form-field">
+                  <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="product-name"
+                    v-model="formData.name"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :class="{ 'border-red-500': validationErrors.name }"
+                    placeholder="Enter product name"
+                  />
+                  <p v-if="validationErrors.name" class="mt-1 text-sm text-red-600">{{ validationErrors.name }}</p>
+                  <p class="mt-1 text-xs text-gray-500">Enter a unique and descriptive name for your product</p>
+                </div>
             </div>
 
             <!-- Category Selection -->
@@ -623,7 +630,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useProductStore } from '@/stores/productStore'
 import { usePrincipalStore } from '@/stores/principalStore'
-import ProductNameField from './ProductNameField.vue'
+// import ProductNameField from './ProductNameField.vue' // Temporarily disabled
 import CategorySelect from './CategorySelect.vue'
 import SkuField from './SkuField.vue'
 import PricingFields from './PricingFields.vue'
