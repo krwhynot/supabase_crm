@@ -29,10 +29,16 @@ jobs:
       - name: Run type checking
         run: npm run type-check
         
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        
       - name: Run tests
         run: npm test
         env:
           NODE_ENV: test
+          CI: true
+          DEV: false
+          VITE_TEST_MODE: true
 
   # Deployment handled by Vercel GitHub integration
   # No manual deployment needed - Vercel auto-deploys on push to main

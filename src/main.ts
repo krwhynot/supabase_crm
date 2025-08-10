@@ -3,9 +3,10 @@ import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
 import './assets/styles/index.css'
+import env from './utils/env'
 
 // Register Service Worker for PWA functionality
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && env.isProduction) {
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
@@ -63,7 +64,7 @@ app.config.errorHandler = (err, _instance, info) => {
   console.error('Vue error:', err, info)
   
   // In production, you might want to send errors to a logging service
-  if (import.meta.env.PROD) {
+  if (env.isProduction) {
     // Log to service (e.g., Sentry, LogRocket, etc.)
   }
 }

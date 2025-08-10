@@ -13,6 +13,11 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Environment variables for test context
+    extraHTTPHeaders: {
+      // Pass environment context to the browser
+      'X-Test-Environment': 'playwright'
+    }
   },
 
   projects: [
@@ -106,5 +111,12 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    // Set environment for the dev server
+    env: {
+      NODE_ENV: 'test',
+      DEV: 'true',
+      VITE_TEST_MODE: 'true'
+    },
+    timeout: 120 * 1000, // 2 minutes for server startup
   },
 });
