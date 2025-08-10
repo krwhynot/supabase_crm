@@ -32,11 +32,72 @@ export default defineConfig({
       },
     },
     {
-      name: 'mobile',
+      name: 'iPhone 12',
       use: { 
         ...devices['iPhone 12'],
         viewport: { width: 375, height: 667 },
         hasTouch: true
+      },
+    },
+    // Mobile device projects for performance testing
+    {
+      name: 'iPhone 14',
+      use: { 
+        ...devices['iPhone 14'],
+        hasTouch: true
+      },
+    },
+    {
+      name: 'iPhone 14 Pro Max',
+      use: { 
+        ...devices['iPhone 14 Pro Max'],
+        hasTouch: true
+      },
+    },
+    {
+      name: 'Samsung Galaxy S22',
+      use: { 
+        ...devices['Galaxy S9+'], // Using closest available Samsung device
+        hasTouch: true
+      },
+    },
+    {
+      name: 'Samsung Galaxy A53',
+      use: { 
+        ...devices['Galaxy S9+'], // Using closest available Samsung device
+        hasTouch: true
+      },
+    },
+    {
+      name: 'Pixel 7',
+      use: { 
+        ...devices['Pixel 5'], // Using closest available Pixel device
+        hasTouch: true
+      },
+    },
+    // Network-specific projects for performance testing
+    {
+      name: 'iPhone 14 3G',
+      use: { 
+        ...devices['iPhone 14'],
+        hasTouch: true,
+        // Network throttling will be handled in tests
+      },
+    },
+    {
+      name: 'iPhone 14 4G',
+      use: { 
+        ...devices['iPhone 14'],
+        hasTouch: true,
+        // Network throttling will be handled in tests
+      },
+    },
+    {
+      name: 'iPhone 14 5G',
+      use: { 
+        ...devices['iPhone 14'],
+        hasTouch: true,
+        // Network throttling will be handled in tests
       },
     },
   ],

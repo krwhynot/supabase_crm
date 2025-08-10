@@ -12,16 +12,7 @@
  * - Scroll performance: 60fps smooth scrolling
  */
 
-import { devices, expect, Page, test } from '@playwright/test'
-
-// Mobile device configurations for testing
-const MOBILE_DEVICES = [
-  'iPhone 14',
-  'iPhone 14 Pro Max',
-  'Samsung Galaxy S22',
-  'Samsung Galaxy A53',
-  'Pixel 7'
-]
+import { expect, Page, test } from '@playwright/test'
 
 // Performance thresholds
 const PERFORMANCE_THRESHOLDS = {
@@ -151,12 +142,9 @@ async function measureScrollPerformance(page: Page, container: string = 'body') 
   }, container)
 }
 
-// Test suites for different mobile devices
-MOBILE_DEVICES.forEach(deviceName => {
-  test.describe(`Mobile Performance - ${deviceName}`, () => {
-    test.use({ ...devices[deviceName] })
-
-    test('Core Web Vitals meet mobile performance standards', async ({ page, context }) => {
+// Core Web Vitals performance tests (run on all mobile device projects)
+test.describe('Core Web Vitals Performance', () => {
+  test('Core Web Vitals meet mobile performance standards', async ({ page, context }) => {
       // Enable performance metrics
       await context.addInitScript(() => {
         // Ensure performance observers are available
@@ -166,7 +154,7 @@ MOBILE_DEVICES.forEach(deviceName => {
       })
 
       // Navigate to interactions list page
-      await page.goto('http://localhost:3004/interactions')
+      await page.goto('http://localhost:3000/interactions')
 
       // Wait for page to be fully loaded
       await page.waitForSelector('[data-testid="interaction-table"]', { timeout: 10000 })
@@ -182,15 +170,18 @@ MOBILE_DEVICES.forEach(deviceName => {
       expect(vitals.FID).toBeLessThan(PERFORMANCE_THRESHOLDS.FID)
       expect(vitals.CLS).toBeLessThan(PERFORMANCE_THRESHOLDS.CLS)
 
-      console.log(`${deviceName} Core Web Vitals:`, {
+      console.log('Core Web Vitals:', {
         LCP: `${vitals.LCP.toFixed(2)}ms (target: <${PERFORMANCE_THRESHOLDS.LCP}ms)`,
         FID: `${vitals.FID.toFixed(2)}ms (target: <${PERFORMANCE_THRESHOLDS.FID}ms)`,
         CLS: `${vitals.CLS.toFixed(3)} (target: <${PERFORMANCE_THRESHOLDS.CLS})`
       })
     })
+})
 
-    test('Touch targets meet minimum size requirements', async ({ page: _ }) => {
-      await page.goto('http://localhost:3004/interactions')
+// Touch target accessibility tests (run on all mobile device projects)
+test.describe('Touch Target Accessibility', () => {
+  test('Touch targets meet minimum size requirements', async ({ page }) => {
+      await page.goto('http://localhost:3000/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
 
       // Test touch targets for buttons
@@ -207,16 +198,19 @@ MOBILE_DEVICES.forEach(deviceName => {
 
       expect(failingTargets.length).toBe(0)
 
-      console.log(`${deviceName} Touch Targets Analysis:`, {
+      console.log('Touch Targets Analysis:', {
         totalTargets: allTouchTargets.length,
         passingTargets: allTouchTargets.length - failingTargets.length,
         failingTargets: failingTargets.length,
         avgSize: allTouchTargets.reduce((sum, t) => sum + t.minDimension, 0) / allTouchTargets.length
       })
     })
+})
 
-    test('Scroll performance maintains smooth 60fps', async ({ page: _ }) => {
-      await page.goto('http://localhost:3004/interactions')
+// Scroll performance tests (run on all mobile device projects)
+test.describe('Scroll Performance', () => {
+  test('Scroll performance maintains smooth 60fps', async ({ page }) => {
+      await page.goto('http://localhost:3000/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
 
       // Test scroll performance on interaction table
@@ -225,17 +219,20 @@ MOBILE_DEVICES.forEach(deviceName => {
       expect(tablePerformance.minFps).toBeGreaterThan(PERFORMANCE_THRESHOLDS.SCROLL_FPS_MIN)
       expect(tablePerformance.avgFps).toBeGreaterThan(PERFORMANCE_THRESHOLDS.SCROLL_FPS_MIN)
 
-      console.log(`${deviceName} Scroll Performance:`, {
+      console.log('Scroll Performance:', {
         averageFPS: `${tablePerformance.avgFps.toFixed(1)}fps`,
         minimumFPS: `${tablePerformance.minFps.toFixed(1)}fps`,
         target: `>${PERFORMANCE_THRESHOLDS.SCROLL_FPS_MIN}fps`
       })
     })
+})
 
-    test('Quick interaction templates load and respond quickly', async ({ page: _ }) => {
+// Quick interaction performance tests (run on all mobile device projects)
+test.describe('Quick Interaction Performance', () => {
+  test('Quick interaction templates load and respond quickly', async ({ page }) => {
       const startTime = Date.now()
 
-      await page.goto('http://localhost:3004/interactions')
+      await page.goto('http://localhost:3000/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
 
       // Open quick interaction templates
@@ -259,14 +256,17 @@ MOBILE_DEVICES.forEach(deviceName => {
       const selectionTime = Date.now() - templateSelectionStart
       expect(selectionTime).toBeLessThan(500) // 500ms
 
-      console.log(`${deviceName} Quick Templates Performance:`, {
+      console.log('Quick Templates Performance:', {
         loadTime: `${loadTime}ms`,
         selectionTime: `${selectionTime}ms`
       })
     })
+})
 
-    test('Voice input responds within performance targets', async ({ page: _ }) => {
-      await page.goto('http://localhost:3004/interactions/new')
+// Voice input performance tests (run on all mobile device projects)
+test.describe('Voice Input Performance', () => {
+  test('Voice input responds within performance targets', async ({ page }) => {
+      await page.goto('http://localhost:3000/interactions/new')
       await page.waitForSelector('[data-testid="voice-input"]')
 
       // Test voice input activation time
@@ -286,20 +286,25 @@ MOBILE_DEVICES.forEach(deviceName => {
       // Voice input should respond within 500ms
       expect(activationTime).toBeLessThan(500)
 
-      console.log(`${deviceName} Voice Input Performance:`, {
+      console.log('Voice Input Performance:', {
         activationTime: `${activationTime}ms`,
         target: '<500ms'
       })
     })
-  })
 })
 
-// Network-specific performance tests
-Object.entries(NETWORK_CONDITIONS).forEach(([networkType, conditions]) => {
-  test.describe(`Mobile Performance on ${networkType} Network`, () => {
-    test.use({ ...devices['iPhone 14'] })
-
-    test(`Page load performance on ${networkType}`, async ({ page, context }) => {
+// Network-specific performance tests (run only on network projects: iPhone 14 3G/4G/5G)
+test.describe('Network Performance', () => {
+  test('Page load performance on throttled network', async ({ page, context }) => {
+    // Determine network type from project name
+    const projectName = test.info().project.name
+    const networkType = projectName.includes('3G') ? '3G' : projectName.includes('4G') ? '4G' : projectName.includes('5G') ? '5G' : 'unknown'
+    const conditions = NETWORK_CONDITIONS[networkType as keyof typeof NETWORK_CONDITIONS]
+    
+    if (!conditions) {
+      test.skip('Not running on a network-specific project')
+      return
+    }
       // Throttle network to simulate conditions
       await context.route('**/*', async (route) => {
         // Simulate network delay
@@ -309,7 +314,7 @@ Object.entries(NETWORK_CONDITIONS).forEach(([networkType, conditions]) => {
 
       const startTime = Date.now()
 
-      await page.goto('http://localhost:3004/interactions')
+      await page.goto('http://localhost:3000/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
 
       const loadTime = Date.now() - startTime
@@ -325,14 +330,23 @@ Object.entries(NETWORK_CONDITIONS).forEach(([networkType, conditions]) => {
       })
     })
 
-    test(`Interaction creation performance on ${networkType}`, async ({ page, context }) => {
+  test('Interaction creation performance on throttled network', async ({ page, context }) => {
+    // Determine network type from project name
+    const projectName = test.info().project.name
+    const networkType = projectName.includes('3G') ? '3G' : projectName.includes('4G') ? '4G' : projectName.includes('5G') ? '5G' : 'unknown'
+    const conditions = NETWORK_CONDITIONS[networkType as keyof typeof NETWORK_CONDITIONS]
+    
+    if (!conditions) {
+      test.skip('Not running on a network-specific project')
+      return
+    }
       // Throttle network
       await context.route('**/*', async (route) => {
         await new Promise(resolve => setTimeout(resolve, conditions.latency / 10))
         await route.continue()
       })
 
-      await page.goto('http://localhost:3004/interactions/new')
+      await page.goto('http://localhost:3000/interactions/new')
       await page.waitForSelector('[data-testid="interaction-form"]')
 
       // Fill out form quickly
@@ -362,14 +376,11 @@ Object.entries(NETWORK_CONDITIONS).forEach(([networkType, conditions]) => {
         target: `<${expectedSubmitTime}ms`
       })
     })
-  })
 })
 
-// Mobile-specific interaction tests
+// Mobile-specific interaction tests (run on all mobile device projects)
 test.describe('Mobile Interaction Patterns', () => {
-  test.use({ ...devices['iPhone 14'] })
-
-  test('Swipe gestures work correctly on mobile tables', async ({ page: _ }) => {
+  test('Swipe gestures work correctly on mobile tables', async ({ page }) => {
     await page.goto('http://localhost:3004/interactions')
     await page.waitForSelector('[data-testid="interaction-table"]')
 
@@ -389,7 +400,7 @@ test.describe('Mobile Interaction Patterns', () => {
     }
   })
 
-  test('Pull-to-refresh works on mobile', async ({ page: _ }) => {
+  test('Pull-to-refresh works on mobile', async ({ page }) => {
     await page.goto('http://localhost:3004/interactions')
     await page.waitForSelector('[data-testid="interaction-table"]')
 
@@ -434,7 +445,7 @@ test.describe('Mobile Interaction Patterns', () => {
     await expect(page.locator('[data-testid="refresh-indicator"]')).toBeVisible({ timeout: 2000 })
   })
 
-  test('Keyboard appearance does not break layout on mobile', async ({ page: _ }) => {
+  test('Keyboard appearance does not break layout on mobile', async ({ page }) => {
     await page.goto('http://localhost:3004/interactions/new')
     await page.waitForSelector('[data-testid="interaction-form"]')
 
@@ -461,11 +472,9 @@ test.describe('Mobile Interaction Patterns', () => {
   })
 })
 
-// Memory and resource usage tests
+// Memory and resource usage tests (run on all mobile device projects, especially lower-end devices)
 test.describe('Mobile Resource Usage', () => {
-  test.use({ ...devices['Samsung Galaxy A53'] }) // Lower-end device
-
-  test('Memory usage remains stable during extended use', async ({ page: _ }) => {
+  test('Memory usage remains stable during extended use', async ({ page }) => {
     await page.goto('http://localhost:3004/interactions')
 
     // Get initial memory usage
@@ -480,10 +489,10 @@ test.describe('Mobile Resource Usage', () => {
     // Perform multiple interactions to stress test memory
     for (let i = 0; i < 10; i++) {
       // Navigate to different views
-      await page.goto('http://localhost:3004/interactions/new')
+      await page.goto('http://localhost:3000/interactions/new')
       await page.waitForSelector('[data-testid="interaction-form"]')
 
-      await page.goto('http://localhost:3004/interactions')
+      await page.goto('http://localhost:3000/interactions')
       await page.waitForSelector('[data-testid="interaction-table"]')
 
       // Open and close modals
@@ -516,7 +525,7 @@ test.describe('Mobile Resource Usage', () => {
     }
   })
 
-  test('Battery usage optimizations are in place', async ({ page: _ }) => {
+  test('Battery usage optimizations are in place', async ({ page }) => {
     await page.goto('http://localhost:3004/interactions')
 
     // Check for battery-optimized features
