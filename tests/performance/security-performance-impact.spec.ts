@@ -9,7 +9,7 @@
  * - Security overhead vs performance optimization analysis
  */
 
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 // Performance thresholds with security overhead considerations
 const SECURITY_PERFORMANCE_THRESHOLDS = {
@@ -19,27 +19,27 @@ const SECURITY_PERFORMANCE_THRESHOLDS = {
   nestedJoinQuery: 300, // ms - Current nested join approach
   separateQueries: 600, // ms - Proposed separate queries approach
   batchOperations: 1000, // ms - Batch operations with validation
-  
+
   // Database Performance
   rlsFunctionCall: 50, // ms - RLS function execution time
   principalValidation: 100, // ms - Principal access validation
   inputValidation: 10, // ms - Input sanitization overhead
   uuidValidation: 5, // ms - UUID validation time
-  
+
   // Load Testing Thresholds
   concurrentUsers: 100, // Number of concurrent users supported
   requestsPerSecond: 50, // RPS under security constraints
   errorRateThreshold: 1, // % - Acceptable error rate under load
-  
+
   // Security Overhead Limits
   maxSecurityOverhead: 15, // % - Maximum acceptable performance impact
   responseTimeIncrease: 20, // % - Max acceptable response time increase
   memoryOverheadLimit: 10, // % - Memory usage increase limit
-  
+
   // Rate Limiting and Audit
   rateLimitWindow: 60000, // ms - Rate limit window
   auditLogLatency: 25, // ms - Audit logging overhead
-  
+
   // Critical Business Operations
   contactAnalyticsLoad: 800, // ms - Contact analytics with security
   opportunityCreation: 600, // ms - Opportunity creation with validation
@@ -112,7 +112,7 @@ class SecurityTestDataGenerator {
 
 // Performance measurement utilities for security testing
 class SecurityPerformanceMeasurement {
-  constructor(public page: any) {}
+  constructor(public page: any) { }
 
   async measureQueryPerformance(queryType: 'nested' | 'separate', dataset: any[]): Promise<{
     executionTime: number,
@@ -229,17 +229,17 @@ class SecurityPerformanceMeasurement {
 
     for (const input of inputs) {
       const startTime = Date.now()
-      
+
       try {
         // Mock input validation endpoint
         await this.page.route('**/api/validate', route => {
           const requestData = route.request().postDataJSON()
           const inputValue = requestData.input
-          
+
           // Simulate validation logic
           const isValid = !SecurityTestDataGenerator.generateMaliciousInputs().includes(inputValue)
           const validationDelay = isValid ? 5 : 15 // More time for malicious input detection
-          
+
           setTimeout(() => {
             route.fulfill({
               status: isValid ? 200 : 400,
@@ -258,7 +258,7 @@ class SecurityPerformanceMeasurement {
         })
 
         const validationTime = Date.now() - startTime
-        
+
         if (response.ok()) {
           successCount++
         } else {
@@ -296,11 +296,12 @@ class SecurityPerformanceMeasurement {
       const startTime = Date.now()
 
       await this.page.route('**/api/rls-check', route => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { principal_id, resource_ids } = route.request().postDataJSON()
-        
+
         // Simulate RLS function logic
         const checkTime = 5 + (resource_ids.length * 0.5) // Base time + scaling factor
-        
+
         setTimeout(() => {
           route.fulfill({
             status: 200,
@@ -314,7 +315,7 @@ class SecurityPerformanceMeasurement {
       })
 
       const resourceIds = Array.from({ length: i }, (_, idx) => `resource-${idx}`)
-      
+
       await this.page.request.post('/api/rls-check', {
         data: { principal_id: principalId, resource_ids: resourceIds }
       })
@@ -366,7 +367,7 @@ class SecurityPerformanceMeasurement {
               // Simulate security checks and principal validation
               const securityDelay = 25 + Math.random() * 25 // 25-50ms security overhead
               const loadDelay = Math.min(50, userCount * 2) // Increased delay under load
-              
+
               setTimeout(() => {
                 // Simulate occasional security blocks
                 if (Math.random() < 0.02) { // 2% security blocks
@@ -565,6 +566,7 @@ test.describe('Load Testing with Security Measures', () => {
   })
 
   test('should measure security overhead in real business operations', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Mock real business scenarios with security measures
@@ -646,6 +648,7 @@ test.describe('Load Testing with Security Measures', () => {
 
 test.describe('Security-Performance Optimization Recommendations', () => {
   test('should generate optimization recommendations', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const measurement = new SecurityPerformanceMeasurement(page)
 
     // Collect performance metrics across different scenarios
@@ -727,7 +730,7 @@ test.describe('Security-Performance Optimization Recommendations', () => {
     // Validate overall security overhead is within acceptable limits
     expect(averageImpact).toBeLessThan(SECURITY_PERFORMANCE_THRESHOLDS.maxSecurityOverhead)
     expect(optimizations.length).toBeGreaterThan(0) // Should have optimization recommendations
-    
+
     // Ensure critical business operations still meet performance requirements
     expect(securityEnhancedMetrics.simpleQuery).toBeLessThan(SECURITY_PERFORMANCE_THRESHOLDS.simpleQuery * 1.2)
     expect(securityEnhancedMetrics.complexQuery).toBeLessThan(SECURITY_PERFORMANCE_THRESHOLDS.complexQuery * 1.2)

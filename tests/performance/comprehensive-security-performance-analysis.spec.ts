@@ -12,33 +12,33 @@
  * for production deployment readiness assessment.
  */
 
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 // Critical Performance Thresholds (Production-Ready)
 const PRODUCTION_THRESHOLDS = {
   // Authentication Performance
   jwtValidation: 25, // ms - JWT validation overhead
   authFlow: 150, // ms - Complete authentication flow
-  
+
   // API Response Times
   simpleQuery: 200, // ms - Simple database queries
   complexQuery: 500, // ms - Complex queries with joins
   userOperations: 300, // ms - User CRUD operations
-  
+
   // Rate Limiting Performance
   rateLimitCheck: 10, // ms - Rate limit validation
   memoryOverhead: 5, // % - Memory usage increase
-  
+
   // Database Performance
   rlsQuery: 100, // ms - RLS policy evaluation
   userQuery: 250, // ms - User-specific queries
   batchOperations: 1000, // ms - Batch operations
-  
+
   // Security Overhead Limits
   maxSecurityOverhead: 15, // % - Acceptable performance impact
   inputSanitization: 15, // ms - Input validation and sanitization
   auditLogging: 20, // ms - Security audit logging
-  
+
   // Load Testing
   concurrentUsers: 100, // Number of users supported
   errorRate: 1, // % - Acceptable error rate under load
@@ -47,14 +47,14 @@ const PRODUCTION_THRESHOLDS = {
 
 // Mock User Management API for testing
 class UserManagementMockAPI {
-  constructor(public page: any) {}
+  constructor(public page: any) { }
 
   async setupAuthenticationMocks() {
     // Mock JWT validation endpoint
     await this.page.route('**/auth/validate-jwt', route => {
       const token = route.request().headers()['authorization']
       const validationTime = 20 + Math.random() * 10 // 20-30ms JWT validation
-      
+
       setTimeout(() => {
         if (token && token.includes('valid-jwt')) {
           route.fulfill({
@@ -85,7 +85,7 @@ class UserManagementMockAPI {
     await this.page.route('**/auth/login', route => {
       const credentials = route.request().postDataJSON()
       const authTime = 120 + Math.random() * 60 // 120-180ms auth flow
-      
+
       setTimeout(() => {
         route.fulfill({
           status: 200,
@@ -107,13 +107,13 @@ class UserManagementMockAPI {
 
   async setupRateLimitingMocks() {
     const requestCounts = new Map()
-    
+
     await this.page.route('**/api/rate-limit/check', route => {
       const { user_id, endpoint } = route.request().postDataJSON()
       const key = `${user_id}-${endpoint}`
       const current = requestCounts.get(key) || 0
       const checkTime = 5 + Math.random() * 10 // 5-15ms rate limit check
-      
+
       setTimeout(() => {
         if (current >= 60) { // 60 requests per minute limit
           route.fulfill({
@@ -150,7 +150,7 @@ class UserManagementMockAPI {
       const url = route.request().url()
       const userId = url.split('/').pop()
       const rlsTime = 80 + Math.random() * 40 // 80-120ms RLS evaluation
-      
+
       setTimeout(() => {
         // Simulate RLS policy evaluation
         route.fulfill({
@@ -172,7 +172,7 @@ class UserManagementMockAPI {
 
     await this.page.route('**/api/users', route => {
       const rlsTime = 150 + Math.random() * 100 // 150-250ms for list with RLS
-      
+
       setTimeout(() => {
         route.fulfill({
           status: 200,
@@ -196,17 +196,18 @@ class UserManagementMockAPI {
 
   async setupInputValidationMocks() {
     await this.page.route('**/api/validate/input', route => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { input, type: _type } = route.request().postDataJSON()
       const validationTime = 10 + Math.random() * 10 // 10-20ms validation
-      
+
       // Simulate threat detection
       const threats = []
       if (input.includes('<script>')) threats.push('xss')
       if (input.includes('DROP TABLE')) threats.push('sql_injection')
       if (input.includes('../')) threats.push('path_traversal')
-      
+
       const sanitizationTime = threats.length > 0 ? 5 + Math.random() * 10 : 2
-      
+
       setTimeout(() => {
         route.fulfill({
           status: threats.length > 0 ? 400 : 200,
@@ -225,9 +226,10 @@ class UserManagementMockAPI {
 
   async setupAuditLoggingMocks() {
     await this.page.route('**/api/audit/log', route => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _auditData = route.request().postDataJSON()
       const loggingTime = 15 + Math.random() * 10 // 15-25ms audit logging
-      
+
       setTimeout(() => {
         route.fulfill({
           status: 201,
@@ -246,7 +248,7 @@ class UserManagementMockAPI {
 
 // Performance measurement utilities
 class SecurityPerformanceMeasurer {
-  constructor(public page: any) {}
+  constructor(public page: any) { }
 
   async measureJWTValidationPerformance(): Promise<{
     validationTime: number,
@@ -255,15 +257,15 @@ class SecurityPerformanceMeasurer {
   }> {
     const results = []
     let successCount = 0
-    
-    const initialMemory = await this.page.evaluate(() => 
+
+    const initialMemory = await this.page.evaluate(() =>
       'memory' in performance ? (performance as any).memory.usedJSHeapSize : 0
     )
 
     // Test multiple JWT validations
     for (let i = 0; i < 10; i++) {
       const startTime = Date.now()
-      
+
       const response = await this.page.request.post('/auth/validate-jwt', {
         headers: {
           'Authorization': `Bearer valid-jwt-token-${i}`
@@ -272,11 +274,11 @@ class SecurityPerformanceMeasurer {
 
       const validationTime = Date.now() - startTime
       results.push(validationTime)
-      
+
       if (response.ok()) successCount++
     }
 
-    const finalMemory = await this.page.evaluate(() => 
+    const finalMemory = await this.page.evaluate(() =>
       'memory' in performance ? (performance as any).memory.usedJSHeapSize : 0
     )
 
@@ -294,15 +296,15 @@ class SecurityPerformanceMeasurer {
   }> {
     const results = []
     let blockedRequests = 0
-    
-    const initialMemory = await this.page.evaluate(() => 
+
+    const initialMemory = await this.page.evaluate(() =>
       'memory' in performance ? (performance as any).memory.usedJSHeapSize : 0
     )
 
     // Simulate multiple users hitting rate limits
     for (let i = 0; i < userCount; i++) {
       const startTime = Date.now()
-      
+
       const response = await this.page.request.post('/api/rate-limit/check', {
         data: {
           user_id: `user-${i % 10}`, // 10 different users
@@ -312,11 +314,11 @@ class SecurityPerformanceMeasurer {
 
       const checkTime = Date.now() - startTime
       results.push(checkTime)
-      
+
       if (response.status() === 429) blockedRequests++
     }
 
-    const finalMemory = await this.page.evaluate(() => 
+    const finalMemory = await this.page.evaluate(() =>
       'memory' in performance ? (performance as any).memory.usedJSHeapSize : 0
     )
 
@@ -392,7 +394,7 @@ class SecurityPerformanceMeasurer {
         data: { input, type: 'text' }
       })
       maliciousResults.push(Date.now() - startTime)
-      
+
       if (response.status() === 400) threatsDetected++
     }
 
@@ -611,7 +613,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     }
 
     // Production readiness assessment
-    const criticalIssues = optimizations.filter(opt => 
+    const criticalIssues = optimizations.filter(opt =>
       opt.area === 'JWT Validation' || opt.area === 'RLS Policies'
     ).length
 
@@ -633,7 +635,7 @@ test.describe('Comprehensive Security-Performance Analysis', () => {
     // Validate production readiness
     expect(avgSecurityOverhead).toBeLessThan(PRODUCTION_THRESHOLDS.maxSecurityOverhead)
     expect(criticalIssues).toBeLessThan(2) // Maximum 1 critical issue acceptable
-    
+
     // Log final recommendations
     if (optimizations.length > 0) {
       console.log('\n🚀 Implementation Priority Recommendations:')

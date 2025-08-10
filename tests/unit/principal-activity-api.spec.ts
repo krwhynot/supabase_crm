@@ -14,51 +14,51 @@
  * - Compatibility methods
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest'
 import { principalActivityApi } from '@/services/principalActivityApi'
-import type { 
+import type {
   PrincipalActivitySummary,
+  PrincipalDashboardData,
   PrincipalFilters,
-  PrincipalSortConfig,
   PrincipalListResponse,
-  PrincipalDashboardData
+  PrincipalSortConfig
 } from '@/types/principal'
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 
 // Mock the supabase import with proper method chaining
 vi.mock('@/lib/supabase', () => {
   // Create shared query chain that can be accessed by tests
   let sharedQueryChain: any
-  
+
   const createQueryChain = () => {
     const queryChain: any = {}
-    
+
     // All methods return the chain for fluent interface
     const methods = [
       'from', 'select', 'eq', 'in', 'or', 'gt', 'gte', 'lt', 'lte',
       'order', 'range', 'single', 'limit'
     ]
-    
+
     methods.forEach(method => {
       queryChain[method] = vi.fn().mockReturnValue(queryChain)
     })
-    
+
     // Override terminal methods with proper async responses
     queryChain.single = vi.fn().mockResolvedValue({ data: null, error: null })
     queryChain.select = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 })
     queryChain.limit = vi.fn().mockResolvedValue({ data: [], error: null })
-    
+
     // Store reference so tests can access it
     sharedQueryChain = queryChain
     return queryChain
   }
-  
+
   // Create the main supabase mock
   const mockSupabase = {
     from: vi.fn(() => createQueryChain()),
     // Also expose the query chain directly for test access
     get queryChain() { return sharedQueryChain }
   }
-  
+
   return {
     supabase: mockSupabase
   }
@@ -110,6 +110,7 @@ const mockPrincipalSummary: PrincipalActivitySummary = {
   summary_generated_at: '2024-01-15T12:00:00Z'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockPrincipalListResponse: PrincipalListResponse = {
   data: [mockPrincipalSummary],
   pagination: {
@@ -135,19 +136,21 @@ describe('Principal Activity API Service', () => {
   let consoleWarnSpy: Mock
   let consoleErrorSpy: Mock
   let mockSupabase: any
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let mockQueryChain: any
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { })
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+
     // Get mocked supabase object
     const { supabase } = await import('@/lib/supabase')
     mockSupabase = supabase
-    
+
     // Trigger query chain creation by calling from()
     mockSupabase.from('test')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mockQueryChain = mockSupabase.queryChain
   })
 
@@ -176,7 +179,7 @@ describe('Principal Activity API Service', () => {
 
       // Reset the mock call count
       vi.clearAllMocks()
-      
+
       // Second call should use cache (no new API call)
       const response2 = await principalActivityApi.getPrincipalSummaries({})
       expect(response2.success).toBe(true)
@@ -185,7 +188,7 @@ describe('Principal Activity API Service', () => {
 
     it('should invalidate cache after TTL expires', async () => {
       vi.useFakeTimers()
-      
+
       // First call
       mockSupabase.select.mockResolvedValueOnce({
         data: [mockPrincipalSummary],
@@ -195,10 +198,10 @@ describe('Principal Activity API Service', () => {
 
       const response1 = await principalActivityApi.getPrincipalSummaries({})
       expect(response1.success).toBe(true)
-      
+
       // Fast-forward time beyond cache TTL (5 minutes + 1 second)
       vi.advanceTimersByTime(300000 + 1000)
-      
+
       mockSupabase.select.mockResolvedValueOnce({
         data: [mockPrincipalSummary],
         error: null,
@@ -209,7 +212,7 @@ describe('Principal Activity API Service', () => {
       const response2 = await principalActivityApi.getPrincipalSummaries({})
       expect(response2.success).toBe(true)
       expect(mockSupabase.from).toHaveBeenCalledTimes(2)
-      
+
       vi.useRealTimers()
     })
   })
@@ -234,7 +237,7 @@ describe('Principal Activity API Service', () => {
       })
 
       await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Slow query detected: getPrincipalSummaries')
       )
@@ -245,7 +248,7 @@ describe('Principal Activity API Service', () => {
       mockSupabase.select.mockRejectedValueOnce(testError)
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Database connection failed')
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -268,7 +271,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(true)
       expect(response.data?.data).toHaveLength(1)
       expect(response.data?.data[0]).toEqual(mockPrincipalSummary)
@@ -283,7 +286,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Table not found')
     })
@@ -296,7 +299,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('No data returned from query')
     })
@@ -315,7 +318,7 @@ describe('Principal Activity API Service', () => {
       })
 
       await principalActivityApi.getPrincipalSummaries(filters)
-      
+
       expect(mockSupabase.or).toHaveBeenCalledWith(
         'principal_name.ilike.%test%,organization_name.ilike.%test%'
       )
@@ -337,7 +340,7 @@ describe('Principal Activity API Service', () => {
       })
 
       await principalActivityApi.getPrincipalSummaries({}, sort)
-      
+
       expect(mockSupabase.order).toHaveBeenCalledWith('principal_name', { ascending: true })
     })
 
@@ -349,13 +352,14 @@ describe('Principal Activity API Service', () => {
       })
 
       await principalActivityApi.getPrincipalSummaries({}, {}, { page: 2, limit: 10 })
-      
+
       expect(mockSupabase.range).toHaveBeenCalledWith(10, 19) // (page-1)*limit to (page*limit-1)
     })
   })
 
   describe('Dashboard Data', () => {
     it('should fetch principal dashboard successfully', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const mockDashboardData: PrincipalDashboardData = {
         summary: mockPrincipalSummary,
         distributor_relationships: [],
@@ -402,7 +406,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalDashboard('test-principal-1')
-      
+
       expect(response.success).toBe(true)
       expect(response.data?.summary).toEqual(mockPrincipalSummary)
       expect(mockSupabase.eq).toHaveBeenCalledWith('principal_id', 'test-principal-1')
@@ -415,7 +419,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalDashboard('invalid-id')
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Principal not found')
     })
@@ -434,14 +438,14 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalActivitySummary({})
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toEqual([mockPrincipalSummary])
     })
 
     it('should provide mock data for getEngagementScoreBreakdown', async () => {
       const response = await principalActivityApi.getEngagementScoreBreakdown()
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toHaveLength(5)
       expect(response.data[0]).toHaveProperty('range', '0-20')
@@ -450,7 +454,7 @@ describe('Principal Activity API Service', () => {
 
     it('should provide mock data for getPrincipalStats', async () => {
       const response = await principalActivityApi.getPrincipalStats()
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toHaveProperty('followUpsRequired')
       expect(response.data).toHaveProperty('activeThisWeek')
@@ -465,7 +469,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.searchPrincipalsWithActivity('test', false)
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toEqual([mockPrincipalSummary])
       expect(mockSupabase.or).toHaveBeenCalledWith(
@@ -483,7 +487,7 @@ describe('Principal Activity API Service', () => {
       mockSupabase.select.mockRejectedValueOnce(new Error('Network timeout'))
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Network timeout')
     })
@@ -492,7 +496,7 @@ describe('Principal Activity API Service', () => {
       mockSupabase.select.mockRejectedValueOnce('String error')
 
       const response = await principalActivityApi.getPrincipalSummaries({})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Unexpected error occurred')
     })
@@ -521,9 +525,9 @@ describe('Principal Activity API Service', () => {
   describe('Analytics Calculations', () => {
     it('should calculate analytics from principal data', async () => {
       const principals = [mockPrincipalSummary]
-      
+
       const response = await principalActivityApi.calculateAnalytics(principals)
-      
+
       expect(response.success).toBe(true)
       expect(response.data?.total_principals).toBe(1)
       expect(response.data?.active_principals).toBe(1)
@@ -534,7 +538,7 @@ describe('Principal Activity API Service', () => {
 
     it('should handle empty principal array', async () => {
       const response = await principalActivityApi.calculateAnalytics([])
-      
+
       expect(response.success).toBe(true)
       expect(response.data?.total_principals).toBe(0)
       expect(response.data?.avg_engagement_score).toBe(0)
@@ -545,9 +549,9 @@ describe('Principal Activity API Service', () => {
         ...mockPrincipalSummary,
         geographic_region: 'North America'
       }
-      
+
       const response = await principalActivityApi.calculateAnalytics([principalWithRegion])
-      
+
       expect(response.success).toBe(true)
       expect(response.data?.geographic_distribution).toHaveLength(1)
       expect(response.data?.geographic_distribution[0].region).toBe('North America')
@@ -563,9 +567,9 @@ describe('Principal Activity API Service', () => {
     it('should simulate batch update operations', async () => {
       const principalIds = ['test-1', 'test-2']
       const updates = { activity_status: 'INACTIVE' as const }
-      
+
       const response = await principalActivityApi.batchUpdatePrincipals(principalIds, updates)
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toBe(true)
       expect(consoleErrorSpy).not.toHaveBeenCalled()
@@ -579,10 +583,10 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.batchUpdatePrincipals(['test-1'], {})
-      
+
       expect(response.success).toBe(false)
       expect(response.error).toBe('Batch operation failed')
-      
+
       console.log = originalLog
     })
   })
@@ -608,7 +612,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getDistributorRelationships(['test-principal-1'])
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toEqual(mockRelationships)
     })
@@ -630,7 +634,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getProductPerformance(['test-principal-1'])
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toEqual(mockPerformance)
     })
@@ -657,7 +661,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalTimeline(['test-principal-1'], 20)
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toEqual(mockTimeline)
       expect(mockSupabase.limit).toHaveBeenCalledWith(20)
@@ -686,7 +690,7 @@ describe('Principal Activity API Service', () => {
       })
 
       const response = await principalActivityApi.getPrincipalOptions()
-      
+
       expect(response.success).toBe(true)
       expect(response.data).toHaveLength(1)
       expect(response.data[0]).toHaveProperty('is_recommended', true) // engagement_score > 70
@@ -701,7 +705,7 @@ describe('Principal Activity API Service', () => {
       })
 
       await principalActivityApi.getPrincipalOptions('org-123')
-      
+
       expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 'org-123')
     })
   })

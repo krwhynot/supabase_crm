@@ -13,7 +13,7 @@
  */
 
 import { execSync } from 'child_process'
-import { writeFileSync, existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 interface TestResult {
@@ -42,7 +42,7 @@ interface TestReport {
 class PrincipalActivityTestRunner {
   private results: TestResult[] = []
   private outputDir = 'test-results/principal-activity'
-  
+
   constructor() {
     this.ensureOutputDirectory()
   }
@@ -58,19 +58,19 @@ class PrincipalActivityTestRunner {
    */
   async runUnitTests(): Promise<TestResult> {
     console.log('🧪 Running Principal Activity API Unit Tests...')
-    
+
     const startTime = Date.now()
     let result: TestResult
-    
+
     try {
       const output = execSync(
         'npx vitest run tests/unit/principal-activity-api.spec.ts --reporter=json',
         { encoding: 'utf-8', cwd: process.cwd() }
       )
-      
+
       const testResults = JSON.parse(output)
       const duration = Date.now() - startTime
-      
+
       result = {
         suite: 'Principal Activity API Unit Tests',
         passed: testResults.numPassedTests || 0,
@@ -80,9 +80,9 @@ class PrincipalActivityTestRunner {
         coverage: this.extractCoverage(testResults),
         errors: this.extractErrors(testResults)
       }
-      
+
       console.log(`✅ API Unit Tests: ${result.passed} passed, ${result.failed} failed`)
-      
+
     } catch (error) {
       result = {
         suite: 'Principal Activity API Unit Tests',
@@ -92,10 +92,10 @@ class PrincipalActivityTestRunner {
         duration: Date.now() - startTime,
         errors: [error.message]
       }
-      
+
       console.log(`❌ API Unit Tests failed: ${error.message}`)
     }
-    
+
     this.results.push(result)
     return result
   }
@@ -105,19 +105,19 @@ class PrincipalActivityTestRunner {
    */
   async runStoreTests(): Promise<TestResult> {
     console.log('🏪 Running Principal Activity Store Tests...')
-    
+
     const startTime = Date.now()
     let result: TestResult
-    
+
     try {
       const output = execSync(
         'npx vitest run tests/unit/principal-activity-store.spec.ts --reporter=json',
         { encoding: 'utf-8', cwd: process.cwd() }
       )
-      
+
       const testResults = JSON.parse(output)
       const duration = Date.now() - startTime
-      
+
       result = {
         suite: 'Principal Activity Store Tests',
         passed: testResults.numPassedTests || 0,
@@ -127,9 +127,9 @@ class PrincipalActivityTestRunner {
         coverage: this.extractCoverage(testResults),
         errors: this.extractErrors(testResults)
       }
-      
+
       console.log(`✅ Store Tests: ${result.passed} passed, ${result.failed} failed`)
-      
+
     } catch (error) {
       result = {
         suite: 'Principal Activity Store Tests',
@@ -139,10 +139,10 @@ class PrincipalActivityTestRunner {
         duration: Date.now() - startTime,
         errors: [error.message]
       }
-      
+
       console.log(`❌ Store Tests failed: ${error.message}`)
     }
-    
+
     this.results.push(result)
     return result
   }
@@ -152,22 +152,22 @@ class PrincipalActivityTestRunner {
    */
   async runE2ETests(): Promise<TestResult> {
     console.log('🌐 Running Principal Activity E2E Tests...')
-    
+
     const startTime = Date.now()
     let result: TestResult
-    
+
     try {
       // Ensure development server is running
       await this.ensureDevServer()
-      
+
       const output = execSync(
         'npx playwright test tests/principal-activity-e2e.spec.ts --reporter=json',
         { encoding: 'utf-8', cwd: process.cwd() }
       )
-      
+
       const testResults = JSON.parse(output)
       const duration = Date.now() - startTime
-      
+
       result = {
         suite: 'Principal Activity E2E Tests',
         passed: testResults.stats?.expected || 0,
@@ -176,9 +176,9 @@ class PrincipalActivityTestRunner {
         duration,
         errors: this.extractPlaywrightErrors(testResults)
       }
-      
+
       console.log(`✅ E2E Tests: ${result.passed} passed, ${result.failed} failed`)
-      
+
     } catch (error) {
       result = {
         suite: 'Principal Activity E2E Tests',
@@ -188,10 +188,10 @@ class PrincipalActivityTestRunner {
         duration: Date.now() - startTime,
         errors: [error.message]
       }
-      
+
       console.log(`❌ E2E Tests failed: ${error.message}`)
     }
-    
+
     this.results.push(result)
     return result
   }
@@ -201,22 +201,22 @@ class PrincipalActivityTestRunner {
    */
   async runPerformanceTests(): Promise<TestResult> {
     console.log('⚡ Running Principal Activity Performance Tests...')
-    
+
     const startTime = Date.now()
     let result: TestResult
-    
+
     try {
       // Run API performance tests
       const apiPerf = await this.benchmarkApiPerformance()
-      
+
       // Run store performance tests
       const storePerf = await this.benchmarkStorePerformance()
-      
+
       // Run UI performance tests
       const uiPerf = await this.benchmarkUIPerformance()
-      
+
       const duration = Date.now() - startTime
-      
+
       result = {
         suite: 'Principal Activity Performance Tests',
         passed: apiPerf.passed + storePerf.passed + uiPerf.passed,
@@ -225,9 +225,9 @@ class PrincipalActivityTestRunner {
         duration,
         errors: [...apiPerf.errors, ...storePerf.errors, ...uiPerf.errors]
       }
-      
+
       console.log(`✅ Performance Tests: ${result.passed} passed, ${result.failed} failed`)
-      
+
     } catch (error) {
       result = {
         suite: 'Principal Activity Performance Tests',
@@ -237,10 +237,10 @@ class PrincipalActivityTestRunner {
         duration: Date.now() - startTime,
         errors: [error.message]
       }
-      
+
       console.log(`❌ Performance Tests failed: ${error.message}`)
     }
-    
+
     this.results.push(result)
     return result
   }
@@ -254,10 +254,10 @@ class PrincipalActivityTestRunner {
     const totalFailed = this.results.reduce((sum, r) => sum + r.failed, 0)
     const totalSkipped = this.results.reduce((sum, r) => sum + r.skipped, 0)
     const totalDuration = this.results.reduce((sum, r) => sum + r.duration, 0)
-    
+
     const coverageResults = this.results.filter(r => r.coverage).map(r => r.coverage!)
-    const overallCoverage = coverageResults.length > 0 
-      ? coverageResults.reduce((sum, c) => sum + c, 0) / coverageResults.length 
+    const overallCoverage = coverageResults.length > 0
+      ? coverageResults.reduce((sum, c) => sum + c, 0) / coverageResults.length
       : 0
 
     const summary = this.generateSummary(totalPassed, totalFailed, totalSkipped, overallCoverage)
@@ -279,10 +279,10 @@ class PrincipalActivityTestRunner {
     // Save report to file
     const reportPath = join(this.outputDir, `principal-activity-test-report-${Date.now()}.json`)
     writeFileSync(reportPath, JSON.stringify(report, null, 2))
-    
+
     // Generate HTML report
     this.generateHTMLReport(report)
-    
+
     return report
   }
 
@@ -291,19 +291,19 @@ class PrincipalActivityTestRunner {
    */
   async runAllTests(): Promise<TestReport> {
     console.log('🚀 Starting Principal Activity Comprehensive Test Suite...\n')
-    
+
     const startTime = Date.now()
-    
+
     try {
       // Run all test suites
       await this.runUnitTests()
       await this.runStoreTests()
       await this.runE2ETests()
       await this.runPerformanceTests()
-      
+
       const report = this.generateReport()
       const totalTime = Date.now() - startTime
-      
+
       console.log('\n📊 Test Suite Summary:')
       console.log(`Total Tests: ${report.totalTests}`)
       console.log(`Passed: ${report.totalPassed}`)
@@ -311,16 +311,16 @@ class PrincipalActivityTestRunner {
       console.log(`Skipped: ${report.totalSkipped}`)
       console.log(`Coverage: ${report.overallCoverage.toFixed(1)}%`)
       console.log(`Duration: ${(totalTime / 1000).toFixed(2)}s`)
-      
+
       if (report.totalFailed > 0) {
         console.log('\n❌ Some tests failed. Check the detailed report for more information.')
         process.exit(1)
       } else {
         console.log('\n✅ All tests passed successfully!')
       }
-      
+
       return report
-      
+
     } catch (error) {
       console.error('\n💥 Test suite execution failed:', error.message)
       process.exit(1)
@@ -334,7 +334,7 @@ class PrincipalActivityTestRunner {
 
   private extractErrors(testResults: any): string[] {
     const errors: string[] = []
-    
+
     if (testResults.testResults) {
       testResults.testResults.forEach((result: any) => {
         if (result.message) {
@@ -342,13 +342,13 @@ class PrincipalActivityTestRunner {
         }
       })
     }
-    
+
     return errors
   }
 
   private extractPlaywrightErrors(testResults: any): string[] {
     const errors: string[] = []
-    
+
     if (testResults.suites) {
       testResults.suites.forEach((suite: any) => {
         suite.specs?.forEach((spec: any) => {
@@ -360,7 +360,7 @@ class PrincipalActivityTestRunner {
         })
       })
     }
-    
+
     return errors
   }
 
@@ -375,7 +375,7 @@ class PrincipalActivityTestRunner {
       console.log('🚀 Starting development server...')
       // Start dev server in background (this is simplified - in practice you'd use a more robust approach)
       execSync('npm run dev > /dev/null 2>&1 &', { cwd: process.cwd() })
-      
+
       // Wait for server to start
       await new Promise(resolve => setTimeout(resolve, 5000))
     }
@@ -383,17 +383,18 @@ class PrincipalActivityTestRunner {
 
   private async benchmarkApiPerformance(): Promise<Partial<TestResult>> {
     // Simplified performance benchmarking
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const startTime = Date.now()
-    
+
     try {
       // This would run actual performance tests
       // For now, simulate with timing checks
       const apiCallTime = await this.measureApiCall()
       const cachePerformance = await this.measureCacheOperations()
-      
+
       const passed = apiCallTime < 1000 && cachePerformance < 100 ? 2 : 0
       const failed = passed === 2 ? 0 : 2
-      
+
       return { passed, failed, errors: [] }
     } catch (error) {
       return { passed: 0, failed: 1, errors: [error.message] }
@@ -405,10 +406,10 @@ class PrincipalActivityTestRunner {
     try {
       const stateUpdateTime = await this.measureStateUpdates()
       const computedPropsTime = await this.measureComputedProperties()
-      
+
       const passed = stateUpdateTime < 50 && computedPropsTime < 20 ? 2 : 0
       const failed = passed === 2 ? 0 : 2
-      
+
       return { passed, failed, errors: [] }
     } catch (error) {
       return { passed: 0, failed: 1, errors: [error.message] }
@@ -420,10 +421,10 @@ class PrincipalActivityTestRunner {
     try {
       const renderTime = await this.measureRenderPerformance()
       const interactionTime = await this.measureInteractionPerformance()
-      
+
       const passed = renderTime < 2000 && interactionTime < 100 ? 2 : 0
       const failed = passed === 2 ? 0 : 2
-      
+
       return { passed, failed, errors: [] }
     } catch (error) {
       return { passed: 0, failed: 1, errors: [error.message] }
@@ -476,17 +477,17 @@ class PrincipalActivityTestRunner {
   private generateSummary(passed: number, failed: number, skipped: number, coverage: number): string {
     const total = passed + failed + skipped
     const passRate = total > 0 ? (passed / total) * 100 : 0
-    
+
     let summary = `Principal Activity Test Suite completed with ${passRate.toFixed(1)}% pass rate.\n\n`
-    
+
     if (failed === 0) {
       summary += '🎉 All tests passed successfully! The Principal Activity Management System is functioning correctly.'
     } else {
       summary += `⚠️ ${failed} test(s) failed. Review the detailed results and fix the issues before deployment.`
     }
-    
+
     summary += `\n\nCode Coverage: ${coverage.toFixed(1)}%`
-    
+
     if (coverage < 80) {
       summary += ' (Below recommended 80% threshold)'
     } else if (coverage >= 90) {
@@ -494,35 +495,35 @@ class PrincipalActivityTestRunner {
     } else {
       summary += ' (Good coverage)'
     }
-    
+
     return summary
   }
 
   private generateRecommendations(): string[] {
     const recommendations: string[] = []
-    
+
     // Analyze results and generate recommendations
     const failedSuites = this.results.filter(r => r.failed > 0)
     const lowCoverageSuites = this.results.filter(r => r.coverage && r.coverage < 80)
     const slowSuites = this.results.filter(r => r.duration > 30000) // > 30 seconds
-    
+
     if (failedSuites.length > 0) {
       recommendations.push(`Fix failing tests in: ${failedSuites.map(s => s.suite).join(', ')}`)
     }
-    
+
     if (lowCoverageSuites.length > 0) {
       recommendations.push(`Improve test coverage for: ${lowCoverageSuites.map(s => s.suite).join(', ')}`)
     }
-    
+
     if (slowSuites.length > 0) {
       recommendations.push(`Optimize performance for slow test suites: ${slowSuites.map(s => s.suite).join(', ')}`)
     }
-    
+
     // General recommendations
     recommendations.push('Run tests regularly as part of CI/CD pipeline')
     recommendations.push('Monitor test performance and coverage metrics')
     recommendations.push('Update tests when adding new features or fixing bugs')
-    
+
     return recommendations
   }
 
@@ -626,7 +627,7 @@ class PrincipalActivityTestRunner {
 
     const htmlPath = join(this.outputDir, 'principal-activity-test-report.html')
     writeFileSync(htmlPath, htmlReport)
-    
+
     console.log(`📄 HTML report generated: ${htmlPath}`)
   }
 }
@@ -634,9 +635,9 @@ class PrincipalActivityTestRunner {
 // CLI execution
 if (require.main === module) {
   const runner = new PrincipalActivityTestRunner()
-  
+
   const command = process.argv[2] || 'all'
-  
+
   switch (command) {
     case 'unit':
       runner.runUnitTests().then(() => console.log('Unit tests completed'))

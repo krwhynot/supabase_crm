@@ -14,16 +14,17 @@
  * - Computed properties
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest'
-import { setActivePinia, createPinia } from 'pinia'
 import { usePrincipalActivityStore } from '@/stores/principalActivityStore'
-import type { 
+import type {
   PrincipalActivitySummary,
   PrincipalFilters,
-  PrincipalSortConfig,
-  PrincipalListResponse 
+  PrincipalListResponse,
+  PrincipalSortConfig
 } from '@/types/principal'
-import { DEFAULT_PRINCIPAL_FILTERS } from '@/types/principal'
+import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// import { DEFAULT_PRINCIPAL_FILTERS } from '@/types/principal'
 
 // Mock the API service
 vi.mock('@/services/principalActivityApi', () => {
@@ -133,11 +134,11 @@ describe('Principal Activity Store', () => {
     setActivePinia(createPinia())
     store = usePrincipalActivityStore()
     vi.clearAllMocks()
-    
+
     // Get the mocked API
     const apiModule = await import('@/services/principalActivityApi')
     mockApi = apiModule.principalActivityApi
-    
+
     // Reset timers for testing
     vi.useFakeTimers()
   })
@@ -211,7 +212,7 @@ describe('Principal Activity Store', () => {
 
     it('should set loading state during fetch', async () => {
       let loadingDuringFetch = false
-      
+
       mockApi.getPrincipalSummaries.mockImplementation(() => {
         loadingDuringFetch = store.loading
         return Promise.resolve({ success: true, data: mockListResponse })
@@ -303,7 +304,7 @@ describe('Principal Activity Store', () => {
     it('should identify principals by ID', () => {
       const principal = store.getPrincipalById('test-principal-1')
       expect(principal).toEqual(mockPrincipalSummary)
-      
+
       const nonExistent = store.getPrincipalById('non-existent')
       expect(nonExistent).toBeUndefined()
     })
@@ -376,7 +377,7 @@ describe('Principal Activity Store', () => {
     it('should clear filters', async () => {
       // Set some search query first
       store.searchQuery = 'test'
-      
+
       mockApi.getPrincipalSummaries.mockResolvedValueOnce({
         success: true,
         data: mockListResponse
@@ -496,7 +497,7 @@ describe('Principal Activity Store', () => {
       // Test lower bound
       store.pagination.page = 1
       store.pagination.has_previous = false
-      
+
       await store.previousPage()
       expect(mockApi.getPrincipalSummaries).not.toHaveBeenCalled()
 
@@ -505,7 +506,7 @@ describe('Principal Activity Store', () => {
       // Test upper bound
       store.pagination.page = 5
       store.pagination.has_next = false
-      
+
       await store.nextPage()
       expect(mockApi.getPrincipalSummaries).not.toHaveBeenCalled()
     })
@@ -542,7 +543,7 @@ describe('Principal Activity Store', () => {
 
     it('should toggle selection', () => {
       const principalId = 'test-principal-1'
-      
+
       // Select
       store.toggleSelection(principalId)
       expect(store.selectedPrincipalIds).toContain(principalId)
@@ -558,35 +559,35 @@ describe('Principal Activity Store', () => {
 
     it('should select multiple principals', () => {
       const principalIds = ['test-principal-1', 'test-principal-2']
-      
+
       store.selectPrincipals(principalIds)
-      
+
       expect(store.selectedPrincipalIds).toEqual(principalIds)
       expect(store.selectionCount).toBe(2)
     })
 
     it('should clear selections', () => {
       store.selectedPrincipalIds = ['test-principal-1', 'test-principal-2']
-      
+
       store.clearSelections()
-      
+
       expect(store.selectedPrincipalIds).toEqual([])
       expect(store.selectionCount).toBe(0)
     })
 
     it('should select all visible principals', () => {
       store.selectAll()
-      
+
       expect(store.selectedPrincipalIds).toEqual(['test-principal-1', 'test-principal-2'])
       expect(store.selectionCount).toBe(2)
     })
 
     it('should respect max selections limit', () => {
       store.setBatchMode(true, 1)
-      
+
       store.toggleSelection('test-principal-1')
       expect(store.selectedPrincipalIds).toHaveLength(1)
-      
+
       // Should not add second selection due to limit
       store.toggleSelection('test-principal-2')
       expect(store.selectedPrincipalIds).toHaveLength(1)
@@ -595,7 +596,7 @@ describe('Principal Activity Store', () => {
 
     it('should get selected principals', () => {
       store.selectedPrincipalIds = ['test-principal-1']
-      
+
       const selected = store.getSelectedPrincipals
       expect(selected).toHaveLength(1)
       expect(selected[0]).toEqual(mockPrincipalSummary)
@@ -603,11 +604,11 @@ describe('Principal Activity Store', () => {
 
     it('should handle batch mode', () => {
       store.selectedPrincipalIds = ['test-principal-1']
-      
+
       store.setBatchMode(true, 5)
       expect(store.batchMode).toBe(true)
       expect(store.maxSelections).toBe(5)
-      
+
       store.setBatchMode(false)
       expect(store.batchMode).toBe(false)
       expect(store.selectedPrincipalIds).toEqual([]) // Should clear selections
@@ -661,16 +662,16 @@ describe('Principal Activity Store', () => {
 
     it('should not perform batch operations without selections', async () => {
       store.selectedPrincipalIds = []
-      
+
       const result = await store.batchUpdatePrincipals({})
-      
+
       expect(result).toBe(false)
       expect(mockApi.batchUpdatePrincipals).not.toHaveBeenCalled()
     })
 
     it('should export selected principals as CSV', () => {
       const csvOutput = store.exportSelectedPrincipals('csv')
-      
+
       expect(csvOutput).toContain('Principal Name,Organization Type')
       expect(csvOutput).toContain('Test Principal Organization')
       expect(csvOutput).toContain('Another Principal')
@@ -679,7 +680,7 @@ describe('Principal Activity Store', () => {
     it('should export selected principals as JSON', () => {
       const jsonOutput = store.exportSelectedPrincipals('json')
       const parsed = JSON.parse(jsonOutput)
-      
+
       expect(parsed).toHaveLength(2)
       expect(parsed[0].principal_name).toBe('Test Principal Organization')
     })
@@ -768,19 +769,19 @@ describe('Principal Activity Store', () => {
 
       // Test that startRealTimeUpdates sets up the state correctly
       expect(store.realTimeMetrics.auto_refresh).toBe(true) // Should be true by default
-      
+
       store.startRealTimeUpdates()
-      
+
       // Verify state after starting
       expect(store.realTimeMetrics.auto_refresh).toBe(true)
       expect(store.loading).toBe(false)
       expect(store.isLoading).toBe(false)
-      
+
       // Since fake timers are problematic with setInterval callbacks,
       // let's test the timer functionality by manually triggering the analytics call
       // that would happen in the timer callback
       await store.calculateAnalytics(true) // This is what the timer callback would call
-      
+
       expect(mockApi.calculateAnalytics).toHaveBeenCalledWith(
         expect.any(Array) // principals array
       )
@@ -931,8 +932,9 @@ describe('Principal Activity Store', () => {
 
     it('should update staleness flag', () => {
       store.lastFetched = new Date(Date.now() - 400000)
-      
+
       // Trigger watcher by accessing computed property
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const stale = store.isDataStale
       expect(store.dataStale).toBe(true)
     })

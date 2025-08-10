@@ -12,7 +12,7 @@
  * - User interaction response times
  */
 
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 // Performance thresholds based on requirements
 const PERFORMANCE_THRESHOLDS = {
@@ -85,7 +85,7 @@ class PerformanceTestDataGenerator {
 
 // Performance measurement helpers
 class PerformanceMeasurement {
-  constructor(public page: any) {}
+  constructor(public page: any) { }
 
   async measurePageLoad(url: string): Promise<{
     loadTime: number,
@@ -96,7 +96,9 @@ class PerformanceMeasurement {
   }> {
     const startTime = Date.now()
     let domContentLoadedTime = 0
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _firstContentfulPaint = 0
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _largestContentfulPaint = 0
     let networkRequestCount = 0
 
@@ -126,7 +128,7 @@ class PerformanceMeasurement {
 
     // Navigate and measure
     await this.page.goto(url)
-    
+
     // Wait for DOM content loaded
     await this.page.waitForEvent('domcontentloaded')
     domContentLoadedTime = Date.now() - startTime
@@ -156,7 +158,7 @@ class PerformanceMeasurement {
     totalTime: number
   }> {
     const startTime = Date.now()
-    
+
     // Execute form filling actions
     await formActions()
     const fillTime = Date.now() - startTime
@@ -164,7 +166,7 @@ class PerformanceMeasurement {
     // Measure submission
     const submissionStartTime = Date.now()
     await this.page.click('[data-testid="submit-opportunity-form"]')
-    
+
     // Wait for submission completion (success or error)
     await this.page.waitForSelector('[data-testid="success-message"], [data-testid="error-message"]')
     const submissionTime = Date.now() - submissionStartTime
@@ -200,25 +202,25 @@ class PerformanceMeasurement {
 
   async measureSearchPerformance(searchTerm: string): Promise<number> {
     const startTime = Date.now()
-    
+
     await this.page.fill('[name="search"]', searchTerm)
     await this.page.keyboard.press('Enter')
-    
+
     // Wait for search results to update
     await this.page.waitForSelector('[data-testid="opportunity-row"], [data-testid="no-results"]')
-    
+
     return Date.now() - startTime
   }
 
   async measureFilterPerformance(filterValue: string): Promise<number> {
     const startTime = Date.now()
-    
+
     await this.page.selectOption('[name="stage_filter"]', filterValue)
-    
+
     // Wait for filter results to update
     await this.page.waitForTimeout(100) // Small delay for UI update
     await this.page.waitForSelector('[data-testid="opportunity-row"], [data-testid="no-results"]')
-    
+
     return Date.now() - startTime
   }
 }
@@ -226,7 +228,7 @@ class PerformanceMeasurement {
 test.describe('Opportunity List - Performance', () => {
   test('should load within performance thresholds', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
-    
+
     // Mock normal dataset
     await page.route('**/api/opportunities**', route => {
       const opportunities = PerformanceTestDataGenerator.generateLargeOpportunityDataset(20)
@@ -275,7 +277,7 @@ test.describe('Opportunity List - Performance', () => {
 
   test('should handle large datasets efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
-    
+
     // Mock large dataset (100+ opportunities)
     await page.route('**/api/opportunities**', route => {
       const opportunities = PerformanceTestDataGenerator.generateLargeOpportunityDataset(150)
@@ -321,16 +323,16 @@ test.describe('Opportunity List - Performance', () => {
 
   test('should perform search operations efficiently', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
-    
+
     // Mock search API with realistic response time
     await page.route('**/api/opportunities**', route => {
       const url = new URL(route.request().url())
       const searchTerm = url.searchParams.get('search')
-      
+
       let opportunities = PerformanceTestDataGenerator.generateLargeOpportunityDataset(100)
-      
+
       if (searchTerm) {
-        opportunities = opportunities.filter(opp => 
+        opportunities = opportunities.filter(opp =>
           opp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           opp.organization_name.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -362,7 +364,7 @@ test.describe('Opportunity List - Performance', () => {
     // Test multiple searches to ensure consistent performance
     const searchTimes = []
     const searchTerms = ['Enterprise', 'Software', 'Analytics', 'Principal', 'Demo']
-    
+
     for (const term of searchTerms) {
       const time = await perf.measureSearchPerformance(term)
       searchTimes.push(time)
@@ -375,13 +377,13 @@ test.describe('Opportunity List - Performance', () => {
 
   test('should filter data quickly', async ({ page: _ }) => {
     const perf = new PerformanceMeasurement(page)
-    
+
     await page.route('**/api/opportunities**', route => {
       const url = new URL(route.request().url())
       const stageFilter = url.searchParams.get('stage')
-      
+
       let opportunities = PerformanceTestDataGenerator.generateLargeOpportunityDataset(100)
-      
+
       if (stageFilter) {
         opportunities = opportunities.filter(opp => opp.stage === stageFilter)
       }
@@ -526,12 +528,12 @@ test.describe('Opportunity Form - Performance', () => {
       await page.fill('[data-testid="probability-input"]', '25')
       await page.fill('[data-testid="close-date-input"]', '2025-06-30')
       await page.fill('[data-testid="deal-owner-input"]', 'Test Rep')
-      
+
       // Select principal
       await page.click('[data-testid="principal-multi-select"]')
       await page.click('[role="option"]:has-text("Test Principal")')
       await page.keyboard.press('Escape')
-      
+
       // Select product  
       await page.click('[data-testid="product-select"]')
       await page.click('[role="option"]:has-text("Test Product")')
@@ -576,7 +578,7 @@ test.describe('Opportunity Form - Performance', () => {
     await page.route('**/api/opportunities/name-preview', route => {
       const postData = route.request().postDataJSON()
       const principalIds = postData.principal_ids || []
-      
+
       const previews = principalIds.map((id: string) => ({
         principal_id: id,
         principal_name: `Principal ${id.split('-')[1]}`,
@@ -599,7 +601,7 @@ test.describe('Opportunity Form - Performance', () => {
       setTimeout(() => {
         const postData = route.request().postDataJSON()
         const principalIds = postData.principal_ids || []
-        
+
         const createdOpportunities = principalIds.map((id: string) => ({
           id: `opp-${id}`,
           name: `Batch Opportunity ${id}`,
@@ -630,14 +632,14 @@ test.describe('Opportunity Form - Performance', () => {
     const batchMetrics = await perf.measureFormSubmission(async () => {
       await page.selectOption('[data-testid="organization-select"]', '1')
       await page.selectOption('[data-testid="context-select"]', 'NEW_BUSINESS')
-      
+
       // Select multiple principals (10 for batch test)
       await page.click('[data-testid="principal-multi-select"]')
       for (let i = 0; i < 10; i++) {
         await page.click(`[role="option"]:has-text("Principal ${i}")`)
       }
       await page.keyboard.press('Escape')
-      
+
       // Enable auto-naming
       await page.check('[data-testid="auto-generate-name"]')
     })
@@ -672,7 +674,7 @@ test.describe('Memory and Resource Usage', () => {
     // Initial memory measurement
     await page.goto('/opportunities')
     await page.waitForLoadState('networkidle')
-    
+
     const initialMemory = await perf.measureMemoryUsage()
     console.log('Initial Memory Usage:', initialMemory)
 
@@ -681,10 +683,10 @@ test.describe('Memory and Resource Usage', () => {
       // Navigate between pages
       await page.goto('/opportunities/new')
       await page.waitForLoadState('networkidle')
-      
+
       await page.goto('/opportunities')
       await page.waitForLoadState('networkidle')
-      
+
       // Perform searches
       await page.fill('[name="search"]', `test ${i}`)
       await page.keyboard.press('Enter')
@@ -698,9 +700,9 @@ test.describe('Memory and Resource Usage', () => {
     if (initialMemory.usedHeapSize > 0 && finalMemory.usedHeapSize > 0) {
       const memoryIncrease = finalMemory.usedHeapSize - initialMemory.usedHeapSize
       const memoryIncreasePercent = (memoryIncrease / initialMemory.usedHeapSize) * 100
-      
+
       console.log('Memory Increase:', { memoryIncrease, memoryIncreasePercent })
-      
+
       // Memory increase should be reasonable (less than 100% increase)
       expect(memoryIncreasePercent).toBeLessThan(100)
     }
@@ -721,7 +723,7 @@ test.describe('Memory and Resource Usage', () => {
 
     // Count API requests vs asset requests
     const apiRequests = requestUrls.filter(url => url.includes('/api/'))
-    const assetRequests = requestUrls.filter(url => 
+    const assetRequests = requestUrls.filter(url =>
       url.includes('.js') || url.includes('.css') || url.includes('.svg') || url.includes('.png')
     )
 
@@ -734,7 +736,7 @@ test.describe('Memory and Resource Usage', () => {
 
     // Should not make excessive API requests
     expect(apiRequests.length).toBeLessThan(10)
-    
+
     // Should not duplicate API calls
     const uniqueApiRequests = [...new Set(apiRequests)]
     expect(uniqueApiRequests.length).toBe(apiRequests.length)
@@ -743,6 +745,7 @@ test.describe('Memory and Resource Usage', () => {
 
 test.describe('Stress Testing', () => {
   test('should handle rapid user interactions', async ({ page: _ }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _perf = new PerformanceMeasurement(page)
 
     await page.route('**/api/opportunities**', route => {
@@ -768,11 +771,11 @@ test.describe('Stress Testing', () => {
     for (let i = 0; i < 20; i++) {
       // Rapid search changes
       await page.fill('[name="search"]', `test${i}`)
-      
+
       // Rapid filter changes
       const stages = ['NEW_LEAD', 'INITIAL_OUTREACH', 'DEMO_SCHEDULED']
       await page.selectOption('[name="stage_filter"]', stages[i % stages.length])
-      
+
       // Short delay to allow some processing
       await page.waitForTimeout(50)
     }

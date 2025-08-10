@@ -9,7 +9,7 @@
  * - Tracks performance metrics over time
  */
 
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -111,19 +111,19 @@ class PerformanceReportGenerator {
 
   async generateComprehensiveReport(): Promise<PerformanceTestResults> {
     const timestamp = new Date().toISOString()
-    
+
     // Collect performance metrics from all test suites
     const metrics = await this.collectPerformanceMetrics()
-    
+
     // Generate optimization recommendations
     const recommendations = this.generateOptimizationRecommendations(metrics)
-    
+
     // Create performance benchmarks
     const benchmarks = this.createPerformanceBenchmarks(metrics)
-    
+
     // Analyze security performance impact
     const securityImpact = this.analyzeSecurityPerformanceImpact(metrics)
-    
+
     const report: PerformanceTestResults = {
       timestamp,
       testSuite: 'comprehensive-performance-analysis',
@@ -135,17 +135,17 @@ class PerformanceReportGenerator {
 
     // Save report
     await this.saveReport(report)
-    
+
     // Update benchmarks
     await this.updateBenchmarks(metrics)
-    
+
     return report
   }
 
   private async collectPerformanceMetrics(): Promise<PerformanceMetrics> {
     // Simulate collecting metrics from various performance tests
     // In a real implementation, this would aggregate results from actual test runs
-    
+
     return {
       apiResponseTimes: {
         simple: 180, // ms - Current simple query performance
@@ -292,6 +292,7 @@ class PerformanceReportGenerator {
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private createPerformanceBenchmarks(metrics: PerformanceMetrics): PerformanceBenchmarks {
     return {
       responseTimeTargets: {
@@ -514,7 +515,7 @@ ${analysis.recommendations.map(rec => `- ${rec}`).join('\n')}
     const highPriorityItems = recommendations.filter(r => r.priority === 'high')
 
     let steps = '### Immediate Actions (Next 2 Weeks)\n'
-    
+
     if (criticalItems.length > 0) {
       steps += criticalItems.map(item => `- ${item.title}: ${item.implementation.split(',')[0]}`).join('\n')
     }
@@ -534,7 +535,7 @@ ${analysis.recommendations.map(rec => `- ${rec}`).join('\n')}
   private async updateBenchmarks(metrics: PerformanceMetrics): Promise<void> {
     try {
       let historicalBenchmarks = []
-      
+
       // Try to load existing benchmarks (in browser, this would be from localStorage or API)
       try {
         if (existsSync(this.benchmarkPath)) {
@@ -567,45 +568,45 @@ ${analysis.recommendations.map(rec => `- ${rec}`).join('\n')}
 test.describe('Performance Report Generation', () => {
   test('should generate comprehensive performance analysis report', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
-    
+
     console.log('Generating comprehensive performance analysis report...')
     const report = await generator.generateComprehensiveReport()
-    
+
     // Validate report structure
     expect(report).toHaveProperty('timestamp')
     expect(report).toHaveProperty('metrics')
     expect(report).toHaveProperty('recommendations')
     expect(report).toHaveProperty('benchmarks')
     expect(report).toHaveProperty('securityImpact')
-    
+
     // Validate metrics completeness
     expect(report.metrics.apiResponseTimes).toBeDefined()
     expect(report.metrics.databaseQueries).toBeDefined()
     expect(report.metrics.loadTesting).toBeDefined()
     expect(report.metrics.networkPerformance).toBeDefined()
     expect(report.metrics.businessOperations).toBeDefined()
-    
+
     // Validate recommendations
     expect(Array.isArray(report.recommendations)).toBe(true)
     expect(report.recommendations.length).toBeGreaterThan(0)
-    
+
     // Check that critical recommendations are present if needed
     const criticalRecommendations = report.recommendations.filter(r => r.priority === 'critical')
     if (report.metrics.loadTesting.maxConcurrentUsers < 100) {
       expect(criticalRecommendations.length).toBeGreaterThan(0)
     }
-    
+
     // Validate security analysis
     expect(report.securityImpact.securityOverhead).toBeGreaterThanOrEqual(0)
     expect(report.securityImpact.recommendations.length).toBeGreaterThan(0)
-    
+
     console.log('Performance report generated successfully with', report.recommendations.length, 'recommendations')
   })
 
   test('should provide actionable optimization recommendations', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
-    
+
     // Validate that recommendations are actionable
     for (const recommendation of report.recommendations) {
       expect(recommendation.title).toBeTruthy()
@@ -621,7 +622,7 @@ test.describe('Performance Report Generation', () => {
     const priorities = report.recommendations.map(r => r.priority)
     const criticalIndex = priorities.indexOf('critical')
     const lowIndex = priorities.lastIndexOf('low')
-    
+
     if (criticalIndex >= 0 && lowIndex >= 0) {
       expect(criticalIndex).toBeLessThan(lowIndex) // Critical should come before low priority
     }
@@ -632,20 +633,20 @@ test.describe('Performance Report Generation', () => {
   test('should establish performance monitoring benchmarks', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
-    
+
     // Validate benchmark targets are realistic
     expect(report.benchmarks.responseTimeTargets.simple).toBeLessThanOrEqual(300)
     expect(report.benchmarks.responseTimeTargets.complex).toBeLessThanOrEqual(800)
     expect(report.benchmarks.throughputTargets.concurrentUsers).toBeGreaterThanOrEqual(50)
     expect(report.benchmarks.resourceLimits.errorRateThreshold).toBeLessThanOrEqual(2)
-    
+
     // Benchmarks should be achievable based on current metrics
     const currentSimpleTime = report.metrics.apiResponseTimes.simple
     const targetSimpleTime = report.benchmarks.responseTimeTargets.simple
-    
+
     if (currentSimpleTime > targetSimpleTime) {
       // Should have recommendations to improve this
-      const relevantRecommendations = report.recommendations.filter(r => 
+      const relevantRecommendations = report.recommendations.filter(r =>
         r.category === 'api' || r.category === 'database'
       )
       expect(relevantRecommendations.length).toBeGreaterThan(0)
@@ -657,23 +658,23 @@ test.describe('Performance Report Generation', () => {
   test('should analyze security vs performance trade-offs', async ({ page: _ }) => {
     const generator = new PerformanceReportGenerator()
     const report = await generator.generateComprehensiveReport()
-    
+
     // Validate security impact analysis
     expect(report.securityImpact.securityOverhead).toBeLessThan(50) // Should be reasonable overhead
     expect(report.securityImpact.rlsPerformanceImpact).toBeLessThan(100) // Should not double query time
     expect(report.securityImpact.validationOverhead).toBeLessThan(20) // Validation should be efficient
-    
+
     // Should have security-specific recommendations
     const securityRecommendations = report.recommendations.filter(r => r.category === 'security')
     expect(securityRecommendations.length).toBeGreaterThan(0)
-    
+
     // Security recommendations should address performance
-    const securityPerfRecommendation = securityRecommendations.find(r => 
-      r.description.toLowerCase().includes('performance') || 
+    const securityPerfRecommendation = securityRecommendations.find(r =>
+      r.description.toLowerCase().includes('performance') ||
       r.implementation.toLowerCase().includes('caching')
     )
     expect(securityPerfRecommendation).toBeDefined()
-    
+
     console.log('Security vs performance analysis completed with balanced recommendations')
   })
 })
