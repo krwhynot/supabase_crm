@@ -33,16 +33,16 @@ const NETWORK_CONDITIONS = {
 /**
  * Helper function to measure Core Web Vitals
  */
-async function measureCoreWebVitals(page: Page) {
+async function measureCoreWebVitals(page: Page): Promise<{ LCP: number; FID: number; CLS: number }> {
   return await page.evaluate(() => {
-    return new Promise((resolve) => {
+    return new Promise<{ LCP: number; FID: number; CLS: number }>((resolve) => {
       const vitals = { LCP: 0, FID: 0, CLS: 0 }
       let metricsCollected = 0
       const totalMetrics = 3
 
       // LCP (Largest Contentful Paint)
       new PerformanceObserver((entryList) => {
-        const entries = entryList.getEntries()
+        const entries = entryList.getEntries() as PerformanceEntry[]
         if (entries.length > 0) {
           vitals.LCP = entries[entries.length - 1].startTime
           metricsCollected++
@@ -52,9 +52,9 @@ async function measureCoreWebVitals(page: Page) {
 
       // FID (First Input Delay) - measured on first interaction
       new PerformanceObserver((entryList) => {
-        const entries = entryList.getEntries()
+        const entries = entryList.getEntries() as any[]
         if (entries.length > 0) {
-          vitals.FID = entries[0].processingStart - entries[0].startTime
+          vitals.FID = (entries[0].processingStart || entries[0].startTime) - entries[0].startTime
           metricsCollected++
           if (metricsCollected === totalMetrics) resolve(vitals)
         }
@@ -63,9 +63,9 @@ async function measureCoreWebVitals(page: Page) {
       // CLS (Cumulative Layout Shift)
       new PerformanceObserver((entryList) => {
         let clsValue = 0
-        for (const entry of entryList.getEntries()) {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value
+        for (const entry of entryList.getEntries() as any[]) {
+          if (!(entry.hadRecentInput || false)) {
+            clsValue += entry.value || 0
           }
         }
         vitals.CLS = clsValue
@@ -82,10 +82,21 @@ async function measureCoreWebVitals(page: Page) {
 /**
  * Helper function to measure touch target sizes
  */
-async function measureTouchTargets(page: Page, selector: string) {
+interface TouchTarget {
+  index: number
+  width: number
+  height: number
+  minDimension: number
+  hasMinHeight: boolean
+  hasMinWidth: boolean
+  element: string
+  className: string
+}
+
+async function measureTouchTargets(page: Page, selector: string): Promise<TouchTarget[]> {
   return await page.evaluate((sel) => {
     const elements = document.querySelectorAll(sel)
-    const touchTargets = []
+    const touchTargets: TouchTarget[] = []
 
     elements.forEach((element, index) => {
       const rect = element.getBoundingClientRect()
@@ -110,11 +121,17 @@ async function measureTouchTargets(page: Page, selector: string) {
 /**
  * Helper function to measure scroll performance
  */
-async function measureScrollPerformance(page: Page, container: string = 'body') {
+interface ScrollPerformance {
+  avgFps: number
+  minFps: number
+  samples: number
+}
+
+async function measureScrollPerformance(page: Page, container: string = 'body'): Promise<ScrollPerformance> {
   return await page.evaluate((containerSelector) => {
-    return new Promise((resolve) => {
+    return new Promise<ScrollPerformance>((resolve) => {
       const container = document.querySelector(containerSelector) || document.body
-      const frameRate = []
+      const frameRate: number[] = []
       let lastTime = performance.now()
       let scrollCount = 0
       const maxScrolls = 20
@@ -302,7 +319,7 @@ test.describe('Network Performance', () => {
     const conditions = NETWORK_CONDITIONS[networkType as keyof typeof NETWORK_CONDITIONS]
     
     if (!conditions) {
-      test.skip('Not running on a network-specific project')
+      test.skip(!conditions, 'Not running on a network-specific project')
       return
     }
       // Throttle network to simulate conditions
@@ -337,7 +354,7 @@ test.describe('Network Performance', () => {
     const conditions = NETWORK_CONDITIONS[networkType as keyof typeof NETWORK_CONDITIONS]
     
     if (!conditions) {
-      test.skip('Not running on a network-specific project')
+      test.skip(!conditions, 'Not running on a network-specific project')
       return
     }
       // Throttle network
@@ -446,12 +463,11 @@ test.describe('Mobile Interaction Patterns', () => {
   })
 
   test('Keyboard appearance does not break layout on mobile', async ({ page }) => {
-    await page.goto('http://localhost:3004/interactions/new')
+    await page.goto('http://localhost:3000/interactions/new')
     await page.waitForSelector('[data-testid="interaction-form"]')
 
-    // Take screenshot before input focus
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _beforeScreenshot = await page.screenshot({ fullPage: true })
+    // Take screenshot before input focus (if needed for debugging)
+    await page.screenshot({ fullPage: true })
 
     // Focus on input field (simulates keyboard appearance)
     await page.focus('[data-testid="interaction-title"]')
@@ -459,9 +475,8 @@ test.describe('Mobile Interaction Patterns', () => {
     // Wait for layout adjustments
     await page.waitForTimeout(500)
 
-    // Take screenshot after input focus
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _afterScreenshot = await page.screenshot({ fullPage: true })
+    // Take screenshot after input focus (if needed for debugging)
+    await page.screenshot({ fullPage: true })
 
     // Form should still be usable (submit button visible)
     await expect(page.locator('[data-testid="submit-interaction"]')).toBeVisible()
