@@ -26,44 +26,157 @@ import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vite
 
 // Mock the supabase import with proper method chaining
 vi.mock('@/lib/supabase', () => {
-  // Create shared query chain that can be accessed by tests
-  let sharedQueryChain: any
+  // Global mock state to track configured responses
+  let mockResponseQueue: any[] = []
+  let mockErrorQueue: any[] = []
+  let callHistory: { method: string; args: any[] }[] = []
+
+  // Helper to get next configured response
+  const getNextMockResponse = () => {
+    if (mockErrorQueue.length > 0) {
+      const error = mockErrorQueue.shift()
+      return Promise.reject(error)
+    }
+    if (mockResponseQueue.length > 0) {
+      return Promise.resolve(mockResponseQueue.shift())
+    }
+    // Default response if no mock configured
+    return Promise.resolve({ data: [], error: null, count: 0 })
+  }
+
+  // Helper to record method calls for verification
+  const recordCall = (method: string, args: any[] = []) => {
+    callHistory.push({ method, args })
+  }
 
   const createQueryChain = () => {
     const queryChain: any = {
-      // Make the query chain thenable to handle await
-      then: (resolve: any) => resolve({ data: [], error: null, count: 0 })
+      // Make the query chain thenable to handle await - this is where actual execution happens
+      then: (resolve: any, reject?: any) => {
+        const mockResponse = getNextMockResponse()
+        if (mockResponse instanceof Promise) {
+          return mockResponse.then(resolve).catch(reject || (() => {}))
+        }
+        return Promise.resolve(mockResponse).then(resolve)
+      },
+      // Also implement catch for proper promise handling
+      catch: (reject: any) => {
+        return getNextMockResponse().catch(reject)
+      }
     }
 
-    // All methods return the chain for fluent interface
+    // All methods return the chain for fluent interface and record calls
     const methods = [
-      'from', 'select', 'eq', 'in', 'or', 'gt', 'gte', 'lt', 'lte',
+      'select', 'eq', 'in', 'or', 'gt', 'gte', 'lt', 'lte',
       'order', 'range', 'single', 'limit'
     ]
 
     methods.forEach(method => {
-      queryChain[method] = vi.fn().mockReturnValue(queryChain)
+      queryChain[method] = vi.fn((...args: any[]) => {
+        recordCall(method, args)
+        return queryChain
+      })
     })
 
-    // Store reference so tests can access it
-    sharedQueryChain = queryChain
     return queryChain
   }
 
-  // Create the main supabase mock with exposed query chain methods
+  // Create the main supabase mock
   const mockSupabase = {
-    from: vi.fn(() => createQueryChain()),
-    // Expose query chain methods directly on mockSupabase for test access
-    get queryChain() { return sharedQueryChain },
-    // Expose common query methods directly for easier test mocking
-    get select() { return sharedQueryChain?.select },
-    get single() { return sharedQueryChain?.single },
-    get limit() { return sharedQueryChain?.limit },
-    get eq() { return sharedQueryChain?.eq },
-    get in() { return sharedQueryChain?.in },
-    get order() { return sharedQueryChain?.order },
-    get range() { return sharedQueryChain?.range }
+    from: vi.fn((table: string) => {
+      recordCall('from', [table])
+      return createQueryChain()
+    })
   }
+
+  // Add dynamic properties to expose query methods for test configuration
+  let currentQueryChain: any = null
+  
+  // Override from to capture the current query chain
+  const originalFrom = mockSupabase.from
+  mockSupabase.from = vi.fn((table: string) => {
+    recordCall('from', [table])
+    currentQueryChain = createQueryChain()
+    return currentQueryChain
+  })
+
+  // Expose query chain methods for test access with proper mock functions
+  Object.defineProperties(mockSupabase, {
+    select: {
+      get() {
+        const mockFn = vi.fn()
+        // Connect mockResolvedValueOnce to the mock response queue
+        mockFn.mockResolvedValueOnce = (response: any) => {
+          mockResponseQueue.push(response)
+          return mockFn
+        }
+        mockFn.mockRejectedValueOnce = (error: any) => {
+          mockErrorQueue.push(error)
+          return mockFn
+        }
+        mockFn.mockImplementation = (impl: any) => {
+          // For custom implementations like slow queries
+          const result = impl()
+          if (result?.then) {
+            mockResponseQueue.push(result)
+          }
+          return mockFn
+        }
+        return mockFn
+      }
+    },
+    single: {
+      get() {
+        const mockFn = vi.fn()
+        mockFn.mockResolvedValueOnce = (response: any) => {
+          mockResponseQueue.push(response)
+          return mockFn
+        }
+        mockFn.mockRejectedValueOnce = (error: any) => {
+          mockErrorQueue.push(error)
+          return mockFn
+        }
+        return mockFn
+      }
+    },
+    limit: {
+      get() {
+        const mockFn = vi.fn()
+        mockFn.mockResolvedValueOnce = (response: any) => {
+          mockResponseQueue.push(response)
+          return mockFn
+        }
+        return mockFn
+      }
+    },
+    // Other query methods that tests might call - expose from the most recent query chain
+    eq: { get() { return currentQueryChain?.eq || vi.fn() } },
+    in: { get() { return currentQueryChain?.in || vi.fn() } },
+    or: { get() { return currentQueryChain?.or || vi.fn() } },
+    gte: { get() { return currentQueryChain?.gte || vi.fn() } },
+    lte: { get() { return currentQueryChain?.lte || vi.fn() } },
+    order: { get() { return currentQueryChain?.order || vi.fn() } },
+    range: { get() { return currentQueryChain?.range || vi.fn() } },
+    
+    // Expose internal state for test utilities
+    __mockState: {
+      get responseQueue() { return mockResponseQueue },
+      get errorQueue() { return mockErrorQueue },
+      get callHistory() { return callHistory },
+      clearQueue() { 
+        mockResponseQueue = []
+        mockErrorQueue = []
+      },
+      clearHistory() { 
+        callHistory = []
+      },
+      reset() {
+        mockResponseQueue = []
+        mockErrorQueue = []
+        callHistory = []
+      }
+    }
+  })
 
   return {
     supabase: mockSupabase
@@ -142,8 +255,6 @@ describe('Principal Activity API Service', () => {
   let consoleWarnSpy: Mock
   let consoleErrorSpy: Mock
   let mockSupabase: any
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let mockQueryChain: any
 
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -154,10 +265,15 @@ describe('Principal Activity API Service', () => {
     const { supabase } = await import('@/lib/supabase')
     mockSupabase = supabase
 
-    // Trigger query chain creation by calling from()
-    mockSupabase.from('test')
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockQueryChain = mockSupabase.queryChain
+    // Clear mock state for each test
+    if (mockSupabase.__mockState) {
+      mockSupabase.__mockState.reset()
+    }
+
+    // Also clear Vitest mock call counts
+    if (mockSupabase.from && typeof mockSupabase.from.mockClear === 'function') {
+      mockSupabase.from.mockClear()
+    }
   })
 
   afterEach(() => {
