@@ -15,28 +15,117 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/*.svg'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'favicon.ico', 'favicon.svg'],
       manifest: {
-        name: 'Supabase CRM - Principal Activity Management',
-        short_name: 'CRM',
-        description: 'Vue 3 TypeScript CRM Application with Principal Activity Tracking',
-        theme_color: '#3b82f6',
+        name: 'CRM Mobile - Sales Interaction Tracker',
+        short_name: 'CRM Mobile',
+        description: 'Mobile-optimized CRM for field sales interactions with offline support',
+        theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
-        scope: '/',
+        orientation: 'portrait-primary',
         start_url: '/',
+        scope: '/',
+        lang: 'en-US',
+        categories: ['business', 'productivity'],
         icons: [
+          {
+            src: 'icons/icon-72x72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-128x128.png',
+            sizes: '128x128',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-144x144.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-152x152.png',
+            sizes: '152x152',
+            type: 'image/png',
+            purpose: 'any'
+          },
           {
             src: 'icons/icon-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'icons/icon-384x384.png',
+            sizes: '384x384',
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'icons/icon-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
-        ]
+        ],
+        shortcuts: [
+          {
+            name: 'Quick Interaction',
+            short_name: 'Quick',
+            description: 'Quickly log a field interaction',
+            url: '/interactions/quick?source=shortcut',
+            icons: [
+              {
+                src: 'icons/quick-icon-96x96.png',
+                sizes: '96x96',
+                type: 'image/png'
+              }
+            ]
+          },
+          {
+            name: 'Drop Samples',
+            short_name: 'Samples',
+            description: 'Log sample delivery',
+            url: '/interactions/quick?template=dropped_samples&source=shortcut',
+            icons: [
+              {
+                src: 'icons/samples-icon-96x96.png',
+                sizes: '96x96',
+                type: 'image/png'
+              }
+            ]
+          },
+          {
+            name: 'Site Visit',
+            short_name: 'Visit',
+            description: 'Log site visit with location',
+            url: '/interactions/quick?template=site_visit&source=shortcut',
+            icons: [
+              {
+                src: 'icons/visit-icon-96x96.png',
+                sizes: '96x96',
+                type: 'image/png'
+              }
+            ]
+          }
+        ],
+        related_applications: [],
+        prefer_related_applications: false,
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+        protocol_handlers: [],
+        edge_side_panel: {
+          preferred_width: 400
+        }
       },
       workbox: {
         cleanupOutdatedCaches: true,
@@ -117,7 +206,7 @@ export default defineConfig({
         sequences: true,
         side_effects: true,
         switches: true,
-        top_retain: false,
+        top_retain: [],
         typeofs: true,
         unused: true,
         conditionals: true,

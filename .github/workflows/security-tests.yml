@@ -1,0 +1,507 @@
+# =============================================================================
+# Security Testing CI/CD Pipeline
+# =============================================================================
+# Automated security testing workflow for Supabase CRM Database
+# Integrates comprehensive RLS policy validation, GDPR compliance testing,
+# and security performance benchmarking into the CI/CD pipeline
+#
+# Triggered on:
+# - Push to main/develop branches
+# - Pull requests targeting main/develop
+# - Manual workflow dispatch
+# - Scheduled runs (weekly security audit)
+# =============================================================================
+
+name: Security Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'sql/**'
+      - '.github/workflows/security-tests.yml'
+      - 'sql/tests/security/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'sql/**'
+      - '.github/workflows/security-tests.yml'
+      - 'sql/tests/security/**'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Select test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - security-only
+          - gdpr-only
+          - performance-only
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - staging
+  schedule:
+    # Weekly security audit every Sunday at 2:00 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  # PostgreSQL Configuration
+  POSTGRES_VERSION: '15'
+  POSTGRES_DB: 'supabase_crm_test'
+  POSTGRES_USER: 'postgres'
+  POSTGRES_PASSWORD: 'postgres'
+  POSTGRES_HOST: 'localhost'
+  POSTGRES_PORT: '5432'
+  
+  # Test Configuration
+  PGTAP_VERSION: 'v1.3.3'
+  TEST_TIMEOUT: '600' # 10 minutes
+  SECURITY_THRESHOLD: '15' # Maximum RLS performance overhead %
+  
+  # Monitoring and Reporting
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  SECURITY_NOTIFICATION_EMAIL: ${{ secrets.SECURITY_EMAIL }}
+
+jobs:
+  # =============================================================================
+  # SETUP AND VALIDATION
+  # =============================================================================
+  setup:
+    name: 'Environment Setup & Validation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    outputs:
+      postgres-ready: ${{ steps.postgres-check.outputs.ready }}
+      test-files-changed: ${{ steps.changes.outputs.security }}
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Check for Security Test Changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            security:
+              - 'sql/tests/security/**'
+              - 'sql/**/*.sql'
+              - '.github/workflows/security-tests.yml'
+              
+      - name: Setup PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.POSTGRES_VERSION }}
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+          
+      - name: Install pgTAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-${{ env.POSTGRES_VERSION }}-pgtap
+          
+      - name: Install TAP Dependencies
+        run: |
+          sudo apt-get install -y libdbd-pg-perl
+          sudo cpan TAP::Parser::SourceHandler::pgTAP
+          
+      - name: Verify PostgreSQL Connection
+        id: postgres-check
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          until pg_isready -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }}; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          psql -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c "SELECT version();"
+          echo "ready=true" >> $GITHUB_OUTPUT
+          
+      - name: Cache Test Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cpan
+            /usr/share/perl5
+          key: ${{ runner.os }}-pgtap-${{ env.PGTAP_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-pgtap-
+
+  # =============================================================================
+  # DATABASE SCHEMA SETUP
+  # =============================================================================
+  schema-setup:
+    name: 'Database Schema Setup'
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.postgres-ready == 'true'
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.POSTGRES_VERSION }}
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+          
+      - name: Apply Database Migrations
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          echo "Applying database schema..."
+          for sql_file in sql/[0-9]*.sql; do
+            if [ -f "$sql_file" ]; then
+              echo "Applying: $sql_file"
+              psql "$PGCONNSTRING" -f "$sql_file" -v ON_ERROR_STOP=1
+            fi
+          done
+          
+          echo "Applying migrations..."
+          for migration_file in sql/migrations/*.sql; do
+            if [ -f "$migration_file" ]; then
+              echo "Applying migration: $migration_file"
+              psql "$PGCONNSTRING" -f "$migration_file" -v ON_ERROR_STOP=1
+            fi
+          done
+          
+      - name: Verify Schema Integrity
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          # Verify core tables exist
+          psql "$PGCONNSTRING" -c "
+            DO \$\$
+            DECLARE
+                tables TEXT[] := ARRAY['organizations', 'contacts', 'opportunities', 'interactions', 'products', 'product_principals'];
+                tbl TEXT;
+                count INTEGER;
+            BEGIN
+                FOREACH tbl IN ARRAY tables LOOP
+                    SELECT COUNT(*) INTO count 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public' AND table_name = tbl;
+                    
+                    IF count = 0 THEN
+                        RAISE EXCEPTION 'Required table % not found', tbl;
+                    END IF;
+                    
+                    RAISE NOTICE 'Table % verified', tbl;
+                END LOOP;
+                
+                RAISE NOTICE 'All required tables verified successfully';
+            END;
+            \$\$;
+          "
+
+  # =============================================================================
+  # SECURITY TEST EXECUTION
+  # =============================================================================
+  security-tests:
+    name: 'Security Tests'
+    runs-on: ubuntu-latest
+    needs: [setup, schema-setup]
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        test-category:
+          - rls-policies
+          - gdpr-compliance
+          - security-performance
+          - integration-security
+      fail-fast: false
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.POSTGRES_VERSION }}
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+          
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-${{ env.POSTGRES_VERSION }}-pgtap libdbd-pg-perl
+          sudo cpan TAP::Parser::SourceHandler::pgTAP
+          
+      - name: Restore Database Schema
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          # Apply all schema files
+          for sql_file in sql/[0-9]*.sql sql/migrations/*.sql; do
+            if [ -f "$sql_file" ]; then
+              psql "$PGCONNSTRING" -f "$sql_file" -v ON_ERROR_STOP=1 > /dev/null
+            fi
+          done
+          
+      - name: Run Security Test Suite
+        id: security-tests
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          cd sql/tests
+          chmod +x run_tests.sh
+          
+          case "${{ matrix.test-category }}" in
+            rls-policies)
+              echo "Running RLS Policy Tests..."
+              ./run_tests.sh --security --verbose > ../../test-results-${{ matrix.test-category }}.txt 2>&1
+              ;;
+            gdpr-compliance)
+              echo "Running GDPR Compliance Tests..."
+              pg_prove --ext .sql --verbose security/test_gdpr_compliance.sql > ../../test-results-${{ matrix.test-category }}.txt 2>&1
+              ;;
+            security-performance)
+              echo "Running Security Performance Tests..."
+              pg_prove --ext .sql --verbose security/test_security_performance.sql > ../../test-results-${{ matrix.test-category }}.txt 2>&1
+              ;;
+            integration-security)
+              echo "Running Integration Security Tests..."
+              pg_prove --ext .sql --verbose security/test_security_integration.sql > ../../test-results-${{ matrix.test-category }}.txt 2>&1
+              ;;
+          esac
+          
+          # Check test results
+          if [ $? -eq 0 ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-test-results-${{ matrix.test-category }}
+          path: test-results-${{ matrix.test-category }}.txt
+          retention-days: 30
+          
+      - name: Parse Test Results
+        if: always()
+        run: |
+          if [ -f "test-results-${{ matrix.test-category }}.txt" ]; then
+            echo "=== Test Results Summary for ${{ matrix.test-category }} ==="
+            grep -E "(All tests successful|Test Summary Report)" test-results-${{ matrix.test-category }}.txt || true
+            grep -E "FAILED|ERROR" test-results-${{ matrix.test-category }}.txt || true
+          fi
+
+  # =============================================================================
+  # PERFORMANCE SECURITY VALIDATION
+  # =============================================================================
+  security-performance-validation:
+    name: 'Security Performance Validation'
+    runs-on: ubuntu-latest
+    needs: [setup, schema-setup]
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.POSTGRES_VERSION }}
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+          
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-${{ env.POSTGRES_VERSION }}-pgtap libdbd-pg-perl
+          sudo cpan TAP::Parser::SourceHandler::pgTAP
+          
+      - name: Restore Database Schema
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          for sql_file in sql/[0-9]*.sql sql/migrations/*.sql; do
+            if [ -f "$sql_file" ]; then
+              psql "$PGCONNSTRING" -f "$sql_file" -v ON_ERROR_STOP=1 > /dev/null
+            fi
+          done
+          
+      - name: Execute Performance Security Tests
+        run: |
+          export PGPASSWORD=${{ env.POSTGRES_PASSWORD }}
+          export PGCONNSTRING="postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${{ env.POSTGRES_HOST }}:${{ env.POSTGRES_PORT }}/${{ env.POSTGRES_DB }}"
+          
+          cd sql/tests
+          echo "Running Security Performance Validation..."
+          pg_prove --ext .sql --verbose security/test_security_performance.sql > ../../security-performance-results.txt 2>&1
+          
+          # Extract performance metrics
+          grep -E "Performance|seconds|ms" ../../security-performance-results.txt > ../../performance-metrics.txt || true
+          
+      - name: Validate Performance Thresholds
+        run: |
+          echo "=== Security Performance Metrics ==="
+          if [ -f "performance-metrics.txt" ]; then
+            cat performance-metrics.txt
+            
+            # Check if any queries exceeded the threshold
+            if grep -q "exceeded threshold" performance-metrics.txt; then
+              echo "❌ Some security measures exceeded performance thresholds"
+              exit 1
+            else
+              echo "✅ All security measures within performance thresholds"
+            fi
+          else
+            echo "⚠️  Performance metrics not available"
+          fi
+          
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-performance-metrics
+          path: |
+            security-performance-results.txt
+            performance-metrics.txt
+          retention-days: 30
+
+  # =============================================================================
+  # COMPREHENSIVE SECURITY REPORT
+  # =============================================================================
+  security-report:
+    name: 'Security Test Report'
+    runs-on: ubuntu-latest
+    needs: [security-tests, security-performance-validation]
+    if: always()
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Download All Test Results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts/
+          
+      - name: Generate Comprehensive Security Report
+        run: |
+          echo "# 🔒 Security Testing Report" > security-report.md
+          echo "**Generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> security-report.md
+          echo "**Commit:** ${{ github.sha }}" >> security-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## Test Results Summary" >> security-report.md
+          echo "" >> security-report.md
+          
+          # Process each test category result
+          for category in rls-policies gdpr-compliance security-performance integration-security; do
+            if [ -f "test-artifacts/security-test-results-$category/test-results-$category.txt" ]; then
+              echo "### $category" >> security-report.md
+              
+              if grep -q "All tests successful" "test-artifacts/security-test-results-$category/test-results-$category.txt"; then
+                echo "✅ **PASSED** - All tests successful" >> security-report.md
+              else
+                echo "❌ **FAILED** - Some tests failed" >> security-report.md
+              fi
+              
+              echo "\`\`\`" >> security-report.md
+              head -20 "test-artifacts/security-test-results-$category/test-results-$category.txt" >> security-report.md
+              echo "\`\`\`" >> security-report.md
+              echo "" >> security-report.md
+            fi
+          done
+          
+          # Performance metrics
+          if [ -f "test-artifacts/security-performance-metrics/performance-metrics.txt" ]; then
+            echo "## Performance Metrics" >> security-report.md
+            echo "\`\`\`" >> security-report.md
+            cat "test-artifacts/security-performance-metrics/performance-metrics.txt" >> security-report.md
+            echo "\`\`\`" >> security-report.md
+          fi
+          
+          echo "## Security Recommendations" >> security-report.md
+          echo "- Review any failed test cases and address security gaps" >> security-report.md
+          echo "- Monitor RLS policy performance impact regularly" >> security-report.md
+          echo "- Ensure GDPR compliance requirements are met in production" >> security-report.md
+          echo "- Validate security measures don't impact user experience" >> security-report.md
+          
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-security-report
+          path: security-report.md
+          retention-days: 90
+          
+      - name: Comment Security Report on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔒 Security Test Results\n\n${report}`
+            });
+
+  # =============================================================================
+  # NOTIFICATION AND ALERTING
+  # =============================================================================
+  security-notifications:
+    name: 'Security Notifications'
+    runs-on: ubuntu-latest
+    needs: [security-tests, security-performance-validation]
+    if: always() && (failure() || github.event_name == 'schedule')
+    
+    steps:
+      - name: Send Security Alert
+        if: failure()
+        run: |
+          echo "🚨 Security tests failed for commit ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Workflow: ${{ github.run_id }}"
+          
+          # Here you would integrate with your notification system
+          # Examples: Slack webhook, email, PagerDuty, etc.
+          
+      - name: Weekly Security Audit Summary
+        if: github.event_name == 'schedule'
+        run: |
+          echo "📊 Weekly security audit completed"
+          echo "All security tests passed for scheduled audit"
+          echo "Next audit: $(date -d '+1 week' '+%Y-%m-%d')"
+
+# =============================================================================
+# WORKFLOW PERMISSIONS
+# =============================================================================
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  actions: read

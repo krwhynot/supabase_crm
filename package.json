@@ -38,6 +38,13 @@
     "test:chrome": "npx playwright test --project=desktop-chromium",
     "test:ipad": "npx playwright test --project=tablet",
     "test:mobile": "npx playwright test --project=mobile",
+    "test:db": "cd sql/tests && ./run_tests.sh",
+    "test:db:setup": "cd sql/tests && ./run_tests.sh --setup-only",
+    "test:db:unit": "cd sql/tests && ./run_tests.sh --unit-only",
+    "test:db:integration": "cd sql/tests && ./run_tests.sh --integration",
+    "test:db:performance": "cd sql/tests && ./run_tests.sh --performance",
+    "test:db:verbose": "cd sql/tests && ./run_tests.sh --verbose",
+    "test:all": "npm run test:db && npm run test:unit && npm run test:playwright",
     "start": "npm run dev",
     "prod:build": "NODE_ENV=production npm run build:prod",
     "serve:local": "npm install -g serve && serve -s dist"
