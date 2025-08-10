@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This directory contains SQL files for database schema and operations. These files serve different purposes in development vs production.
+This directory contains SQL files for database schema and operations. These files serve different purposes in development vs production...
 
 ## File Structure
 
