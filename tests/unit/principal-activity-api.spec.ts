@@ -31,6 +31,11 @@ vi.mock('@/lib/supabase', () => {
   let mockErrorQueue: any[] = []
   let callHistory: { method: string; args: any[] }[] = []
 
+  // Store mock functions so tests can configure them
+  let selectMockFn: any = null
+  let singleMockFn: any = null
+  let limitMockFn: any = null
+
   // Helper to get next configured response
   const getNextMockResponse = () => {
     if (mockErrorQueue.length > 0) {
@@ -81,82 +86,74 @@ vi.mock('@/lib/supabase', () => {
     return queryChain
   }
 
+  // Create mock functions that tests can configure
+  const createSelectMock = () => {
+    const mockFn = vi.fn()
+    mockFn.mockResolvedValueOnce = (response: any) => {
+      mockResponseQueue.push(response)
+      return mockFn
+    }
+    mockFn.mockRejectedValueOnce = (error: any) => {
+      mockErrorQueue.push(error)
+      return mockFn
+    }
+    mockFn.mockImplementation = (impl: any) => {
+      const result = impl()
+      if (result?.then) {
+        mockResponseQueue.push(result)
+      }
+      return mockFn
+    }
+    return mockFn
+  }
+
+  const createSingleMock = () => {
+    const mockFn = vi.fn()
+    mockFn.mockResolvedValueOnce = (response: any) => {
+      mockResponseQueue.push(response)
+      return mockFn
+    }
+    mockFn.mockRejectedValueOnce = (error: any) => {
+      mockErrorQueue.push(error)
+      return mockFn
+    }
+    return mockFn
+  }
+
+  const createLimitMock = () => {
+    const mockFn = vi.fn()
+    mockFn.mockResolvedValueOnce = (response: any) => {
+      mockResponseQueue.push(response)
+      return mockFn
+    }
+    return mockFn
+  }
+
+  // Initialize mock functions
+  selectMockFn = createSelectMock()
+  singleMockFn = createSingleMock()
+  limitMockFn = createLimitMock()
+
   // Create the main supabase mock
   const mockSupabase = {
     from: vi.fn((table: string) => {
       recordCall('from', [table])
       return createQueryChain()
-    })
-  }
-
-  // Add dynamic properties to expose query methods for test configuration
-  let currentQueryChain: any = null
-  
-  // Override from to capture the current query chain
-  const originalFrom = mockSupabase.from
-  mockSupabase.from = vi.fn((table: string) => {
-    recordCall('from', [table])
-    currentQueryChain = createQueryChain()
-    return currentQueryChain
-  })
-
-  // Expose query chain methods for test access with proper mock functions
-  Object.defineProperties(mockSupabase, {
-    select: {
-      get() {
-        const mockFn = vi.fn()
-        // Connect mockResolvedValueOnce to the mock response queue
-        mockFn.mockResolvedValueOnce = (response: any) => {
-          mockResponseQueue.push(response)
-          return mockFn
-        }
-        mockFn.mockRejectedValueOnce = (error: any) => {
-          mockErrorQueue.push(error)
-          return mockFn
-        }
-        mockFn.mockImplementation = (impl: any) => {
-          // For custom implementations like slow queries
-          const result = impl()
-          if (result?.then) {
-            mockResponseQueue.push(result)
-          }
-          return mockFn
-        }
-        return mockFn
-      }
-    },
-    single: {
-      get() {
-        const mockFn = vi.fn()
-        mockFn.mockResolvedValueOnce = (response: any) => {
-          mockResponseQueue.push(response)
-          return mockFn
-        }
-        mockFn.mockRejectedValueOnce = (error: any) => {
-          mockErrorQueue.push(error)
-          return mockFn
-        }
-        return mockFn
-      }
-    },
-    limit: {
-      get() {
-        const mockFn = vi.fn()
-        mockFn.mockResolvedValueOnce = (response: any) => {
-          mockResponseQueue.push(response)
-          return mockFn
-        }
-        return mockFn
-      }
-    },
-    // Other query methods that tests might call - expose from the most recent query chain
-    eq: { get() { return currentQueryChain?.eq || vi.fn() } },
-    in: { get() { return currentQueryChain?.in || vi.fn() } },
-    or: { get() { return currentQueryChain?.or || vi.fn() } },
-    gte: { get() { return currentQueryChain?.gte || vi.fn() } },
-    lte: { get() { return currentQueryChain?.lte || vi.fn() } },
-    order: { get() { return currentQueryChain?.order || vi.fn() } },
-    range: { get() { return currentQueryChain?.range || vi.fn() } },
+    }),
+    
+    // Expose the configurable mock functions directly
+    select: selectMockFn,
+    single: singleMockFn,
+    limit: limitMockFn,
+    
+    // Other query methods that tests might call
+    eq: vi.fn(),
+    in: vi.fn(),
+    or: vi.fn(),
+    gte: vi.fn(),
+    lte: vi.fn(),
+    order: vi.fn(),
+    range: vi.fn(),
     
     // Expose internal state for test utilities
     __mockState: {
@@ -174,9 +171,16 @@ vi.mock('@/lib/supabase', () => {
         mockResponseQueue = []
         mockErrorQueue = []
         callHistory = []
+        // Reset the mock functions
+        selectMockFn = createSelectMock()
+        singleMockFn = createSingleMock()
+        limitMockFn = createLimitMock()
+        mockSupabase.select = selectMockFn
+        mockSupabase.single = singleMockFn
+        mockSupabase.limit = limitMockFn
       }
     }
-  })
+  }
 
   return {
     supabase: mockSupabase
