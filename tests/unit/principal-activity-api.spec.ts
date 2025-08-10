@@ -30,7 +30,10 @@ vi.mock('@/lib/supabase', () => {
   let sharedQueryChain: any
 
   const createQueryChain = () => {
-    const queryChain: any = {}
+    const queryChain: any = {
+      // Make the query chain thenable to handle await
+      then: (resolve: any) => resolve({ data: [], error: null, count: 0 })
+    }
 
     // All methods return the chain for fluent interface
     const methods = [
@@ -42,21 +45,24 @@ vi.mock('@/lib/supabase', () => {
       queryChain[method] = vi.fn().mockReturnValue(queryChain)
     })
 
-    // Override terminal methods with proper async responses
-    queryChain.single = vi.fn().mockResolvedValue({ data: null, error: null })
-    queryChain.select = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 })
-    queryChain.limit = vi.fn().mockResolvedValue({ data: [], error: null })
-
     // Store reference so tests can access it
     sharedQueryChain = queryChain
     return queryChain
   }
 
-  // Create the main supabase mock
+  // Create the main supabase mock with exposed query chain methods
   const mockSupabase = {
     from: vi.fn(() => createQueryChain()),
-    // Also expose the query chain directly for test access
-    get queryChain() { return sharedQueryChain }
+    // Expose query chain methods directly on mockSupabase for test access
+    get queryChain() { return sharedQueryChain },
+    // Expose common query methods directly for easier test mocking
+    get select() { return sharedQueryChain?.select },
+    get single() { return sharedQueryChain?.single },
+    get limit() { return sharedQueryChain?.limit },
+    get eq() { return sharedQueryChain?.eq },
+    get in() { return sharedQueryChain?.in },
+    get order() { return sharedQueryChain?.order },
+    get range() { return sharedQueryChain?.range }
   }
 
   return {
