@@ -115,6 +115,13 @@ class PrincipalActivityApiService {
       }
     }
   }
+
+  /**
+   * Clear all query cache - useful for testing
+   */
+  public clearAllCache(): void {
+    queryCache.clear()
+  }
   
   // ============================
   // PERFORMANCE MONITORING
@@ -234,6 +241,7 @@ class PrincipalActivityApiService {
           console.error('Principal summaries query error:', error)
           return {
             success: false,
+            data: null,
             error: error.message || 'Failed to fetch principal summaries'
           }
         }
@@ -327,6 +335,7 @@ class PrincipalActivityApiService {
         if (summaryError) {
           return {
             success: false,
+            data: null,
             error: summaryError.message || 'Failed to fetch principal summary'
           }
         }

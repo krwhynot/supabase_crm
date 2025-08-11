@@ -131,28 +131,55 @@ class ContactsApiService {
    */
   async createContact(contact: ContactInsert): Promise<ApiResponse<Contact>> {
     try {
-      const { data, error } = await supabase
+      console.log('Creating contact with data:', contact)
+      
+      // Insert the contact
+      const { data: insertData, error: insertError } = await supabase
         .from('contacts')
         .insert(contact)
-        .select()
-        .single()
+        .select('*')
+      
+      console.log('Insert result:', { insertData, insertError })
 
-      if (error) {
-        console.error('Error creating contact:', error)
+      if (insertError) {
+        console.error('Supabase error creating contact:', insertError)
+        console.error('Error details:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
+        })
+        console.error('Contact data sent:', contact)
+        
         return {
           data: null,
-          error: `Failed to create contact: ${error.message}`,
+          error: `Failed to create contact: ${insertError.message} (${insertError.code})`,
           success: false
         }
       }
 
+      if (!insertData || insertData.length === 0) {
+        console.error('Contact insertion succeeded but no data returned')
+        console.error('This might indicate an issue with select permissions or the data structure')
+        
+        return {
+          data: null,
+          error: 'Contact was created but could not be retrieved',
+          success: false
+        }
+      }
+
+      // Return the first (and should be only) inserted contact
+      const createdContact = insertData[0]
+      console.log('Contact created successfully:', createdContact)
       return {
-        data,
+        data: createdContact,
         error: null,
         success: true
       }
     } catch (error) {
       console.error('Unexpected error creating contact:', error)
+      console.error('Contact data sent:', contact)
       return {
         data: null,
         error: 'An unexpected error occurred while creating the contact',

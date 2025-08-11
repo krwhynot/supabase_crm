@@ -8,12 +8,12 @@
             ],
             "startupDelay": 0,
             "priority": "essential",
-            "timeout": 30000
+            "timeout": 20000
         },
         "exa": {
             "command": "exa-mcp-server",
             "args": [
-                "--tools=web_search_exa,research_paper_search,company_research,crawling,competitor_finder,linkedin_search,wikipedia_search_exa,github_search"
+                "--tools=web_search_exa,github_search,crawling"
             ],
             "env": {
                 "EXA_API_KEY": "ec834474-736b-4070-a6cb-265ab6225e89"
@@ -44,17 +44,17 @@
         "sequential-thinking": {
             "command": "mcp-server-sequential-thinking",
             "args": [
-                "--max-thoughts=15",
-                "--branch-limit=2",
-                "--detail-level=low",
-                "--revision-depth=3"
+                "--max-thoughts=8",
+                "--branch-limit=1",
+                "--detail-level=minimal",
+                "--revision-depth=2"
             ],
             "env": {
-                "DISABLE_THOUGHT_LOGGING": "false"
+                "DISABLE_THOUGHT_LOGGING": "true"
             },
             "startupDelay": 400,
             "priority": "optional",
-            "timeout": 30000
+            "timeout": 15000
         },
         "Context7": {
             "command": "context7-mcp",

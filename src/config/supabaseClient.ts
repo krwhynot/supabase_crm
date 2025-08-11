@@ -8,12 +8,58 @@ const { useDemoMode, showDebugInfo, getString: getEnvString } = env
 class MockQueryBuilder {
   private mockData: any[] = []
   private mockError: any = null
+  private tableName: string = ''
+  private insertData: any = null
+  private isInsertOperation: boolean = false
+
+  constructor(tableName?: string) {
+    this.tableName = tableName || ''
+  }
+
+  // Generate UUID v4 compatible string for testing
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0
+      const v = c === 'x' ? r : (r & 0x3 | 0x8)
+      return v.toString(16)
+    })
+  }
+
+  // Allow tests to override mock data
+  static setMockResponse(data: any[] | any | null, error: any = null, count?: number) {
+    MockQueryBuilder.globalMockData = data
+    MockQueryBuilder.globalMockError = error
+    MockQueryBuilder.globalMockCount = count
+  }
+
+  static clearMockResponse() {
+    MockQueryBuilder.globalMockData = null
+    MockQueryBuilder.globalMockError = null
+    MockQueryBuilder.globalMockCount = 0
+    
+    // Also clear any API caches to prevent test isolation issues
+    try {
+      // Clear API cache if available
+      const { principalActivityApi } = require('../services/principalActivityApi')
+      if (principalActivityApi && typeof principalActivityApi.clearAllCache === 'function') {
+        principalActivityApi.clearAllCache()
+      }
+    } catch {
+      // Ignore if service not available
+    }
+  }
+
+  private static globalMockData: any = null
+  private static globalMockError: any = null  
+  private static globalMockCount: number = 0
 
   select(_columns?: string): MockQueryBuilder {
     return this
   }
   
-  insert(_data: any): MockQueryBuilder {
+  insert(data: any): MockQueryBuilder {
+    this.isInsertOperation = true
+    this.insertData = data
     return this
   }
   
@@ -102,7 +148,36 @@ class MockQueryBuilder {
   }
   
   single(): Promise<{ data: any | null; error: any }> {
-    return Promise.resolve({ data: null, error: this.mockError })
+    // Handle organization creation specifically
+    if (this.isInsertOperation && this.tableName === 'organizations' && this.insertData) {
+      const createdOrg = {
+        id: this.generateUUID(),
+        name: this.insertData.name || 'Test Organization',
+        industry: this.insertData.industry || 'Technology',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...this.insertData
+      }
+      
+      return Promise.resolve({ data: createdOrg, error: null })
+    }
+
+    // Use global mock data if set, otherwise fall back to instance data
+    let data = MockQueryBuilder.globalMockData !== null ? MockQueryBuilder.globalMockData : null
+    const error = MockQueryBuilder.globalMockError !== null ? MockQueryBuilder.globalMockError : this.mockError
+    
+    // In Supabase, when there's an error, data is null
+    if (error) {
+      data = null
+    } else if (Array.isArray(data) && data.length > 0) {
+      // For single() calls, return first item from array
+      data = data[0]
+    } else if (Array.isArray(data) && data.length === 0) {
+      // Empty array should return null for single()
+      data = null
+    }
+    
+    return Promise.resolve({ data, error })
   }
   
   // Make the class thenable to support await
@@ -110,7 +185,62 @@ class MockQueryBuilder {
     onfulfilled?: ((value: any) => TResult1 | PromiseLike<TResult1>) | undefined | null,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ): Promise<TResult1 | TResult2> {
-    const result = { data: this.mockData, error: this.mockError, count: 0 }
+    // Handle organization creation specifically
+    if (this.isInsertOperation && this.tableName === 'organizations' && this.insertData) {
+      const createdOrg = {
+        id: this.generateUUID(),
+        name: this.insertData.name || 'Test Organization',
+        industry: this.insertData.industry || 'Technology',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...this.insertData
+      }
+      
+      const result = { data: createdOrg, error: null, count: 1 }
+      return Promise.resolve(result).then(onfulfilled, onrejected)
+    }
+
+    // Handle organization select operations
+    if (this.tableName === 'organizations' && !this.isInsertOperation) {
+      // Try to get organizations from window mock data first
+      let mockOrganizations: any[] = []
+      
+      try {
+        // Check if running in browser environment
+        if (typeof window !== 'undefined') {
+          mockOrganizations = (window as any).__MOCK_ORGANIZATIONS__ || []
+        }
+      } catch {
+        // Fallback for Node.js environments
+      }
+      
+      // If no mock organizations, create some defaults with valid UUIDs
+      if (mockOrganizations.length === 0) {
+        mockOrganizations = [
+          {
+            id: 'a0b1c2d3-e4f5-4678-9abc-def123456789',
+            name: 'Default Organization',
+            industry: 'Technology',
+            created_at: new Date().toISOString()
+          }
+        ]
+      }
+      
+      const result = { data: mockOrganizations, error: null, count: mockOrganizations.length }
+      return Promise.resolve(result).then(onfulfilled, onrejected)
+    }
+
+    // Use global mock data if set, otherwise fall back to instance data
+    let data = MockQueryBuilder.globalMockData !== null ? MockQueryBuilder.globalMockData : this.mockData
+    const error = MockQueryBuilder.globalMockError !== null ? MockQueryBuilder.globalMockError : this.mockError
+    const count = MockQueryBuilder.globalMockCount !== undefined ? MockQueryBuilder.globalMockCount : 0
+    
+    // In Supabase, when there's an error, data is null, not empty array
+    if (error) {
+      data = null
+    }
+    
+    const result = { data, error, count }
     return Promise.resolve(result).then(onfulfilled, onrejected)
   }
 }
@@ -127,7 +257,7 @@ interface MockSupabaseClient {
 
 // Mock client for demo mode to avoid PostgREST import issues
 const mockClient: MockSupabaseClient = {
-  from: (_table: string) => new MockQueryBuilder(),
+  from: (table: string) => new MockQueryBuilder(table),
   auth: {
     getUser: () => Promise.resolve({ data: { user: null }, error: null }),
     signIn: () => Promise.resolve({ data: null, error: null }),
@@ -203,7 +333,7 @@ export async function initializeRealSupabaseClient(): Promise<SupabaseClient | M
   }
 }
 
-export { supabase }
+export { supabase, MockQueryBuilder }
 
 // Development utilities with centralized environment access
 export const devUtils = {

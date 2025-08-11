@@ -76,3 +76,55 @@ ehthumbs.db
 # Temporary folders
 tmp/
 temp/
+
+# Debug and test files
+debug-*.js
+*.log
+test-results*.json
+test-output*.json
+test-fixes.js
+performance-measurement.js
+
+# Analysis and build scripts (archived)
+archived-scripts/
+
+# Screenshots and images (except assets)
+screenshots/
+*.png
+!src/assets/**/*.png
+!public/**/*.png
+!dist/icons/*.png
+
+# Test results and reports
+playwright-report/
+test-results/
+coverage/
+
+# Build artifacts
+dist/
+.vite/
+
+# Report files (keep only essential ones)
+*REPORT*.md
+!README.md
+!docs/**/*REPORT*.md
+
+# Environment files (except examples)
+.env
+.env.development
+.env.production
+!.env.example
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.rpt2_cache/
+.rts2_cache_*/
+
+# Vercel
+.vercel
+
+# IDE specific
+.vscode/settings.json
+.idea/
